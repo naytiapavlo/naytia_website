@@ -1,0 +1,228 @@
+/* 动态 UI 全局样式：由客户端模块注入的元素使用（非 Astro scoped）。
+ * 仅这一份全局表；页面静态样式仍归各 .astro 文件。 */
+
+/* 主页背景层（支持 GIF/WebP/APNG 动图，位于最底层） */
+.site-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background: transparent center / cover no-repeat;
+  pointer-events: none;
+}
+.site-bg .site-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: #1c1420;
+  opacity: 0; /* 由站点配置控制 */
+}
+
+/* 按钮 / 表单 / 弹窗（account 与 site-admin 共用） */
+.ui-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+  padding: 8px 15px;
+  background: #fff;
+  color: #7c7284;
+  border: 1px solid #e2dae6;
+  box-shadow: 2px 2px 0 #f1edf3;
+  cursor: pointer;
+}
+.ui-btn:hover { color: #4a4450; border-color: #d4cad9; }
+.ui-btn-primary {
+  background: #fff1f6;
+  color: #a3456b;
+  border-color: #f2d8e3;
+  box-shadow: 2px 2px 0 #f2d8e3;
+}
+.ui-btn-primary:hover { background: #ffe7f0; }
+
+.nav-account { display: flex; align-items: center; }
+.ui-user-chip {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 4px 10px 4px 4px;
+  border: 1px solid #f2d8e3;
+  background: #fff8fb;
+  box-shadow: 2px 2px 0 #f7e6ee;
+}
+.ui-user-avatar {
+  width: 27px;
+  height: 27px;
+  background: #f9dfe8;
+  color: #94466b;
+  display: grid;
+  place-items: center;
+  font: bold 14px/1 Consolas, monospace;
+  flex: none;
+}
+.ui-user-name {
+  font-size: 13px;
+  color: #6d5a70;
+  max-width: 9em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-role-badge {
+  font-size: 11px;
+  padding: 1px 7px;
+  border: 1px solid #eee9f1;
+  background: #f7f5f9;
+  color: #8d7f92;
+  white-space: nowrap;
+}
+.ui-role-admin { background: #fdf6ec; color: #a5834b; border-color: #f0e3cd; }
+.ui-role-superadmin { background: #f4f1fc; color: #9782b5; border-color: #e8e0f3; }
+.ui-logout {
+  border: 0;
+  background: none;
+  color: #a596ab;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 3px 2px;
+}
+.ui-logout:hover { color: #a3456b; text-decoration: underline; }
+
+/* 弹窗 */
+.ui-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(56, 52, 60, 0.34);
+  display: grid;
+  place-items: center;
+  z-index: 50;
+  padding: 22px;
+}
+.ui-dialog {
+  width: min(400px, 100%);
+  background: #fff;
+  border: 2px solid #e6d4df;
+  box-shadow: 7px 7px 0 rgba(163, 69, 107, 0.16);
+  padding: 28px 28px 22px;
+  position: relative;
+  max-height: calc(100vh - 44px);
+  overflow: auto;
+}
+.ui-dialog h2 { font-size: 22px; margin: 5px 0 14px; letter-spacing: 1px; }
+.ui-dialog-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  border: 0;
+  background: none;
+  font: 20px/1 Consolas, monospace;
+  color: #a596ab;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+.ui-dialog-close:hover { color: #a3456b; }
+.ui-eyebrow { font: 12px Consolas, monospace; letter-spacing: 2px; color: #9b677f; margin: 0; }
+.ui-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+.ui-tab {
+  font-family: inherit;
+  font-size: 13px;
+  padding: 5px 13px;
+  border: 1px solid #e5dfe8;
+  background: #faf8fb;
+  color: #7c7284;
+  cursor: pointer;
+}
+.ui-tab.is-active {
+  background: #fff1f6;
+  border-color: #f2d8e3;
+  color: #a3456b;
+  box-shadow: 2px 2px 0 #f2d8e3;
+}
+.ui-field { margin-bottom: 14px; }
+.ui-field label {
+  display: block;
+  font-size: 12px;
+  color: #7d6f83;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+.ui-field input,
+.ui-field textarea,
+.ui-field select {
+  width: 100%;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.7;
+  padding: 9px 12px;
+  border: 1px solid #ddd4e0;
+  background: #fff;
+  color: #38343c;
+}
+.ui-field textarea { resize: vertical; }
+.ui-field input:focus,
+.ui-field textarea:focus,
+.ui-field select:focus {
+  outline: 2px solid #f2c7d8;
+  border-color: #a3456b;
+}
+.ui-error { color: #b3466b; font-size: 13px; margin: 10px 0; }
+.ui-note {
+  font-size: 12px;
+  color: #9a8ba0;
+  margin: 16px 0 0;
+  padding-top: 12px;
+  border-top: 1px dashed #e8e0ea;
+  line-height: 1.7;
+}
+
+/* 超管编辑面板 */
+.ui-admin-panel {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+.ui-admin-form {
+  width: min(340px, calc(100vw - 36px));
+  background: #fff;
+  border: 2px solid #e6d4df;
+  box-shadow: 6px 6px 0 rgba(163, 69, 107, 0.14);
+  padding: 20px;
+  max-height: calc(100vh - 120px);
+  overflow: auto;
+}
+.ui-admin-form h2 { font-size: 18px; margin: 0 0 14px; }
+.ui-admin-form h2 small { font-size: 12px; color: #9782b5; font-weight: 400; margin-left: 6px; }
+.ui-admin-form .ui-field input[type='range'] { padding: 0; }
+.ui-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* 全局提示条 */
+.app-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 34px;
+  transform: translateX(-50%) translateY(8px);
+  background: #38343c;
+  color: #fff;
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 10px 19px;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.18);
+  z-index: 60;
+  max-width: 82vw;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.app-toast.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+@media (prefers-reduced-motion: reduce) { .app-toast { transition: none; } }

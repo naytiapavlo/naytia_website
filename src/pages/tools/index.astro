@@ -1,33 +1,55 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeading from '../../components/ui/PageHeading.astro';
-import { toolRegistry, toolStatusLabels } from '../../modules/toolbox/registry';
+import { toolManifests } from '../../tools/manifests';
+import { isRunnable, toolStatusLabels } from '../../tools/_host/manifest';
+import '../../styles/tools.css';
 
 /**
- * 工具目录：只读注册表 manifest。
- * status='planned' 的工具只展示说明与状态，不出现可运行入口（01 文档第 6 节）。
- * 阶段 4 接入账号后，此处追加「登录后解锁收藏」区域。
+ * 工具目录：只读 manifest（不加载任何 engine / view）。
+ * status='planned' 的工具只展示说明与状态，卡片不可点击，也不出现可运行入口（01 文档第 6 节）。
  */
+const sorted = [...toolManifests];
+const runnableCount = sorted.filter((tool) => isRunnable(tool.status)).length;
 ---
 
 <BaseLayout title="工具箱" description="少一点重复计算，多一点时间创造。">
   <PageHeading eyebrow="A FEW HANDY THINGS" heading="玩家工具箱" lead="少一点重复计算，多一点时间创造。" />
 
   <div class="tools">
-    {toolRegistry.map((tool) => (
-      <article class="tool">
-        <div class="tool-icon">
-          <svg class="pixel" aria-hidden="true"><use href={`#${tool.icon}`} /></svg>
-        </div>
-        <div>
-          <h2>{tool.title}</h2>
-          <p>{tool.summary}</p>
-          <span class="tool-status">{toolStatusLabels[tool.status]}</span>
-        </div>
-      </article>
-    ))}
+    {sorted.map((tool) => {
+      const runnable = isRunnable(tool.status);
+      const Tag = runnable ? 'a' : 'div';
+      return (
+        <Tag
+          class={runnable ? 'tool-link' : 'tool-link is-static'}
+          href={runnable ? `/tools/${tool.slug}/` : undefined}
+        >
+          <div class="tool-icon">
+            <svg class="pixel" aria-hidden="true"><use href={`#${tool.icon}`} /></svg>
+          </div>
+          <div>
+            <h2>{tool.title}</h2>
+            <p>{tool.summary}</p>
+            <div class="tool-link-head">
+              <span class={`tool-status is-${tool.status}`}>{toolStatusLabels[tool.status]}</span>
+              <span class="tool-meta">{tool.category}</span>
+            </div>
+            {runnable ? (
+              <span class="tool-cta">打开工具 →</span>
+            ) : (
+              <span class="tool-static-note">尚未上线，暂无运行入口</span>
+            )}
+          </div>
+        </Tag>
+      );
+    })}
   </div>
-  <p class="page-note">工具计算功能按阶段计划（05 文档阶段 3）实现；当前均为概念预览，不提供运行入口。</p>
+
+  <p class="page-note">
+    共 {sorted.length} 个工具，其中 {runnableCount} 个已经可以运行；计算结果在你的浏览器里完成，不会上传输入内容。
+    工具目录见 <a href="/forum/">论坛</a> 的机制研究版块，欢迎反馈算法问题。
+  </p>
 </BaseLayout>
 
 <style>
@@ -37,14 +59,7 @@ import { toolRegistry, toolStatusLabels } from '../../modules/toolbox/registry';
     gap: 20px;
     padding-bottom: 28px;
   }
-  .tool {
-    border: 1px solid #e3dce7;
-    box-shadow: 3px 3px 0 #f5f0f6;
-    padding: 24px;
-    display: flex;
-    gap: 20px;
-    align-items: flex-start;
-  }
+  /* 目录专属部分；工具卡片本体样式在 src/styles/tools.css（与详情页共用） */
   .tool-icon {
     width: 46px;
     height: 46px;
@@ -56,18 +71,11 @@ import { toolRegistry, toolStatusLabels } from '../../modules/toolbox/registry';
     border: 1px solid #e9ddec;
   }
   .tool-icon .pixel { width: 23px; height: 23px; }
-  .tool:nth-child(2) .tool-icon { color: #b97c95; background: #fff1f5; border-color: #f1dce5; }
-  .tool:nth-child(3) .tool-icon { color: #7c9eba; background: #eef6fc; border-color: #dfeaf4; }
-  .tool h2 { font-size: 17px; margin: 0 0 7px; }
-  .tool p { font-size: 14px; color: var(--muted); margin: 0 0 15px; }
-  .tool-status {
-    font-size: 12px;
-    color: #81708a;
-    background: #f7f4f9;
-    border: 1px solid #eae3ee;
-    padding: 2px 8px;
-  }
+  .tool-link:nth-child(2) .tool-icon { color: #b97c95; background: #fff1f5; border-color: #f1dce5; }
+  .tool-link:nth-child(3) .tool-icon { color: #7c9eba; background: #eef6fc; border-color: #dfeaf4; }
   .page-note { font-size: 12px; color: #88758f; padding-bottom: 35px; margin: 0; }
+  .page-note a { color: var(--accent); }
+  .page-note a:hover { text-decoration: underline; }
   @media (max-width: 760px) { .tools { grid-template-columns: 1fr; } }
-  @media (max-width: 500px) { .tool { padding: 20px; gap: 16px; } }
+  @media (max-width: 500px) { .tool-link { padding: 20px; gap: 16px; } }
 </style>

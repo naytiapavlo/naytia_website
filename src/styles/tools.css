@@ -1,0 +1,186 @@
+/* 工具工作区样式（像素风）：由工具详情页与宿主注入的 DOM 共同使用。
+   颜色只用 tokens.css 的变量，避免主题更换时这里残留硬编码色块。 */
+
+/* ---------- 目录页可运行状态 ---------- */
+.tool-link {
+  border: 1px solid #e3dce7;
+  box-shadow: 3px 3px 0 #f5f0f6;
+  padding: 24px;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  transition: background 0.15s, transform 0.15s;
+}
+.tool-link:hover { background: #fff9fc; transform: translateY(-2px); }
+.tool-link.is-static { transition: none; }
+.tool-link.is-static:hover { background: #fdfbfc; transform: none; }
+.tool-link h2 { font-size: 17px; margin: 0 0 7px; }
+.tool-link p { font-size: 14px; color: var(--muted); margin: 0 0 13px; }
+.tool-link-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 13px; }
+.tool-status {
+  font-size: 12px;
+  color: #81708a;
+  background: #f7f4f9;
+  border: 1px solid #eae3ee;
+  padding: 2px 8px;
+}
+.tool-status.is-stable { color: #3f7256; background: #f1faf4; border-color: #d6ecdf; }
+.tool-status.is-experimental { color: #8a6a2f; background: #fdf8ec; border-color: #f0e3c8; }
+.tool-meta { font-size: 12px; color: #8b7f92; }
+.tool-cta { font-size: 12px; color: var(--accent); }
+.tool-static-note { font-size: 12px; color: #9a8fa0; }
+
+/* ---------- 详情页外壳 ---------- */
+.tool-top { padding-bottom: 24px; border-bottom: 1px solid var(--line); margin-bottom: 26px; }
+.tool-eyebrow { font: 12px var(--mono); letter-spacing: 2px; color: #9b677f; margin: 0; }
+.tool-top h1 { font-size: 29px; margin: 7px 0 10px; letter-spacing: 1px; }
+.tool-top .tool-heading-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+.tool-intro { color: var(--muted); font-size: 16px; margin: 0 0 14px; max-width: 62ch; }
+.tool-breadcrumb { font-size: 12px; color: #8b7f92; margin: 0 0 14px; }
+.tool-breadcrumb a:hover { color: var(--accent); text-decoration: underline; }
+
+/* ---------- 工作台 ---------- */
+.tool-workbench { border: 1px solid #e3dce7; box-shadow: 4px 4px 0 #f5f0f6; padding: 24px; margin-bottom: 34px; }
+.tool-notice { padding: 30px 22px; border: 1px dashed #e2d9e6; text-align: center; color: #7c6f83; }
+.tool-notice strong { display: block; font-size: 15px; margin-bottom: 7px; color: #5d5462; }
+.tool-notice p { margin: 0 auto; max-width: 56ch; font-size: 14px; }
+
+.tool-actions-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-bottom: 18px;
+  margin-bottom: 20px;
+  border-bottom: 1px dashed var(--line);
+}
+.tool-actions-note { font-size: 12px; color: #8b7f92; }
+
+/* ---------- 表单 ---------- */
+.tool-form { display: grid; gap: 18px; }
+.tool-field { display: grid; gap: 6px; }
+.tool-field label { font-size: 13px; font-weight: 600; color: #5d5462; }
+.tool-field input,
+.tool-field select {
+  font: 15px var(--font-body);
+  padding: 9px 11px;
+  border: 1px solid #ded7e1;
+  background: #fff;
+  color: var(--ink);
+  min-width: 0;
+}
+.tool-field input:focus-visible,
+.tool-field select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tool-field-hint { font-size: 12px; color: #9a8fa0; }
+.tool-field-error { font-size: 12px; color: #b23b52; }
+.has-error { border-color: #d98a99 !important; background: #fff7f8 !important; }
+
+.tool-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.tool-submit,
+.tool-secondary {
+  font: 14px var(--font-body);
+  padding: 9px 20px;
+  border: 1px solid var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--accent);
+  cursor: pointer;
+}
+.tool-submit:hover,
+.tool-secondary:hover { background: #ffe9f1; }
+.tool-secondary { background: #fff; border-color: #ded7e1; color: #6d6373; }
+.tool-secondary[data-state='on'] { border-color: #d6ecdf; background: #f1faf4; color: #3f7256; }
+.tool-secondary:disabled { opacity: 0.6; cursor: default; }
+
+/* ---------- 结果 ---------- */
+.tool-result { margin-top: 24px; }
+.tool-result.has-content { border-top: 1px solid var(--line); padding-top: 22px; }
+.tool-state { font-size: 13px; color: #9a8fa0; margin: 0; }
+.tool-headline { font-size: 15px; margin: 0 0 18px; color: #4d4552; }
+.tool-headline b { color: var(--accent); }
+.tool-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 0 0 20px;
+}
+.tool-stat { border: 1px solid var(--line); padding: 12px 14px; background: #fdfbfc; }
+.tool-stat.is-strong { border-color: var(--accent-line); background: var(--accent-soft); }
+.tool-stat dt { font-size: 12px; color: #8b7f92; margin-bottom: 4px; }
+.tool-stat dd { margin: 0; font: 16px var(--mono); color: var(--ink); word-break: break-word; }
+.tool-stat small { display: block; margin-top: 5px; font-size: 11px; color: #9a8fa0; line-height: 1.6; }
+.tool-section { margin-bottom: 20px; }
+.tool-section h4 { font-size: 13px; margin: 0 0 10px; color: #5d5462; letter-spacing: 0.5px; }
+.tool-notes { margin: 0; padding-left: 20px; font-size: 13px; color: #6f6577; line-height: 1.85; }
+.tool-notes li { margin-bottom: 4px; }
+.tool-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tool-table th,
+.tool-table td { border: 1px solid var(--line); padding: 7px 10px; text-align: left; }
+.tool-table th { background: #faf8fb; font-weight: 600; color: #5d5462; font-size: 12px; }
+.tool-table td { font-family: var(--mono); }
+.tool-table td:first-child { font-family: var(--font-body); }
+.tool-warning { border: 1px solid #f0e3c8; background: #fdf8ec; padding: 10px 14px; margin-bottom: 16px; }
+.tool-warning p { margin: 0; font-size: 13px; color: #8a6a2f; }
+.tool-error { border: 1px solid #eccdd3; background: #fff7f8; padding: 12px 15px; }
+.tool-error strong { display: block; font-size: 14px; color: #a8374c; }
+.tool-error small { font-size: 12px; color: #b08b93; }
+
+/* ---------- 多行材料编辑器 ---------- */
+.material-rows { display: grid; gap: 10px; }
+.material-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) 34px;
+  gap: 10px;
+  align-items: end;
+  border: 1px dashed var(--line);
+  padding: 12px;
+  background: #fffdfe;
+}
+.material-cell { display: grid; gap: 5px; min-width: 0; }
+.material-cell label { font-size: 12px; color: #6f6577; }
+.material-cell input {
+  font: 14px var(--font-body);
+  padding: 8px 10px;
+  border: 1px solid #ded7e1;
+  background: #fff;
+  min-width: 0;
+  width: 100%;
+}
+.material-stack-hint { font-size: 11px; color: #a89cae; }
+.material-remove {
+  font: 16px var(--mono);
+  height: 36px;
+  border: 1px solid #ded7e1;
+  background: #fff;
+  color: #9a8fa0;
+  cursor: pointer;
+}
+.material-remove:hover { border-color: #eccdd3; color: #a8374c; background: #fff7f8; }
+
+/* ---------- 文档区 ---------- */
+.tool-doc { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; padding-bottom: 30px; }
+.tool-doc-card { border: 1px solid var(--line); padding: 20px; }
+.tool-doc-card h2 { font-size: 15px; margin: 0 0 10px; }
+.tool-doc-card p { font-size: 13px; color: var(--muted); margin: 0 0 8px; line-height: 1.85; }
+.tool-doc-card ul { margin: 0; padding-left: 20px; font-size: 13px; color: var(--muted); line-height: 1.85; }
+.tool-doc-card a { color: var(--accent); }
+.tool-doc-card a:hover { text-decoration: underline; }
+.tool-doc-card dl { margin: 0; display: grid; gap: 8px; }
+.tool-doc-card dt { font-size: 12px; color: #9a8fa0; }
+.tool-doc-card dd { margin: 0 0 4px; font-size: 13px; color: #5d5462; font-family: var(--mono); }
+
+@media (max-width: 760px) {
+  .tool-doc { grid-template-columns: 1fr; }
+  .material-row { grid-template-columns: 1fr 1fr 34px; }
+  .material-row .is-name { grid-column: 1 / -1; }
+}
+@media (max-width: 500px) {
+  .tool-workbench { padding: 18px; }
+  .material-row { grid-template-columns: 1fr 34px; }
+  .material-row .is-count,
+  .material-row .is-stack { grid-column: 1 / 2; }
+  .material-remove { grid-row: 1; grid-column: 2 / 3; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tool-link { transition: none; }
+  .tool-link:hover { transform: none; }
+}

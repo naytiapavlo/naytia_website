@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     session_days: int = 14
     cookie_secure: bool = False
     cors_origins: str = "http://localhost:4321,http://127.0.0.1:4321"
+    # 超级管理员引导：非空时，注册携带此邀请码即授予 superadmin（ADR-002）
+    superadmin_code: str = ""
 
     @property
     def cors_origin_list(self) -> list[str]:

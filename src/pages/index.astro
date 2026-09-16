@@ -11,15 +11,21 @@ const publishedPosts = (await getCollection('posts', ({ data }) => !data.draft))
 <BaseLayout title="首页">
   <section class="welcome">
     <div class="avatar-wrap">
-      <img class="avatar" src={site.avatar} width="132" height="132" alt="像素风人物示意头像，待替换为个人头像" />
+      <img
+        class="avatar"
+        src={site.avatar}
+        width="132"
+        height="132"
+        data-site-field="avatar"
+        alt="站长头像"
+      />
       <span class="avatar-label">PLAYER 01</span>
     </div>
     <div>
       <p class="hello">HELLO, PIXEL WORLD!</p>
-      <h1>你好，我是<span>{site.displayName}</span>。</h1>
-      <p class="intro">
-        一个喜欢研究 Minecraft 的人。<br />
-        在这里记录灵感、分享作品，也折腾一些有趣的小工具。
+      <h1>你好，我是<span data-site-field="display_name">{site.displayName}</span>。</h1>
+      <p class="intro" data-site-field="intro">
+        一个喜欢研究 Minecraft 的人。在这里记录灵感、分享作品，也折腾一些有趣的小工具。
       </p>
       <div class="identity">
         <span>{site.name}</span>
@@ -74,6 +80,12 @@ const publishedPosts = (await getCollection('posts', ({ data }) => !data.draft))
     </div>
   </section>
 </BaseLayout>
+
+<script>
+  // 仅超级管理员会渲染编辑面板（模块内部自行判断角色与权限）。
+  import { initSiteAdmin } from '../modules/site-admin';
+  initSiteAdmin();
+</script>
 
 <style>
   .welcome {

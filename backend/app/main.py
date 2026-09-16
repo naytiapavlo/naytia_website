@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import get_settings
 from .db import Base, engine
-from .routers import auth, favorites, forum
+from .routers import admin, auth, favorites, forum, site_config
 
 settings = get_settings()
 
@@ -26,6 +26,8 @@ def create_app() -> FastAPI:
     app.include_router(auth.router)
     app.include_router(forum.router)
     app.include_router(favorites.router)
+    app.include_router(admin.router)
+    app.include_router(site_config.router)
 
     @app.get("/api/health", tags=["meta"])
     def health() -> dict[str, str]:

@@ -1,6 +1,6 @@
 """账号路由：注册 / 登录 / 登出 / 当前用户。"""
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session as DBSession
 
 from ..config import PASSWORD_MIN, get_settings
@@ -48,16 +48,26 @@ def register(payload: AccountCreate, response: Response,
             status_code=status.HTTP_409_CONFLICT,
             detail={"code": "username_taken", "message": "这个用户名已经被注册了"},
         )
+    settings = get_settings()
+    total = db.scalar(select(func.count(Account.id))) or 0
+    if total == 0:
+        # 引导规则：库中还没有任何账号时，第一个注册者成为超级管理员（ADR-002）
+        role = "superadmin"
+    elif settings.superadmin_code and payload.code == settings.superadmin_code:
+        role = "superadmin"
+    else:
+        role = "member"
     account = Account(
         username=payload.username,
         username_key=key,
         password_hash=hash_password(payload.password),
+        role=role,
     )
     db.add(account)
     db.flush()
     _set_session_cookie(response, db, account.id)
     return AccountSummary(id=account.id, username=account.username,
-                          created_at=account.created_at)
+                          role=account.role, created_at=account.created_at)
 
 
 @router.post("/login", response_model=AccountSummary)
@@ -74,7 +84,7 @@ def login(payload: LoginRequest, response: Response,
         )
     _set_session_cookie(response, db, account.id)
     return AccountSummary(id=account.id, username=account.username,
-                          created_at=account.created_at)
+                          role=account.role, created_at=account.created_at)
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
@@ -94,4 +104,4 @@ def me(account: Account | None = Depends(get_current_account)) -> AccountSummary
     if account is None:
         return None
     return AccountSummary(id=account.id, username=account.username,
-                          created_at=account.created_at)
+                          role=account.role, created_at=account.created_at)

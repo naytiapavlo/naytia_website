@@ -32,3 +32,21 @@ def require_account(account: Account | None = Depends(get_current_account)) -> A
             detail={"code": "auth_required", "message": "请先登录"},
         )
     return account
+
+
+def require_role(*roles: str):
+    """权限一律服务端判定（01 文档第 7 节）；roles 取 models.account.ROLES 子集。"""
+
+    def dep(account: Account = Depends(require_account)) -> Account:
+        if account.role not in roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={"code": "forbidden", "message": "权限不足"},
+            )
+        return account
+
+    return dep
+
+
+require_staff = require_role("admin", "superadmin")
+require_superadmin = require_role("superadmin")

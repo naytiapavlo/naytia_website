@@ -2,10 +2,15 @@
 /**
  * 公共页壳：所有页面共用头部导航、图标 sprite、页脚与基础样式。
  * 页面只提供 title / description，不重复实现外壳。
+ * 动态能力（登录角标、站点配置）由 account / site-config 模块在客户端增强；
+ * 后端不可用时页面保持内置静态默认值（02 文档：无隐式强依赖）。
  */
 import '../styles/tokens.css';
 import '../styles/base.css';
+import '../styles/dynamic-ui.css';
 import { site } from '../config/site';
+import { applyConfig, fetchSiteConfig, mergeConfig } from '../modules/site-config';
+import { mountAccountChip } from '../modules/account';
 
 interface Props {
   title: string;
@@ -37,6 +42,9 @@ const year = new Date().getFullYear();
     />
   </head>
   <body>
+    <div class="site-bg" id="site-background" aria-hidden="true">
+      <div class="site-bg-overlay"></div>
+    </div>
     <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
       <symbol id="i-home" viewBox="0 0 16 16"><path d="M7 1h2v2h2v2h2v2h2v2h-2v6H9v-4H7v4H3V9H1V7h2V5h2V3h2z"/></symbol>
       <symbol id="i-grid" viewBox="0 0 16 16"><path d="M1 1h6v6H1zm8 0h6v6H9zM1 9h6v6H1zm8 0h6v6H9z"/></symbol>
@@ -172,5 +180,16 @@ const year = new Date().getFullYear();
         .nav-link { padding: 7px 13px; }
       }
     </style>
+
+    <script>
+      // 客户端增强：登录角标 + 站点配置。失败静默回退静态默认值。
+      import { applyConfig, fetchSiteConfig, mergeConfig } from '../modules/site-config';
+      import { mountAccountChip } from '../modules/account';
+
+      mountAccountChip(document.getElementById('navAccount'));
+      fetchSiteConfig()
+        .then((overrides) => applyConfig(mergeConfig(overrides)))
+        .catch(() => applyConfig(mergeConfig(null)));
+    </script>
   </body>
 </html>

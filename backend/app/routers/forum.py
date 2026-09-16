@@ -141,11 +141,16 @@ def create_reply(thread_id: int, payload: ReplyCreate,
                         created_at=reply.created_at)
 
 
+def _can_moderate(account: Account) -> bool:
+    """admin / superadmin 可审核删除任何内容（ADR-002 权限矩阵）。"""
+    return account.role in ("admin", "superadmin")
+
+
 @router.delete("/threads/{thread_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_thread(thread_id: int, db: DBSession = Depends(get_db),
                   account: Account = Depends(require_account)) -> None:
     thread = _published_thread(db, thread_id)
-    if thread.author_id != account.id:
+    if thread.author_id != account.id and not _can_moderate(account):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": "not_owner", "message": "只能删除自己的帖子"},
@@ -163,7 +168,7 @@ def delete_reply(reply_id: int, db: DBSession = Depends(get_db),
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"code": "reply_not_found", "message": "回复不存在"},
         )
-    if reply.author_id != account.id:
+    if reply.author_id != account.id and not _can_moderate(account):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": "not_owner", "message": "只能删除自己的回复"},

@@ -1,0 +1,145 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { toolManifests } from '../../tools/manifests';
+import { isRunnable, toolStatusLabels } from '../../tools/_host/manifest';
+import '../../styles/tools.css';
+
+/**
+ * 工具详情（阶段 3）：每个注册工具一个静态路由。
+ * 页面只渲染元数据与文档；输入界面由工具宿主在客户端按需加载（见 src/tools/_host/host.ts）。
+ * status='planned' 的工具保留详情页说明，但不挂载任何可运行界面。
+ */
+export function getStaticPaths() {
+  return toolManifests.map((manifest) => ({
+    params: { slug: manifest.slug },
+    props: { manifest },
+  }));
+}
+
+const { manifest } = Astro.props;
+const runnable = isRunnable(manifest.status);
+const related = manifest.relatedContent;
+
+// 传给客户端脚本的唯一数据；只放渲染需要的字段。
+const clientPayload = {
+  slug: manifest.slug,
+  title: manifest.title,
+  status: manifest.status,
+};
+---
+
+<BaseLayout title={manifest.title} description={manifest.summary}>
+  <p class="tool-breadcrumb"><a href="/tools/">← 返回工具箱</a></p>
+
+  <header class="tool-top">
+    <p class="tool-eyebrow">{manifest.category} / TOOL</p>
+    <h1>{manifest.title}</h1>
+    <div class="tool-heading-row">
+      <span class={`tool-status is-${manifest.status}`}>{toolStatusLabels[manifest.status]}</span>
+      <span class="tool-meta">实现版本 {manifest.implementationVersion}</span>
+      <span class="tool-meta">输入协议 v{manifest.inputSchemaVersion}</span>
+    </div>
+    <p class="tool-intro">{manifest.purpose}</p>
+    <p class="tool-scope"><strong>适用范围：</strong>{manifest.scope}</p>
+  </header>
+
+  {runnable ? (
+    <section class="tool-workbench" aria-label={`${manifest.title} 工作区`}>
+      <div
+        id="tool-workbench"
+        data-tool={manifest.slug}
+        data-tool-title={manifest.title}
+        data-tool-payload={JSON.stringify(clientPayload)}
+      >
+        <p class="tool-state">正在加载工具界面…</p>
+      </div>
+    </section>
+  ) : (
+    <section class="tool-workbench" aria-label={`${manifest.title} 说明`}>
+      <div class="tool-notice">
+        <strong>这个工具还在开发中</strong>
+        <p>
+          当前状态：{toolStatusLabels[manifest.status]}。工具上线后这里会出现输入界面；
+          现在不提供可运行的按钮，避免出现「点了没反应」的入口。
+        </p>
+      </div>
+    </section>
+  )}
+
+  <div class="tool-doc">
+    <section class="tool-doc-card">
+      <h2>算法依据与限制</h2>
+      <ul>
+        {manifest.notes.map((note) => <li>{note}</li>)}
+      </ul>
+    </section>
+
+    <section class="tool-doc-card">
+      <h2>运行信息</h2>
+      <dl>
+        <dt>计算位置</dt>
+        <dd>{manifest.executionMode === 'inline' ? '浏览器本地（纯函数）' : manifest.executionMode}</dd>
+        <dt>规则集</dt>
+        <dd>{manifest.supportedRulesetIds.join('、')}</dd>
+        <dt>适用规则版本</dt>
+        <dd>{manifest.rulesetId}</dd>
+        <dt>标签</dt>
+        <dd>{manifest.tags.join(' / ')}</dd>
+      </dl>
+      <p>
+        结果只在你的浏览器里计算，输入不会上传。登录只用于保存收藏，不参与计算。
+      </p>
+    </section>
+
+    {related.length > 0 && (
+      <section class="tool-doc-card">
+        <h2>关联内容</h2>
+        <ul>
+          {related.map((item) => (
+            <li>
+              {item.kind === 'work' ? (
+                <a href={`/works/${item.id}/`}>{item.label}</a>
+              ) : (
+                <a href={`/blog/${item.id}/`}>{item.label}</a>
+              )}
+              <small>（详情页在阶段 2 实装）</small>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <section class="tool-doc-card">
+      <h2>发现问题？</h2>
+      <p>
+        算法有疑问或结果对不上，欢迎到 <a href="/forum/">论坛</a> 的「机制研究」版块反馈，
+        附上你的输入和期望结果，方便对照。
+      </p>
+      <p>每个结果都应能按「实现版本 + 规则集 + 输入」复现，上面两项版本号就是为此记录的。</p>
+    </section>
+  </div>
+</BaseLayout>
+
+<script>
+  import { initToolHost } from '../../tools/_host/host';
+
+  const workbench = document.getElementById('tool-workbench');
+  if (workbench) {
+    const payload = workbench.dataset.toolPayload;
+    if (payload) {
+      // 元数据已在服务端渲染；这里只是让宿主能读到状态并决定是否挂载
+      try {
+        const parsed = JSON.parse(payload) as { slug: string };
+        workbench.dataset.tool = parsed.slug;
+      } catch {
+        // 解析失败时保留服务端渲染的 slug，宿主仍能按 data-tool 查表
+      }
+    }
+    initToolHost(workbench);
+  }
+</script>
+
+<style>
+  .tool-scope { font-size: 13px; color: #8b7f92; margin: 0; max-width: 70ch; }
+  .tool-scope strong { color: #5d5462; }
+</style>

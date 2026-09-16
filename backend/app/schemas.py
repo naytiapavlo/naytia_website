@@ -16,6 +16,44 @@ class AccountCreate(BaseModel):
         description="2-16 位字母、数字、下划线或中文",
     )
     password: str = Field(min_length=PASSWORD_MIN, max_length=128)
+    # 超级管理员引导邀请码（可选；见 config.superadmin_code）
+    code: str | None = Field(default=None, max_length=64)
+
+
+class RoleUpdate(BaseModel):
+    role: str = Field(pattern="^(member|admin|superadmin)$")
+
+
+class BackgroundConfig(BaseModel):
+    """主页背景：image 模式直接用 URL，支持 GIF/WebP/APNG 等动图格式（ADR-002）。"""
+
+    mode: str = Field(default="none", pattern="^(none|image)$")
+    url: str | None = Field(default=None, max_length=2048)
+    # 遮罩不透明度：动图背景上压一层暗色保证文字可读
+    overlay: float = Field(default=0.35, ge=0, le=0.9)
+
+    @field_validator("url")
+    @classmethod
+    def url_https_only(cls, v: str | None) -> str | None:
+        if v is not None and not v.lower().startswith(("http://", "https://")):
+            raise ValueError("背景/头像地址必须是 http(s) 链接")
+        return v
+
+
+class SiteConfigUpdate(BaseModel):
+    """超级管理员可修改的主页内容；None 字段表示不修改。"""
+
+    display_name: str | None = Field(default=None, min_length=1, max_length=24)
+    intro: str | None = Field(default=None, max_length=400)
+    avatar_url: str | None = Field(default=None, max_length=2048)
+    background: BackgroundConfig | None = None
+
+    @field_validator("avatar_url")
+    @classmethod
+    def avatar_https_only(cls, v: str | None) -> str | None:
+        if v is not None and not v.lower().startswith(("http://", "https://")):
+            raise ValueError("头像地址必须是 http(s) 链接")
+        return v
 
 
 class LoginRequest(BaseModel):
@@ -26,6 +64,7 @@ class LoginRequest(BaseModel):
 class AccountSummary(BaseModel):
     id: int
     username: str
+    role: str
     created_at: datetime
 
 
