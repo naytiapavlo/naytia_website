@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeading from '../../components/ui/PageHeading.astro';
+import EmptyState from '../../components/ui/EmptyState.astro';
+
+/**
+ * 论坛页（阶段 4 实装）：
+ * 正式实现 = 静态外壳 + 客户端调用 Python API（FastAPI + SQLite，见 ADR-001）。
+ * 当前 API 未部署，页面保持诚实的建设中状态，不渲染任何交互控件。
+ */
+---
+
+<BaseLayout title="论坛" description="聊机制、晒作品、互帮互助的小广场。">
+  <PageHeading eyebrow="TALK & SHARE" heading="玩家论坛" lead="聊机制、晒作品、互帮互助的小广场。" />
+
+  <EmptyState
+    message="论坛建设中。"
+    hint="版块规划：机制研究 / 作品展示 / 问答互助 / 站务公告。发帖与回复需要登录（阶段 4 实装）。"
+  />
+</BaseLayout>

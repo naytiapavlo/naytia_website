@@ -1,0 +1,28 @@
+---
+/** 页首标题区：小字英文标语 + 大标题 + 说明文字。 */
+interface Props {
+  eyebrow: string;
+  heading: string;
+  lead?: string;
+}
+const { eyebrow, heading, lead } = Astro.props;
+---
+
+<div class="page-heading">
+  <p class="eyebrow">{eyebrow}</p>
+  <h1>{heading}<span>。</span></h1>
+  {lead && <p class="lead">{lead}</p>}
+</div>
+
+<style>
+  .page-heading { padding: 50px 0 30px; }
+  .eyebrow {
+    font: 12px var(--mono);
+    letter-spacing: 2px;
+    color: #9b677f;
+    margin: 0;
+  }
+  h1 { font-size: 29px; margin: 7px 0 0; letter-spacing: 1px; }
+  h1 span { color: var(--accent); }
+  .lead { color: var(--muted); font-size: 16px; margin: 10px 0 0; }
+</style>

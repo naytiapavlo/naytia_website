@@ -1,0 +1,104 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeading from '../../components/ui/PageHeading.astro';
+import EmptyState from '../../components/ui/EmptyState.astro';
+import { getCollection } from 'astro:content';
+
+const works = (await getCollection('works', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<BaseLayout title="作品" description="把想法放进方块世界，再把发现分享给你。">
+  <PageHeading eyebrow="MADE WITH CURIOSITY" heading="我的作品" lead="把想法放进方块世界，再把发现分享给你。" />
+
+  {works.length === 0 ? (
+    <EmptyState message="作品整理中。" />
+  ) : (
+    <div class="work-grid">
+      {works.map((work, i) => (
+        <article class="work">
+          <div class="work-top">
+            <span class="work-number">PROJECT / {String(i + 1).padStart(2, '0')}</span>
+            <svg class="pixel" aria-hidden="true"><use href={`#${work.data.icon}`} /></svg>
+          </div>
+          <div class="work-body">
+            <span class="label">{work.data.type} · {work.data.edition}</span>
+            <h2 set:html={work.data.title.replace(' · ', '<br />')} />
+            <p>{work.data.summary}</p>
+            <div class="work-bottom">
+              <span>{work.data.tags.join(' · ') || '研究与应用'}</span>
+              {work.data.videoUrl ? (
+                <a href={work.data.videoUrl} target="_blank" rel="noopener noreferrer">{work.data.videoLabel}</a>
+              ) : (
+                <span>整理中</span>
+              )}
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  )}
+</BaseLayout>
+
+<style>
+  .work-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding-bottom: 46px;
+  }
+  .work {
+    border: 1px solid #ded7e1;
+    box-shadow: 4px 4px 0 #f2edf4;
+    background: white;
+    min-width: 0;
+  }
+  .work-top {
+    height: 135px;
+    background-color: #fff3f7;
+    background-image:
+      linear-gradient(#efdeea60 1px, transparent 1px),
+      linear-gradient(90deg, #efdeea60 1px, transparent 1px);
+    background-size: 16px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    color: #aa7090;
+  }
+  .work:nth-child(2) .work-top { background-color: #f3effb; color: #9980b6; }
+  .work:nth-child(3) .work-top { background-color: #edf5fc; color: #759aba; }
+  .work-top .pixel { width: 48px; height: 48px; }
+  .work-number { position: absolute; top: 12px; left: 14px; font: 12px var(--mono); color: #938196; }
+  .work-body { padding: 20px; }
+  .work h2 { font-size: 18px; margin: 7px 0 10px; line-height: 1.6; }
+  .work p { font-size: 14px; color: var(--muted); margin: 0; line-height: 1.9; }
+  .work-bottom {
+    margin-top: 22px;
+    border-top: 1px dashed var(--line);
+    padding-top: 13px;
+    font-size: 12px;
+    color: #84768b;
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .work-bottom a { color: var(--accent); }
+  .work-bottom a:hover { text-decoration: underline; }
+  .label {
+    font-size: 12px;
+    display: inline-block;
+    padding: 1px 7px;
+    background: #fff2f7;
+    color: #9b5a78;
+  }
+  @media (max-width: 760px) {
+    .work-grid { grid-template-columns: 1fr; }
+    .work { display: grid; grid-template-columns: 150px 1fr; }
+    .work-top { height: 100%; min-height: 170px; }
+  }
+  @media (max-width: 500px) {
+    .work { display: block; }
+    .work-top { height: 135px; min-height: 0; }
+  }
+</style>

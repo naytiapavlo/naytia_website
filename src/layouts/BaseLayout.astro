@@ -1,0 +1,176 @@
+---
+/**
+ * 公共页壳：所有页面共用头部导航、图标 sprite、页脚与基础样式。
+ * 页面只提供 title / description，不重复实现外壳。
+ */
+import '../styles/tokens.css';
+import '../styles/base.css';
+import { site } from '../config/site';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = site.description } = Astro.props;
+
+const currentPath = Astro.url.pathname;
+const isActive = (href: string) =>
+  href === '/' ? currentPath === '/' : currentPath.startsWith(href);
+
+const year = new Date().getFullYear();
+---
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title} · Naytia 的像素小站</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23f9dfe8' d='M4 0h24v4h4v24h-4v4H4v-4H0V4h4z'/%3E%3Cpath fill='%23944668' d='M8 24V8h4v4h4v4h4V8h4v16h-4v-4h-4v-4h-4v8z'/%3E%3C/svg%3E"
+    />
+  </head>
+  <body>
+    <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+      <symbol id="i-home" viewBox="0 0 16 16"><path d="M7 1h2v2h2v2h2v2h2v2h-2v6H9v-4H7v4H3V9H1V7h2V5h2V3h2z"/></symbol>
+      <symbol id="i-grid" viewBox="0 0 16 16"><path d="M1 1h6v6H1zm8 0h6v6H9zM1 9h6v6H1zm8 0h6v6H9z"/></symbol>
+      <symbol id="i-tool" viewBox="0 0 16 16"><path d="M9 0h3v4h4v3h-2v2h-4v2H8v2H6v2H2v-4h2V9h2V7h1V3h2z"/></symbol>
+      <symbol id="i-note" viewBox="0 0 16 16"><path d="M2 1h12v14H2zm2 2v10h8V3zm1 2h6v2H5zm0 4h6v2H5z" fill-rule="evenodd"/></symbol>
+      <symbol id="i-bolt" viewBox="0 0 16 16"><path d="M8 0h5l-3 6h4L6 16l1-7H2z"/></symbol>
+      <symbol id="i-heart" viewBox="0 0 16 16"><path d="M2 2h4v2h4V2h4v2h2v6h-2v2h-2v2h-2v2H6v-2H4v-2H2v-2H0V4h2z"/></symbol>
+      <symbol id="i-signal" viewBox="0 0 16 16"><path d="M0 5h5v2h6V5h5v6h-5V9H5v2H0zm2 2v2h1V7zm11 0v2h1V7z" fill-rule="evenodd"/></symbol>
+      <symbol id="i-target" viewBox="0 0 16 16"><path d="M1 1h5v2H3v3H1zm9 0h5v5h-2V3h-3zM1 10h2v3h3v2H1zm12 0h2v5h-5v-2h3zM6 6h4v4H6z"/></symbol>
+      <symbol id="i-box" viewBox="0 0 16 16"><path d="M1 2h14v12H1zm2 2v3h10V4zm0 5v3h10V9zM7 5h2v5H7z" fill-rule="evenodd"/></symbol>
+      <symbol id="i-chat" viewBox="0 0 16 16"><path d="M1 2h14v9H8v3l-3-3H1z"/></symbol>
+      <symbol id="i-lock" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4 1h8v5h3v9H1V6h3zM6 3h4v3H6zM7 9h2v3H7z"/></symbol>
+      <symbol id="i-user" viewBox="0 0 16 16"><path d="M6 2h4v4H6zM7 6h2v3H7zM3 9h10v5H3z"/></symbol>
+      <symbol id="i-send" viewBox="0 0 16 16"><path d="M9 6h2v1h2v2h-2v1h-2V9H1V7h8z"/></symbol>
+    </svg>
+
+    <header>
+      <nav class="navigation" aria-label="主导航">
+        <a href="/" class="brand">
+          <span class="brand-mark" aria-hidden="true">N</span>
+          Naytia<small>{site.brandSuffix}</small>
+        </a>
+        <div class="nav-links">
+          {site.nav.map((item) => (
+            <a
+              class="nav-link"
+              href={item.href}
+              aria-current={isActive(item.href) ? 'page' : undefined}
+            >
+              <svg class="pixel" aria-hidden="true"><use href={`#${item.icon}`} /></svg>
+              {item.label}
+            </a>
+          ))}
+        </div>
+        <div class="nav-account" id="navAccount">
+          <!-- 阶段 4：由论坛/账号模块的前端脚本填充登录状态 -->
+        </div>
+      </nav>
+    </header>
+
+    <main class="shell">
+      <slot />
+    </main>
+
+    <footer class="footer shell">
+      <span>© {year} <b>{site.name}</b> · 用好奇心，一块一块搭建。<svg class="pixel" aria-hidden="true"><use href="#i-heart" /></svg></span>
+      <span class="footer-right">NAYTIA'S PIXEL SITE</span>
+    </footer>
+
+    <style>
+      header { border-bottom: 1px solid var(--line); }
+      .navigation {
+        max-width: 980px;
+        width: calc(100% - 64px);
+        margin: auto;
+        min-height: 90px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        font-weight: 750;
+        font-size: 20px;
+        letter-spacing: -0.5px;
+      }
+      .brand-mark {
+        width: 30px;
+        height: 30px;
+        display: grid;
+        place-items: center;
+        background: var(--pink);
+        color: var(--accent);
+        font: bold 22px var(--mono);
+        box-shadow: 3px 3px 0 #ecd0dc;
+      }
+      .brand small {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 400;
+        margin-left: 5px;
+        letter-spacing: 1px;
+      }
+      .nav-links { display: flex; align-items: center; gap: 12px; }
+      .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 8px 18px;
+        font-size: 14px;
+        color: #756e7a;
+        border: 1px solid transparent;
+      }
+      .nav-link .pixel { width: 16px; height: 16px; }
+      .nav-link:hover { color: var(--accent); background: #fff7fa; }
+      .nav-link[aria-current='page'] {
+        background: var(--accent-soft);
+        color: var(--accent);
+        border: 1px solid var(--accent-line);
+        box-shadow: 2px 2px 0 var(--shadow-pink);
+      }
+      main { min-height: calc(100vh - 190px); }
+      .shell { max-width: 980px; width: calc(100% - 64px); margin: auto; }
+      .footer {
+        border-top: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 24px 0 30px;
+        color: #817087;
+        font-size: 12px;
+        margin-top: 30px;
+      }
+      .footer b { color: #95667f; font-weight: 400; }
+      .footer .pixel { height: 12px; width: 12px; vertical-align: -1px; color: #d3a0b8; }
+      .footer-right { font: 12px var(--mono); letter-spacing: 1px; }
+      @media (max-width: 760px) {
+        .shell, .navigation { width: calc(100% - 40px); }
+        .brand small { display: none; }
+        .navigation { min-height: 82px; }
+        .nav-links { gap: 5px; }
+        .nav-link { padding: 7px 11px; }
+      }
+      @media (max-width: 500px) {
+        .navigation { flex-wrap: wrap; justify-content: center; gap: 15px; padding: 19px 0 17px; }
+        .brand { width: 100%; justify-content: center; }
+        .brand small { display: inline; }
+        .nav-links { gap: 17px; }
+        .nav-link { padding: 7px 13px; }
+      }
+    </style>
+  </body>
+</html>

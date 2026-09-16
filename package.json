@@ -1,0 +1,21 @@
+{
+  "name": "naytia-site",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "api:types": "openapi-typescript http://127.0.0.1:8000/openapi.json -o src/ports/api-schema.d.ts"
+  },
+  "dependencies": {
+    "astro": "^5.0.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "openapi-typescript": "^7.5.0",
+    "typescript": "^5.5.0"
+  }
+}

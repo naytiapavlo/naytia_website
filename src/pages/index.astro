@@ -1,0 +1,182 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config/site';
+import { getCollection } from 'astro:content';
+
+const publishedPosts = (await getCollection('posts', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
+---
+
+<BaseLayout title="首页">
+  <section class="welcome">
+    <div class="avatar-wrap">
+      <img class="avatar" src={site.avatar} width="132" height="132" alt="像素风人物示意头像，待替换为个人头像" />
+      <span class="avatar-label">PLAYER 01</span>
+    </div>
+    <div>
+      <p class="hello">HELLO, PIXEL WORLD!</p>
+      <h1>你好，我是<span>{site.displayName}</span>。</h1>
+      <p class="intro">
+        一个喜欢研究 Minecraft 的人。<br />
+        在这里记录灵感、分享作品，也折腾一些有趣的小工具。
+      </p>
+      <div class="identity">
+        <span>{site.name}</span>
+        <span>MC 技术玩家</span>
+        <span>B 站 UP 主</span>
+      </div>
+    </div>
+    <span class="welcome-symbol" aria-hidden="true">+ &nbsp; ·</span>
+  </section>
+
+  <aside class="note">
+    <svg class="pixel" aria-hidden="true"><use href="#i-heart" /></svg>
+    <span>欢迎来到我的小站。慢慢探索，保持好奇。</span>
+    <small>ENJOY YOUR STAY :)</small>
+  </aside>
+
+  <section class="journal" aria-labelledby="journal-title">
+    <div class="section-heading">
+      <svg class="pixel" aria-hidden="true"><use href="#i-note" /></svg>
+      <h2 id="journal-title">最近的记录</h2>
+      <span class="en">LITTLE NOTES</span>
+      <span class="hint"><a href="/blog/">博客 →</a></span>
+    </div>
+    {publishedPosts.length === 0 ? (
+      <div class="blog-empty">博客内容整理中，文章发布后会出现在这里。</div>
+    ) : (
+      <div class="posts">
+        {publishedPosts.map((post) => (
+          <article class="post">
+            <div class="post-icon"><svg class="pixel" aria-hidden="true"><use href="#i-note" /></svg></div>
+            <div class="post-info">
+              <span class="post-tag">{post.data.category}</span>
+              <h3>{post.data.title}</h3>
+              <p>{post.data.summary}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    )}
+
+    <div class="home-links">
+      {site.homeEntries.map((entry) => (
+        <a href={entry.href} class="entry">
+          <svg class="pixel" aria-hidden="true"><use href={`#${entry.icon}`} /></svg>
+          <div>
+            <strong>{entry.title}</strong>
+            <small>{entry.summary}</small>
+          </div>
+          <span class="arrow" aria-hidden="true">→</span>
+        </a>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .welcome {
+    padding: 65px 0 43px;
+    display: flex;
+    gap: 35px;
+    align-items: center;
+  }
+  .avatar-wrap {
+    flex: none;
+    position: relative;
+    padding: 7px;
+    border: 2px solid #dfd5df;
+    box-shadow: 5px 5px 0 #f3e8ee;
+    background: #fff;
+  }
+  .avatar {
+    display: block;
+    object-fit: cover;
+    image-rendering: pixelated;
+    width: 132px;
+    height: 132px;
+    background: #fff3f7;
+  }
+  .avatar-label {
+    position: absolute;
+    bottom: -13px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    border: 1px solid #e6d4df;
+    padding: 0 9px;
+    white-space: nowrap;
+    color: #8c6179;
+    font: 12px/23px var(--mono);
+  }
+  .hello { font: 12px var(--mono); letter-spacing: 2px; color: #9b677f; margin: 0 0 11px; }
+  h1 { font-size: 34px; line-height: 1.4; font-weight: 700; letter-spacing: 1px; margin: 0 0 12px; }
+  h1 span { color: var(--accent); }
+  .intro { font-size: 16px; color: var(--muted); margin: 0; line-height: 1.95; }
+  .identity { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 17px; }
+  .identity span {
+    font-size: 12px;
+    color: #756a7d;
+    background: #f7f5f9;
+    padding: 2px 9px;
+    border: 1px solid #eee9f1;
+  }
+  .identity span:first-child { color: var(--accent); background: var(--accent-soft); border-color: #f7e1ea; }
+  .welcome-symbol { margin-left: auto; align-self: flex-start; margin-top: 34px; color: #dccbda; font: 28px var(--mono); }
+  .note {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    background: var(--wash);
+    border: 1px dashed #ded4e2;
+    padding: 13px 18px;
+    color: #7b6b7c;
+    font-size: 14px;
+  }
+  .note .pixel { width: 16px; height: 16px; color: #af83a1; }
+  .note small { margin-left: auto; font: 12px var(--mono); color: #85788d; white-space: nowrap; }
+  .journal { padding: 35px 0 46px; }
+  .section-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 17px; }
+  .section-heading .pixel { color: #ab7996; width: 18px; height: 18px; }
+  .section-heading h2 { font-size: 19px; margin: 0; letter-spacing: 1px; }
+  .section-heading .en { color: #8c7e93; font: 12px var(--mono); letter-spacing: 1px; margin-left: 5px; }
+  .section-heading .hint { margin-left: auto; color: #817385; font-size: 12px; }
+  .section-heading .hint a:hover { color: var(--accent); }
+  .blog-empty {
+    padding: 28px 20px;
+    text-align: center;
+    color: #93879a;
+    font-size: 14px;
+    border: 1px dashed #e2d9e6;
+  }
+  .home-links { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 25px; }
+  .entry {
+    padding: 18px 22px;
+    border: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: background 0.15s, transform 0.15s;
+  }
+  .entry:hover { background: #fff9fc; transform: translateY(-2px); }
+  .entry > .pixel { color: #b6819a; width: 22px; height: 22px; }
+  .entry strong { font-size: 14px; font-weight: 600; display: block; }
+  .entry small { font-size: 12px; color: var(--muted); }
+  .entry .arrow { margin-left: auto; font-family: var(--mono); color: #a48ba1; }
+  @media (max-width: 760px) {
+    .welcome { gap: 26px; padding-top: 46px; }
+    .avatar { width: 108px; height: 108px; }
+    .welcome-symbol { display: none; }
+    h1 { font-size: 28px; }
+  }
+  @media (max-width: 500px) {
+    .welcome { flex-direction: column; text-align: center; padding: 35px 0 27px; gap: 26px; }
+    .identity { justify-content: center; }
+    .note { padding: 12px; gap: 10px; }
+    .note small { display: none; }
+    .home-links { grid-template-columns: 1fr; gap: 12px; }
+    .entry { padding: 15px 18px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .entry { transition: none; } }
+</style>

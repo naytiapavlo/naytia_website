@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="页面不存在">
+  <div class="not-found">
+    <p class="code">404</p>
+    <h1>这一格还没有方块。</h1>
+    <p>页面可能被移动或删除了，从首页重新出发吧。</p>
+    <a href="/">← 返回首页</a>
+  </div>
+</BaseLayout>
+
+<style>
+  .not-found { padding: 90px 0 60px; text-align: center; }
+  .code { font: 44px var(--mono); color: #ecd0dc; margin: 0; letter-spacing: 6px; }
+  h1 { font-size: 26px; margin: 10px 0 8px; }
+  p { color: var(--muted); margin: 0 0 26px; }
+  a { color: var(--accent); }
+  a:hover { text-decoration: underline; }
+</style>

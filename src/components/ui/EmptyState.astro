@@ -1,0 +1,26 @@
+---
+/** 诚实的空状态：说明原因，不给假内容，不放假按钮。 */
+interface Props {
+  message: string;
+  hint?: string;
+}
+const { message, hint } = Astro.props;
+---
+
+<div class="empty">
+  <p>{message}</p>
+  {hint && <small>{hint}</small>}
+</div>
+
+<style>
+  .empty {
+    padding: 42px 20px;
+    text-align: center;
+    color: #93879a;
+    font-size: 14px;
+    border: 1px dashed #e2d9e6;
+    margin-bottom: 40px;
+  }
+  .empty p { margin: 0; }
+  .empty small { display: block; margin-top: 6px; color: #a89cae; }
+</style>

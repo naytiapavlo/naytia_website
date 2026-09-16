@@ -1,0 +1,28 @@
+/* 基础样式：只做元素级默认，页面级样式归属各自组件与布局。 */
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 16px/1.8 var(--font-body);
+}
+
+a { color: inherit; text-decoration: none; }
+
+::selection { background: var(--pink); }
+
+a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 5px;
+}
+
+[hidden] { display: none !important; }
+
+.pixel {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+  flex: none;
+  shape-rendering: crispEdges;
+}

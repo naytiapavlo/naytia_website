@@ -1,0 +1,24 @@
+/* 设计 tokens（阶段 1）：颜色、字体、线条只在这里定义，组件引用变量，不散落硬编码。 */
+:root {
+  color-scheme: light;
+
+  /* 墨色与辅助文字 */
+  --ink: #38343c;
+  --muted: #817b86;
+
+  /* 线与背景 */
+  --line: #eae6ec;
+  --paper: #ffffff;
+  --wash: #fdfbfc;
+
+  /* 粉色主色系 */
+  --pink: #f9e2eb;
+  --accent: #a3456b;
+  --accent-soft: #fff1f6;
+  --accent-line: #f2d8e3;
+  --shadow-pink: #f2d8e3;
+
+  /* 字体 */
+  --font-body: "Segoe UI", "Microsoft YaHei", sans-serif;
+  --mono: Consolas, "Courier New", monospace;
+}

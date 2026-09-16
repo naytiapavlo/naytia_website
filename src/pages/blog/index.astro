@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeading from '../../components/ui/PageHeading.astro';
+import EmptyState from '../../components/ui/EmptyState.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('posts', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<BaseLayout title="博客" description="记录灵感与探索过程的文字角落。">
+  <PageHeading eyebrow="LITTLE NOTES" heading="博客" lead="视频之外，用文字留下探索的过程。" />
+
+  {posts.length === 0 ? (
+    <EmptyState
+      message="文章整理中，发布后会出现在这里。"
+      hint="草稿不会进入正式页面、RSS 或搜索索引。"
+    />
+  ) : (
+    <ul class="post-list">
+      {posts.map((post) => (
+        <li>
+          <span class="tag">{post.data.category}</span>
+          <h2>{post.data.title}</h2>
+          <p>{post.data.summary}</p>
+          <time datetime={post.data.date.toISOString().slice(0, 10)}>
+            {post.data.date.toISOString().slice(0, 10)}
+          </time>
+        </li>
+      ))}
+    </ul>
+  )}
+</BaseLayout>
+
+<style>
+  .post-list { list-style: none; margin: 0; padding: 0 0 46px; border-top: 1px solid var(--line); }
+  .post-list li { padding: 24px 0; border-bottom: 1px solid var(--line); }
+  .tag { font-size: 12px; color: #9b5a78; }
+  h2 { font-size: 17px; margin: 3px 0 5px; }
+  p { margin: 0; color: var(--muted); font-size: 14px; }
+  time { display: block; margin-top: 6px; font: 12px var(--mono); color: #887a8e; }
+</style>
