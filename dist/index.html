@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Naytia_帕芙洛的个人小站。记录日常，探索 Minecraft，分享作品与技术工具，还有一个玩家小论坛。">
+<meta name="theme-color" content="#ffffff">
+<title>首页 · Naytia 的像素小站</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23f9dfe8' d='M4 0h24v4h4v24h-4v4H4v-4H0V4h4z'/%3E%3Cpath fill='%23944668' d='M8 24V8h4v4h4v4h4V8h4v16h-4v-4h-4v-4h-4v8z'/%3E%3C/svg%3E">
+<style>
+:root{color-scheme:light;--ink:#38343c;--muted:#817b86;--line:#eae6ec;--pink:#f9e2eb;--accent:#a3456b;--mono:Consolas,"Courier New",monospace}
+*{box-sizing:border-box}body{margin:0;background:#fff;color:var(--ink);font:16px/1.8 "Segoe UI","Microsoft YaHei",sans-serif}a{color:inherit;text-decoration:none}::selection{background:var(--pink)}a:focus-visible{outline:2px solid var(--accent);outline-offset:5px}[hidden]{display:none!important}.shell{max-width:980px;width:calc(100% - 64px);margin:auto}.pixel{width:20px;height:20px;fill:currentColor;flex:none;shape-rendering:crispEdges}
+header{border-bottom:1px solid var(--line)}.navigation{min-height:90px;display:flex;align-items:center;justify-content:space-between;gap:24px}.brand{display:flex;align-items:center;gap:11px;font-weight:750;font-size:20px;letter-spacing:-.5px}.brand-mark{width:30px;height:30px;display:grid;place-items:center;background:var(--pink);color:var(--accent);font:bold 22px var(--mono);box-shadow:3px 3px 0 #ecd0dc}.brand small{color:var(--muted);font-size:12px;font-weight:400;margin-left:5px;letter-spacing:1px}.nav-links{display:flex;align-items:center;gap:12px}.nav-link{display:flex;align-items:center;gap:9px;padding:8px 18px;font-size:14px;color:#756e7a;border:1px solid transparent}.nav-link .pixel{width:16px;height:16px}.nav-link:hover{color:var(--accent);background:#fff7fa}.nav-link[aria-current="page"]{background:#fff1f6;color:var(--accent);border:1px solid #f2d8e3;box-shadow:2px 2px 0 #f2d8e3}
+main{min-height:calc(100vh - 190px)}.welcome{padding:65px 0 43px;display:flex;gap:35px;align-items:center}.avatar-wrap{flex:none;position:relative;padding:7px;border:2px solid #dfd5df;box-shadow:5px 5px 0 #f3e8ee;background:#fff}.avatar{display:block;object-fit:cover;image-rendering:pixelated;width:132px;height:132px;background:#fff3f7}.avatar-label{position:absolute;bottom:-13px;left:50%;transform:translateX(-50%);background:white;border:1px solid #e6d4df;padding:0 9px;white-space:nowrap;color:#8c6179;font:12px/23px var(--mono)}.hello{font:12px var(--mono);letter-spacing:2px;color:#9b677f;margin:0 0 11px}h1{font-size:34px;line-height:1.4;font-weight:700;letter-spacing:1px;margin:0 0 12px}h1 span{color:var(--accent)}.intro{font-size:16px;color:var(--muted);margin:0;line-height:1.95}.identity{display:flex;gap:8px;flex-wrap:wrap;margin-top:17px}.identity span{font-size:12px;color:#756a7d;background:#f7f5f9;padding:2px 9px;border:1px solid #eee9f1}.identity span:first-child{color:var(--accent);background:#fff1f6;border-color:#f7e1ea}.welcome-symbol{margin-left:auto;align-self:flex-start;margin-top:34px;color:#dccbda;font:28px var(--mono)}
+.note{display:flex;gap:12px;align-items:center;background:#fcf9fc;border:1px dashed #ded4e2;padding:13px 18px;color:#7b6b7c;font-size:14px}.note .pixel{width:16px;height:16px;color:#af83a1}.note small{margin-left:auto;font:12px var(--mono);color:#85788d;white-space:nowrap}.journal{padding:35px 0 46px}.section-heading{display:flex;align-items:center;gap:10px;margin-bottom:17px}.section-heading .pixel{color:#ab7996;width:18px;height:18px}h2{font-size:19px;margin:0;letter-spacing:1px}.section-heading .en{color:#8c7e93;font:12px var(--mono);letter-spacing:1px;margin-left:5px}.section-heading .hint{margin-left:auto;color:#817385;font-size:12px}.posts{border-top:1px solid var(--line)}.post{display:grid;grid-template-columns:64px 1fr auto;align-items:center;gap:22px;padding:24px 0;border-bottom:1px solid var(--line)}.post-icon{width:56px;height:56px;display:grid;place-items:center;background:#fff1f6;border:1px solid #f3dce6;color:#b77491;box-shadow:3px 3px 0 #faedf2}.post-icon .pixel{width:24px;height:24px}.post:nth-child(2) .post-icon{background:#f4f1fc;border-color:#e8e0f3;color:#9782b9;box-shadow:3px 3px 0 #f3eef9}.post:nth-child(3) .post-icon{background:#eff6fd;border-color:#dfeaf5;color:#7d9fc1;box-shadow:3px 3px 0 #eff4fa}.post-info{min-width:0}.post-tag{font-size:12px;color:#9b5a78}.post:nth-child(2) .post-tag{color:#8972a5}.post:nth-child(3) .post-tag{color:#6689ad}.post h3{font-size:17px;font-weight:600;margin:3px 0 5px;line-height:1.65}.post p{margin:0;color:var(--muted);font-size:14px}.post-status{font-size:12px;color:#887a8e;white-space:nowrap}.home-links{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:25px}.entry{padding:18px 22px;border:1px solid var(--line);display:flex;align-items:center;gap:14px;transition:background .15s,transform .15s}.entry:hover{background:#fff9fc;transform:translateY(-2px)}.entry>.pixel{color:#b6819a;width:22px;height:22px}.entry strong{font-size:14px;font-weight:600;display:block}.entry small{font-size:12px;color:var(--muted)}.entry .arrow{margin-left:auto;font-family:var(--mono);color:#a48ba1}
+.page-heading{padding:50px 0 30px}.page-heading h1{font-size:29px;margin-top:7px}.page-heading p{color:var(--muted);font-size:16px;margin:0}.page-heading .hello{color:#9b677f;font-size:12px}.work-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;padding-bottom:46px}.work{border:1px solid #ded7e1;box-shadow:4px 4px 0 #f2edf4;background:white;min-width:0}.work-top{height:135px;background-color:#fff3f7;background-image:linear-gradient(#efdeea60 1px,transparent 1px),linear-gradient(90deg,#efdeea60 1px,transparent 1px);background-size:16px 16px;display:flex;align-items:center;justify-content:center;position:relative;color:#aa7090}.work:nth-child(2) .work-top{background-color:#f3effb;color:#9980b6}.work:nth-child(3) .work-top{background-color:#edf5fc;color:#759aba}.work-top .pixel{width:48px;height:48px}.work-number{position:absolute;top:12px;left:14px;font:12px var(--mono);color:#938196}.work-body{padding:20px}.work h2{font-size:18px;margin:7px 0 10px;letter-spacing:0;line-height:1.6}.work p{font-size:14px;color:var(--muted);margin:0;line-height:1.9}.work-bottom{margin-top:22px;border-top:1px dashed var(--line);padding-top:13px;font-size:12px;color:#84768b;display:flex;justify-content:space-between;gap:8px}.work-bottom a{color:var(--accent)}.work-bottom a:hover{text-decoration:underline}.label{font-size:12px;display:inline-block;padding:1px 7px;background:#fff2f7;color:#9b5a78}
+.tools{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;padding-bottom:28px}.tool{border:1px solid #e3dce7;box-shadow:3px 3px 0 #f5f0f6;padding:24px;display:flex;gap:20px;align-items:flex-start}.tool-icon{width:46px;height:46px;background:#f6effa;display:grid;place-items:center;color:#9c7ab2;flex:none;border:1px solid #e9ddec}.tool-icon .pixel{width:23px;height:23px}.tool:nth-child(2) .tool-icon{color:#b97c95;background:#fff1f5;border-color:#f1dce5}.tool:nth-child(3) .tool-icon{color:#7c9eba;background:#eef6fc;border-color:#dfeaf4}.tool h2{font-size:17px;letter-spacing:0;margin:0 0 7px}.tool p{font-size:14px;color:var(--muted);margin:0 0 15px}.tool-status{font-size:12px;color:#81708a;background:#f7f4f9;border:1px solid #eae3ee;padding:2px 8px}.page-note{font-size:12px;color:#88758f;padding-bottom:35px;margin:0}.footer{border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:16px;padding:24px 0 30px;color:#817087;font-size:12px}.footer b{color:#95667f;font-weight:400}.footer .pixel{height:12px;width:12px;vertical-align:-1px;color:#d3a0b8}.footer-right{font:12px var(--mono);letter-spacing:1px}
+@media(max-width:760px){.shell{width:calc(100% - 40px)}.brand small{display:none}.navigation{min-height:82px}.nav-links{gap:5px}.nav-link{padding:7px 11px}.welcome{gap:26px;padding-top:46px}.avatar{width:108px;height:108px}.welcome-symbol{display:none}h1{font-size:28px}.work-grid{grid-template-columns:1fr}.work{display:grid;grid-template-columns:150px 1fr}.work-top{height:100%;min-height:170px}.tools{grid-template-columns:1fr}.post{gap:16px}.note small{display:none}}
+@media(max-width:500px){.shell{width:calc(100% - 36px)}.navigation{flex-wrap:wrap;justify-content:center;gap:15px;padding:19px 0 17px}.brand{width:100%;justify-content:center}.brand small{display:inline}.nav-links{gap:17px}.nav-link{padding:7px 13px}.welcome{flex-direction:column;text-align:center;padding:35px 0 27px;gap:26px}.avatar{width:106px;height:106px}.identity{justify-content:center}.hello{font-size:12px}h1{font-size:28px}.note{padding:12px;gap:10px}.journal{padding-top:29px}.section-heading .en{display:none}.post{grid-template-columns:44px 1fr;gap:14px;padding:21px 0}.post-icon{width:42px;height:46px}.post-status{display:none}.post h3{font-size:16px}.home-links{grid-template-columns:1fr;gap:12px}.entry{padding:15px 18px}.work{display:block}.work-top{height:135px;min-height:0}.page-heading{padding:34px 0 23px}.page-heading h1{font-size:26px}.tool{padding:20px;gap:16px}.footer{flex-direction:column;text-align:center;gap:8px}}
+@media(prefers-reduced-motion:reduce){.entry{transition:none}}
+</style>
+<style>
+/* ===== 扩展：账号系统 / 论坛 / 工具箱联动（本地演示） ===== */
+.nav-side{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:flex-end}
+.nav-account{display:flex;align-items:center;flex:none}
+.btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:inherit;font-size:13px;line-height:1.4;padding:8px 15px;background:#fff1f6;color:#a3456b;border:1px solid #f2d8e3;box-shadow:2px 2px 0 #f2d8e3;cursor:pointer}
+.btn-primary .pixel{width:14px;height:14px}
+.btn-primary:hover{background:#ffe7f0}
+.btn-primary:active{transform:translate(1px,1px);box-shadow:1px 1px 0 #f2d8e3}
+.btn-ghost{display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-size:13px;line-height:1.4;padding:8px 15px;background:#fff;color:#7c7284;border:1px solid #e2dae6;box-shadow:2px 2px 0 #f1edf3;cursor:pointer}
+.btn-ghost:hover{color:#4a4450;border-color:#d4cad9}
+.user-chip{display:flex;align-items:center;gap:9px;padding:4px 10px 4px 4px;border:1px solid #f2d8e3;background:#fff8fb;box-shadow:2px 2px 0 #f7e6ee}
+.user-avatar{width:27px;height:27px;background:#f9dfe8;color:#94466b;display:grid;place-items:center;font:bold 14px/1 var(--mono);flex:none}
+.user-name{font-size:13px;color:#6d5a70;max-width:9em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.user-logout{border:0;background:none;color:#a596ab;font-family:inherit;font-size:12px;cursor:pointer;padding:3px 2px}
+.user-logout:hover{color:#a3456b;text-decoration:underline}
+.home-links .entry:nth-child(3){grid-column:1/-1}
+/* 论坛 */
+.forum-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.forum-tabs{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font-family:inherit;font-size:13px;padding:5px 13px;border:1px solid #e5dfe8;background:#faf8fb;color:#7c7284;cursor:pointer}
+.chip:hover{color:#a3456b;border-color:#e9c9d6}
+.chip[aria-pressed="true"]{background:#fff1f6;border-color:#f2d8e3;color:#a3456b;box-shadow:2px 2px 0 #f2d8e3}
+.threads{border-top:1px solid var(--line)}
+.thread-row{display:grid;grid-template-columns:44px 1fr auto;gap:18px;align-items:center;padding:17px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.thread-row:hover{background:#fffafb}
+.thread-icon{width:42px;height:42px;display:grid;place-items:center;background:#fff1f6;border:1px solid #f3dce6;color:#b77491;box-shadow:2px 2px 0 #faedf2}
+.thread-icon .pixel{width:18px;height:18px}
+.thread-main{min-width:0}
+.thread-title{font-size:16px;font-weight:600;margin:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;line-height:1.6}
+.thread-meta{font-size:12px;color:#8b7d90;margin:4px 0 0;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.thread-side{font-size:12px;color:#8a7c8f;white-space:nowrap}
+.badge{font-size:11px;line-height:1.7;padding:1px 7px;border:1px solid #eee9f1;background:#f7f5f9;color:#8d7f92;white-space:nowrap}
+.badge-cat{background:#fff2f7;color:#9b5a78;border-color:#f7e1ea}
+.badge-demo{background:#f4f1fc;color:#9782b5;border-color:#e8e0f3}
+.badge-owner{background:#fdf6ec;color:#a5834b;border-color:#f0e3cd}
+.forum-empty{padding:42px 20px;text-align:center;color:#93879a;font-size:14px;border:1px dashed #e2d9e6}
+.thread-detail{padding:4px 0 34px}
+.back-link{font-size:13px;color:#8a7c8f;display:inline-block;margin-bottom:14px;cursor:pointer}
+.back-link:hover{color:#a3456b}
+.detail-head h2{font-size:22px;line-height:1.5;margin:0 0 6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.detail-meta{font-size:12px;color:#8b7d90;margin:0 0 16px}
+.detail-body{white-space:pre-wrap;word-break:break-word;font-size:15px;line-height:2;color:#4a4450;border:1px solid #ece6ee;background:#fdfbfc;box-shadow:3px 3px 0 #f6f0f7;padding:18px 22px}
+.replies{margin-top:28px}
+.reply{display:flex;gap:14px;padding:15px 0;border-bottom:1px dashed var(--line)}
+.reply-avatar{width:34px;height:34px;flex:none;background:#f4f1fc;color:#9782b5;display:grid;place-items:center;font:bold 15px/1 var(--mono);border:1px solid #e8e0f3}
+.reply-main{min-width:0;flex:1}
+.reply-head{font-size:12px;color:#8b7d90;margin-bottom:5px}
+.reply-body{white-space:pre-wrap;word-break:break-word;font-size:14px;line-height:1.95;color:#4a4450}
+.panel-form{margin-top:22px;border:1px solid #ece6ee;background:#fdfbfc;padding:18px 20px;box-shadow:3px 3px 0 #f6f0f7}
+.form-field{margin-bottom:14px}
+.form-field label{display:block;font-size:12px;color:#7d6f83;margin-bottom:6px;letter-spacing:.5px}
+.form-field input,.form-field textarea,.form-field select{width:100%;font-family:inherit;font-size:14px;line-height:1.7;padding:9px 12px;border:1px solid #ddd4e0;background:#fff;color:var(--ink)}
+.form-field textarea{resize:vertical;min-height:96px}
+.form-field input:focus,.form-field textarea:focus,.form-field select:focus{outline:2px solid #f2c7d8;border-color:#a3456b}
+.form-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.form-error{color:#b3466b;font-size:13px;margin:10px 0 0}
+.form-info{font-size:13px;color:#9b5a78;background:#fff5f8;border:1px dashed #f0d6e1;padding:7px 11px;margin:0 0 14px}
+.note .note-action{margin-left:auto;flex:none}
+/* 工具箱与账号联动 */
+.tool-extra{margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tool-lock{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#9b5a78;background:#fff5f8;border:1px dashed #f0d6e1;padding:3px 9px}
+.tool-lock .pixel{width:13px;height:13px}
+.btn-fav{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:12px;padding:4px 11px;background:#fff;border:1px solid #e5dfe8;color:#7c7284;cursor:pointer}
+.btn-fav .pixel{width:13px;height:13px}
+.btn-fav:hover{color:#a3456b;border-color:#e9c9d6}
+.btn-fav[aria-pressed="true"]{background:#fff1f6;border-color:#f2d8e3;color:#a3456b}
+.fav-strip{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-4px 0 18px;font-size:12px;color:#8a7c8f}
+.fav-strip .chip{padding:4px 11px}
+/* 登录注册弹层与全局提示 */
+.overlay{position:fixed;inset:0;background:rgba(56,52,60,.34);display:grid;place-items:center;z-index:50;padding:22px}
+.dialog{width:min(400px,100%);background:#fff;border:2px solid #e6d4df;box-shadow:7px 7px 0 rgba(163,69,107,.16);padding:28px 28px 22px;position:relative;max-height:calc(100vh - 44px);overflow:auto}
+.dialog h2{font-size:22px;margin:5px 0 18px;letter-spacing:1px}
+.dialog-close{position:absolute;top:10px;right:12px;border:0;background:none;font:20px/1 var(--mono);color:#a596ab;cursor:pointer;padding:4px 6px}
+.dialog-close:hover{color:#a3456b}
+.dialog-switch{font-size:13px;color:#7d6f83;margin:15px 0 0}
+.dialog-switch a{color:#a3456b;cursor:pointer;text-decoration:underline}
+.dialog-note{font-size:12px;color:#9a8ba0;margin:16px 0 0;padding-top:12px;border-top:1px dashed #e8e0ea;line-height:1.7}
+.toast{position:fixed;left:50%;bottom:34px;transform:translateX(-50%);background:#38343c;color:#fff;font-size:13px;line-height:1.6;padding:10px 19px;box-shadow:3px 3px 0 rgba(0,0,0,.18);z-index:60;max-width:82vw}
+.reset-link{color:#a3456b;text-decoration:underline;cursor:pointer}
+@media(max-width:760px){.forum-bar{flex-direction:column;align-items:stretch}.thread-row{grid-template-columns:44px 1fr}.thread-side{display:none}}
+@media(max-width:500px){.nav-side{width:100%;justify-content:center}.user-name{max-width:6em}.thread-row{grid-template-columns:40px 1fr;gap:13px}.thread-icon{width:38px;height:38px}.detail-head h2{font-size:19px}.home-links .entry:nth-child(3){grid-column:auto}}
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+<symbol id="i-home" viewBox="0 0 16 16"><path d="M7 1h2v2h2v2h2v2h2v2h-2v6H9v-4H7v4H3V9H1V7h2V5h2V3h2z"/></symbol>
+<symbol id="i-grid" viewBox="0 0 16 16"><path d="M1 1h6v6H1zm8 0h6v6H9zM1 9h6v6H1zm8 0h6v6H9z"/></symbol>
+<symbol id="i-tool" viewBox="0 0 16 16"><path d="M9 0h3v4h4v3h-2v2h-4v2H8v2H6v2H2v-4h2V9h2V7h1V3h2z"/></symbol>
+<symbol id="i-note" viewBox="0 0 16 16"><path d="M2 1h12v14H2zm2 2v10h8V3zm1 2h6v2H5zm0 4h6v2H5z" fill-rule="evenodd"/></symbol>
+<symbol id="i-bolt" viewBox="0 0 16 16"><path d="M8 0h5l-3 6h4L6 16l1-7H2z"/></symbol>
+<symbol id="i-heart" viewBox="0 0 16 16"><path d="M2 2h4v2h4V2h4v2h2v6h-2v2h-2v2h-2v2H6v-2H4v-2H2v-2H0V4h2z"/></symbol>
+<symbol id="i-signal" viewBox="0 0 16 16"><path d="M0 5h5v2h6V5h5v6h-5V9H5v2H0zm2 2v2h1V7zm11 0v2h1V7z" fill-rule="evenodd"/></symbol>
+<symbol id="i-target" viewBox="0 0 16 16"><path d="M1 1h5v2H3v3H1zm9 0h5v5h-2V3h-3zM1 10h2v3h3v2H1zm12 0h2v5h-5v-2h3zM6 6h4v4H6z"/></symbol>
+<symbol id="i-box" viewBox="0 0 16 16"><path d="M1 2h14v12H1zm2 2v3h10V4zm0 5v3h10V9zM7 5h2v5H7z" fill-rule="evenodd"/></symbol>
+<symbol id="i-chat" viewBox="0 0 16 16"><path d="M1 2h14v9H8v3l-3-3H1z"/></symbol>
+<symbol id="i-lock" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4 1h8v5h3v9H1V6h3zM6 3h4v3H6zM7 9h2v3H7z"/></symbol>
+<symbol id="i-user" viewBox="0 0 16 16"><path d="M6 2h4v4H6zM7 6h2v3H7zM3 9h10v5H3z"/></symbol>
+<symbol id="i-send" viewBox="0 0 16 16"><path d="M9 6h2v1h2v2h-2v1h-2V9H1V7h8z"/></symbol>
+</svg>
+<header><nav class="shell navigation" aria-label="主导航"><a href="#home" class="brand"><span class="brand-mark" aria-hidden="true">N</span>Naytia<small>的小小世界</small></a><div class="nav-side"><div class="nav-links">
+<a class="nav-link" href="#home" aria-current="page"><svg class="pixel" aria-hidden="true"><use href="#i-home"/></svg>首页</a>
+<a class="nav-link" href="#works"><svg class="pixel" aria-hidden="true"><use href="#i-grid"/></svg>作品</a>
+<a class="nav-link" href="#tools"><svg class="pixel" aria-hidden="true"><use href="#i-tool"/></svg>工具箱</a>
+<a class="nav-link" href="#forum"><svg class="pixel" aria-hidden="true"><use href="#i-chat"/></svg>论坛</a></div><div class="nav-account" id="navAccount"></div></div></nav></header>
+<main class="shell">
+<div class="page" id="home" aria-labelledby="home-title">
+<section class="welcome"><div class="avatar-wrap"><img class="avatar" src="avatar.png" width="132" height="132" alt="像素风人物示意头像，待替换为个人头像"><span class="avatar-label">PLAYER 01</span></div><div><p class="hello">HELLO, PIXEL WORLD!</p><h1 id="home-title">你好，我是<span>帕芙洛</span>。</h1><p class="intro">一个喜欢研究 Minecraft 的人。<br>在这里记录灵感、分享作品，也折腾一些有趣的小工具。</p><div class="identity"><span>Naytia_帕芙洛</span><span>MC 技术玩家</span><span>B 站 UP 主</span></div></div><span class="welcome-symbol" aria-hidden="true">+ &nbsp; ·</span></section>
+<aside class="note"><svg class="pixel" aria-hidden="true"><use href="#i-heart"/></svg><span>欢迎来到我的小站。慢慢探索，保持好奇。</span><small>ENJOY YOUR STAY :)</small></aside>
+<section class="journal" aria-labelledby="journal-title"><div class="section-heading"><svg class="pixel" aria-hidden="true"><use href="#i-note"/></svg><h2 id="journal-title">最近的记录</h2><span class="en">LITTLE NOTES</span><span class="hint">博客 · 示例内容</span></div><div class="posts">
+<article class="post"><div class="post-icon"><svg class="pixel" aria-hidden="true"><use href="#i-bolt"/></svg></div><div class="post-info"><span class="post-tag">机制研究</span><h3>从一个异常现象开始，理解一项机制</h3><p>记录观察、提出猜想，再让实验告诉我们答案。</p></div><span class="post-status">文章预览</span></article>
+<article class="post"><div class="post-icon"><svg class="pixel" aria-hidden="true"><use href="#i-grid"/></svg></div><div class="post-info"><span class="post-tag">设计手记</span><h3>一台机器之外：稳定性与使用体验</h3><p>聊聊效率以外，那些值得认真对待的小细节。</p></div><span class="post-status">文章预览</span></article>
+<article class="post"><div class="post-icon"><svg class="pixel" aria-hidden="true"><use href="#i-note"/></svg></div><div class="post-info"><span class="post-tag">日常碎片</span><h3>给散落的想法，搭一个自己的家</h3><p>视频之外，也想用文字留下一些探索的过程。</p></div><span class="post-status">文章预览</span></article></div>
+<div class="home-links"><a href="#works" class="entry"><svg class="pixel" aria-hidden="true"><use href="#i-grid"/></svg><div><strong>去看看我的作品</strong><small>一些研究，一些方块之间的创造。</small></div><span class="arrow" aria-hidden="true">→</span></a><a href="#tools" class="entry"><svg class="pixel" aria-hidden="true"><use href="#i-tool"/></svg><div><strong>打开玩家工具箱</strong><small>让重复的事情，变得简单一点。</small></div><span class="arrow" aria-hidden="true">→</span></a><a href="#forum" class="entry"><svg class="pixel" aria-hidden="true"><use href="#i-chat"/></svg><div><strong>来论坛聊聊</strong><small>登录后发帖回复；机制、作品与互助的小广场。</small></div><span class="arrow" aria-hidden="true">→</span></a></div></section>
+</div>
+<section class="page" id="works" aria-labelledby="works-title" hidden><div class="page-heading"><p class="hello">MADE WITH CURIOSITY</p><h1 id="works-title">我的作品<span>。</span></h1><p>把想法放进方块世界，再把发现分享给你。</p></div><div class="work-grid">
+<article class="work"><div class="work-top"><span class="work-number">PROJECT / 01</span><svg class="pixel" aria-hidden="true"><use href="#i-signal"/></svg></div><div class="work-body"><span class="label">机制探索 · MCBE</span><h2>箱子纠缠<br>超距信号传递</h2><p>探索方块之间的联系，以及距离之外的信号传递。</p><div class="work-bottom"><span>研究与应用</span><a href="https://www.bilibili.com/video/BV1HaaxzuExT/" target="_blank" rel="noopener noreferrer">B 站视频 ↗</a></div></div></article>
+<article class="work"><div class="work-top"><span class="work-number">PROJECT / 02</span><svg class="pixel" aria-hidden="true"><use href="#i-target"/></svg></div><div class="work-body"><span class="label">机器设计 · MCBE</span><h2>无基岩<br>凋零笼</h2><p>围绕凋零行为与约束条件，探索机器设计的可能。</p><div class="work-bottom"><span>机器与教程</span><span>展示示例</span></div></div></article>
+<article class="work"><div class="work-top"><span class="work-number">PROJECT / 03</span><svg class="pixel" aria-hidden="true"><use href="#i-bolt"/></svg></div><div class="work-body"><span class="label">红石工程 · MCBE</span><h2>高频闪门<br>猪人塔</h2><p>从触发时序到机器搭建，研究高频闪门的应用。</p><div class="work-bottom"><span>时序与设计</span><span>展示示例</span></div></div></article>
+</div></section>
+<section class="page" id="tools" aria-labelledby="tools-title" hidden><div class="page-heading"><p class="hello">A FEW HANDY THINGS</p><h1 id="tools-title">玩家工具箱<span>。</span></h1><p>少一点重复计算，多一点时间创造。</p></div><div class="fav-strip" id="favStrip" hidden></div><div class="tools">
+<article class="tool" data-tool="chunk-coords"><div class="tool-icon"><svg class="pixel" aria-hidden="true"><use href="#i-target"/></svg></div><div><h2>区块与坐标助手</h2><p>区块定位、相对坐标与维度换算。</p><span class="tool-status">概念预览</span><div class="tool-extra"></div></div></article>
+<article class="tool" data-tool="redstone-clock"><div class="tool-icon"><svg class="pixel" aria-hidden="true"><use href="#i-bolt"/></svg></div><div><h2>红石时序计算器</h2><p>游戏刻换算，梳理周期与频率。</p><span class="tool-status">概念预览</span><div class="tool-extra"></div></div></article>
+<article class="tool" data-tool="material-counter"><div class="tool-icon"><svg class="pixel" aria-hidden="true"><use href="#i-box"/></svg></div><div><h2>材料清单助手</h2><p>把物品数量换算成组数和盒数。</p><span class="tool-status">概念预览</span><div class="tool-extra"></div></div></article>
+</div><p class="page-note">登录后可收藏常用工具（收藏按账号保存）；工具计算功能尚未实现，当前均为概念预览。</p></section>
+<section class="page" id="forum" aria-labelledby="forum-title" hidden><div class="page-heading"><p class="hello">TALK &amp; SHARE</p><h1 id="forum-title">玩家论坛<span>。</span></h1><p>聊机制、晒作品、互帮互助的小广场。</p></div>
+<div class="forum-bar"><div class="forum-tabs" id="forumTabs"></div><button type="button" class="btn-primary" id="newThreadBtn"><svg class="pixel" aria-hidden="true"><use href="#i-send"/></svg>发新帖</button></div>
+<div id="forumBody"></div>
+<p class="page-note">演示版论坛：帖子与账号数据仅保存在当前浏览器 · <a class="reset-link" data-reset>重置演示数据</a></p></section>
+</main>
+<footer class="shell footer"><span>© 2026 <b>Naytia_帕芙洛</b> · 用好奇心，一块一块搭建。<svg class="pixel" aria-hidden="true"><use href="#i-heart"/></svg></span><span class="footer-right">DESIGN DEMO / 示意头像</span></footer>
+<div class="overlay" id="authOverlay" hidden><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+<button type="button" class="dialog-close" id="authClose" aria-label="关闭">×</button>
+<p class="hello" id="authHello">WELCOME BACK</p>
+<h2 id="authTitle">登录</h2>
+<form id="authForm" novalidate><div id="authFields"></div></form>
+<p class="dialog-switch" id="authSwitch"></p>
+<p class="dialog-note">演示账号系统：数据仅保存在本地浏览器，请勿使用你在其他网站的常用密码；正式版将提供服务端账号。</p>
+</div></div>
+<div class="toast" id="toast" hidden></div>
+<script>
+(() => {
+'use strict';
+
+/* ---------- 基础工具 ---------- */
+const $  = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+const esc = v => String(v).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const icon = name => `<svg class="pixel" aria-hidden="true"><use href="#${name}"/></svg>`;
+const OWNER = 'Naytia_帕芙洛';
+
+function fmtTime(iso){
+  const d = new Date(iso), n = new Date(), p = x => String(x).padStart(2, '0');
+  const core = `${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+  return d.getFullYear() === n.getFullYear() ? core : `${d.getFullYear()}-${core}`;
+}
+
+/* ---------- 本地演示数据层（正式版由服务端 API 替代，契约见 docs/plans/03） ---------- */
+const STORE_KEY = 'naytia.demo.v2';
+const CATEGORIES = ['机制研究', '作品展示', '问答互助', '站务公告'];
+
+function seedThreads(){
+  return [
+    { id: 'seed-welcome', demo: true, title: '欢迎来到论坛：先读这里', category: '站务公告', author: OWNER,
+      createdAt: '2026-09-16T09:00:00+08:00',
+      body: '这是演示示例帖，用来展示论坛的样子。\n\n版块说明：\n· 机制研究：聊游戏机制、实验与结论\n· 作品展示：晒出你的建造与装置\n· 问答互助：提问、解答与思路分享\n· 站务公告：站长发布的通知\n\n当前为本地演示版：帖子与账号数据只保存在你自己的浏览器里，正式服务上线后数据会重新开始。',
+      replies: [] },
+    { id: 'seed-chunk', demo: true, title: '【示例】负坐标换算区块，你习惯怎么记？', category: '机制研究', author: OWNER,
+      createdAt: '2026-09-16T09:30:00+08:00',
+      body: '示例帖：在负坐标区域，方块坐标换算成区块坐标时要向下取整，也就是对齐到 -1 而不是 0。\n\n你在做刷怪塔或定位结构时，有什么自己习惯的记法？登录后欢迎回复分享。',
+      replies: [] }
+  ];
+}
+
+function defaultStore(){
+  return { accounts: Object.create(null), session: null, forum: { threads: seedThreads() }, favs: Object.create(null) };
+}
+function loadStore(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(raw){
+      const s = JSON.parse(raw);
+      if(s && typeof s === 'object' && s.forum && Array.isArray(s.forum.threads)) return s;
+    }
+  }catch(err){ /* 数据损坏时回到默认演示内容 */ }
+  return defaultStore();
+}
+let store = loadStore();
+function save(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(store)); }
+  catch(err){ toast('本地存储不可用，本次操作不会被保存'); }
+}
+
+const me = () => (store.session && store.accounts[store.session]) ? store.session : null;
+
+/* 演示用口令散列：仅用于本地演示，正式版必须换成服务端加盐哈希 */
+function hashPass(key, pass){
+  let h1 = 0xdeadbeef ^ key.length, h2 = 0x41c6ce57 ^ key.length;
+  for(let i = 0; i < pass.length; i++){
+    const ch = pass.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+}
+
+function register(name, pass){
+  const key = name.toLowerCase();
+  if(store.accounts[key]) return { ok: false, error: '这个用户名已经被注册了' };
+  store.accounts[key] = { name, hash: hashPass(key, pass), createdAt: new Date().toISOString() };
+  store.session = key;
+  save();
+  return { ok: true };
+}
+function login(name, pass){
+  const key = name.toLowerCase();
+  const acc = store.accounts[key];
+  if(!acc || acc.hash !== hashPass(key, pass)) return { ok: false, error: '用户名或密码不正确' };
+  store.session = key;
+  save();
+  return { ok: true };
+}
+function logout(){ store.session = null; save(); }
+
+/* ---------- 论坛操作 ---------- */
+function threadLast(t){ return t.replies.length ? t.replies[t.replies.length - 1].createdAt : t.createdAt; }
+function sortedThreads(){ return store.forum.threads.slice().sort((a, b) => new Date(threadLast(b)) - new Date(threadLast(a))); }
+function findThread(id){ return store.forum.threads.find(t => t.id === id) || null; }
+function createThread(title, category, body){
+  const user = me();
+  if(!user) return { ok: false, error: '请先登录' };
+  const thread = { id: 't-' + uid(), title, category, author: store.accounts[user].name,
+    createdAt: new Date().toISOString(), body, replies: [] };
+  store.forum.threads.push(thread);
+  save();
+  return { ok: true, thread };
+}
+function addReply(threadId, body){
+  const user = me();
+  if(!user) return { ok: false, error: '请先登录' };
+  const thread = findThread(threadId);
+  if(!thread) return { ok: false, error: '帖子不存在' };
+  thread.replies.push({ id: 'r-' + uid(), author: store.accounts[user].name,
+    createdAt: new Date().toISOString(), body });
+  save();
+  return { ok: true };
+}
+
+/* ---------- 工具箱收藏（按账号隔离） ---------- */
+function myFavs(){
+  const user = me();
+  if(!user) return [];
+  if(!Array.isArray(store.favs[user])) store.favs[user] = [];
+  return store.favs[user];
+}
+function toggleFav(toolId){
+  const list = myFavs();
+  const i = list.indexOf(toolId);
+  if(i >= 0) list.splice(i, 1); else list.push(toolId);
+  store.favs[me()] = list;
+  save();
+}
+
+/* ---------- 全局提示条 ---------- */
+let toastTimer = null;
+function toast(msg){
+  const t = $('#toast');
+  t.textContent = msg;
+  t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.hidden = true; }, 2600);
+}
+
+/* ---------- 登录 / 注册弹层 ---------- */
+let authMode = 'login';
+let authNote = '';
+
+function renderAuthDialog(){
+  $('#authTitle').textContent = authMode === 'login' ? '登录' : '注册新账号';
+  $('#authHello').textContent = authMode === 'login' ? 'WELCOME BACK' : 'JOIN THE CLUB';
+  $('#authFields').innerHTML = `
+    ${authNote ? `<p class="form-info">${esc(authNote)}</p>` : ''}
+    <div class="form-field"><label for="auName">用户名</label><input id="auName" maxlength="16" autocomplete="username" placeholder="2-16 位字母 / 数字 / 下划线 / 中文"></div>
+    <div class="form-field"><label for="auPass">密码</label><input id="auPass" type="password" autocomplete="${authMode === 'login' ? 'current-password' : 'new-password'}" placeholder="至少 6 位"></div>
+    ${authMode === 'register' ? '<div class="form-field"><label for="auPass2">确认密码</label><input id="auPass2" type="password" autocomplete="new-password" placeholder="再输入一次密码"></div>' : ''}
+    <p class="form-error" id="auError" hidden></p>
+    <div class="form-actions"><button type="submit" class="btn-primary" style="width:100%">${authMode === 'login' ? '登录' : '注册并登录'}</button></div>`;
+  $('#authSwitch').innerHTML = authMode === 'login'
+    ? '还没有账号？<a data-switch="register">注册一个</a>'
+    : '已有账号？<a data-switch="login">直接登录</a>';
+}
+function openAuth(mode = 'login', note = ''){
+  authMode = mode;
+  authNote = note;
+  renderAuthDialog();
+  $('#authOverlay').hidden = false;
+  const first = $('#auName');
+  if(first) first.focus();
+}
+function closeAuth(){
+  $('#authOverlay').hidden = true;
+  authNote = '';
+}
+function handleAuthSubmit(){
+  const name = $('#auName').value.trim();
+  const pass = $('#auPass').value;
+  const err = $('#auError');
+  const fail = m => { err.textContent = m; err.hidden = false; };
+  if(!/^[A-Za-z0-9_\u4e00-\u9fa5]{2,16}$/.test(name)) return fail('用户名需为 2-16 位字母、数字、下划线或中文');
+  if(pass.length < 6) return fail('密码至少 6 位');
+  let res;
+  if(authMode === 'register'){
+    if(pass !== $('#auPass2').value) return fail('两次输入的密码不一致');
+    res = register(name, pass);
+  }else{
+    res = login(name, pass);
+  }
+  if(!res.ok) return fail(res.error);
+  closeAuth();
+  toast(`欢迎你，${store.accounts[store.session].name}！`);
+  renderAll();
+}
+
+/* ---------- 渲染：账号区 ---------- */
+function renderAccountNav(){
+  const box = $('#navAccount');
+  const user = me();
+  if(user){
+    const name = store.accounts[user].name;
+    box.innerHTML = `<span class="user-chip"><span class="user-avatar" aria-hidden="true">${esc(name.slice(0, 1).toUpperCase())}</span><span class="user-name">${esc(name)}</span><button type="button" class="user-logout" id="logoutBtn">退出</button></span>`;
+    $('#logoutBtn').addEventListener('click', () => { logout(); toast('已退出登录'); renderAll(); });
+  }else{
+    box.innerHTML = `<button type="button" class="btn-primary" id="loginBtn">${icon('i-user')}登录 / 注册</button>`;
+    $('#loginBtn').addEventListener('click', () => openAuth('login'));
+  }
+}
+
+/* ---------- 渲染：论坛 ---------- */
+const forumState = { view: 'list', category: '全部', threadId: null };
+
+function badgeHtml(t){
+  const list = [`<span class="badge badge-cat">${esc(t.category)}</span>`];
+  if(t.demo) list.push('<span class="badge badge-demo">示例</span>');
+  if(t.author === OWNER) list.push('<span class="badge badge-owner">站长</span>');
+  return list.join('');
+}
+
+function renderForum(){
+  const cats = ['全部', ...CATEGORIES];
+  $('#forumTabs').innerHTML = cats.map(c =>
+    `<button type="button" class="chip" data-cat="${esc(c)}" aria-pressed="${forumState.category === c}">${esc(c)}</button>`).join('');
+  const body = $('#forumBody');
+  if(forumState.view === 'thread') renderThreadDetail(body);
+  else if(forumState.view === 'new') renderNewThread(body);
+  else renderThreadList(body);
+}
+
+function renderThreadList(root){
+  const list = sortedThreads().filter(t => forumState.category === '全部' || t.category === forumState.category);
+  if(!list.length){
+    root.innerHTML = `<div class="forum-empty">这个版块还没有帖子，${me() ? '点右上角「发新帖」来发第一帖吧' : '登录后即可发第一帖'}。</div>`;
+    return;
+  }
+  root.innerHTML = '<div class="threads">' + list.map(t => `
+    <article class="thread-row" data-id="${t.id}" tabindex="0" role="link" aria-label="${esc(t.title)}">
+      <span class="thread-icon">${icon('i-chat')}</span>
+      <div class="thread-main">
+        <h3 class="thread-title">${esc(t.title)}${t.demo ? '<span class="badge badge-demo">示例</span>' : ''}${t.author === OWNER ? '<span class="badge badge-owner">站长</span>' : ''}</h3>
+        <p class="thread-meta"><span class="badge badge-cat">${esc(t.category)}</span><span>${esc(t.author)} · ${fmtTime(threadLast(t))}</span></p>
+      </div>
+      <span class="thread-side">${t.replies.length} 回复</span>
+    </article>`).join('') + '</div>';
+}
+
+function renderThreadDetail(root){
+  const t = findThread(forumState.threadId);
+  if(!t){ forumState.view = 'list'; renderThreadList(root); return; }
+  const user = me();
+  root.innerHTML = `
+  <div class="thread-detail">
+    <a class="back-link" data-back>← 返回列表</a>
+    <div class="detail-head"><h2>${esc(t.title)}${badgeHtml(t)}</h2>
+      <p class="detail-meta">${esc(t.author)} · ${fmtTime(t.createdAt)} 发布</p></div>
+    <div class="detail-body">${esc(t.body)}</div>
+    <section class="replies" aria-label="帖子回复">
+      <div class="section-heading">${icon('i-chat')}<h2>回复（${t.replies.length}）</h2><span class="en">REPLIES</span></div>
+      ${t.replies.length ? t.replies.map(r => `
+      <div class="reply"><span class="reply-avatar" aria-hidden="true">${esc(r.author.slice(0, 1).toUpperCase())}</span>
+        <div class="reply-main"><div class="reply-head">${esc(r.author)} · ${fmtTime(r.createdAt)}</div>
+        <div class="reply-body">${esc(r.body)}</div></div></div>`).join('')
+      : '<p class="forum-empty" style="border:0">还没有回复，来做第一个吧。</p>'}
+    </section>
+    ${user ? `
+    <form class="panel-form" id="replyForm" novalidate>
+      <div class="form-field"><label for="replyBody">以 ${esc(store.accounts[user].name)} 的身份回复</label>
+      <textarea id="replyBody" rows="4" maxlength="2000" placeholder="友善发言，聊聊你的想法或经验…"></textarea></div>
+      <p class="form-error" id="replyError" hidden></p>
+      <div class="form-actions"><button type="submit" class="btn-primary">${icon('i-send')}发表回复</button></div>
+    </form>`
+    : `<div class="note" style="margin-top:24px">${icon('i-lock')}<span>登录后才能回复。</span><button type="button" class="btn-primary note-action" data-open-auth>去登录</button></div>`}
+  </div>`;
+}
+
+function renderNewThread(root){
+  if(!me()){
+    forumState.view = 'list';
+    renderThreadList(root);
+    openAuth('login', '登录后可以发帖');
+    return;
+  }
+  root.innerHTML = `
+  <form class="panel-form" id="newThreadForm" novalidate style="margin-top:0">
+    <div class="form-field"><label for="ntTitle">标题</label><input id="ntTitle" maxlength="60" placeholder="一句话说清主题（2-60 字）"></div>
+    <div class="form-field"><label for="ntCategory">版块</label><select id="ntCategory">${CATEGORIES.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('')}</select></div>
+    <div class="form-field"><label for="ntBody">正文</label><textarea id="ntBody" rows="7" maxlength="2000" placeholder="支持换行；请友善发言，勿发布违反法律法规或攻击他人的内容。"></textarea></div>
+    <p class="form-error" id="ntError" hidden></p>
+    <div class="form-actions"><button type="submit" class="btn-primary">${icon('i-send')}发布帖子</button><button type="button" class="btn-ghost" data-cancel>取消</button></div>
+  </form>`;
+  const title = $('#ntTitle');
+  if(title) title.focus();
+}
+
+function handleReplySubmit(form){
+  const body = form.querySelector('#replyBody').value.trim();
+  const err = form.querySelector('#replyError');
+  if(body.length < 2){ err.textContent = '回复内容至少 2 个字符'; err.hidden = false; return; }
+  const res = addReply(forumState.threadId, body);
+  if(!res.ok){ err.textContent = res.error; err.hidden = false; return; }
+  toast('回复发布成功');
+  renderForum();
+}
+function handleNewThreadSubmit(form){
+  const title = form.querySelector('#ntTitle').value.trim();
+  const category = form.querySelector('#ntCategory').value;
+  const body = form.querySelector('#ntBody').value.trim();
+  const err = form.querySelector('#ntError');
+  if(title.length < 2 || title.length > 60){ err.textContent = '标题需为 2-60 个字符'; err.hidden = false; return; }
+  if(body.length < 2){ err.textContent = '正文内容至少 2 个字符'; err.hidden = false; return; }
+  const res = createThread(title, category, body);
+  if(!res.ok){ err.textContent = res.error; err.hidden = false; return; }
+  forumState.view = 'thread';
+  forumState.threadId = res.thread.id;
+  toast('帖子发布成功');
+  renderForum();
+  window.scrollTo(0, 0);
+}
+
+/* ---------- 渲染：工具箱与收藏 ---------- */
+function toolTitle(id){
+  const el = document.querySelector(`.tool[data-tool="${id}"] h2`);
+  return el ? el.textContent.trim() : id;
+}
+function renderTools(){
+  const user = me();
+  const favs = myFavs();
+  $$('.tool').forEach(card => {
+    const extra = card.querySelector('.tool-extra');
+    if(!extra) return;
+    if(!user){
+      extra.innerHTML = `<span class="tool-lock">${icon('i-lock')}登录后解锁收藏</span>`;
+    }else{
+      const on = favs.includes(card.dataset.tool);
+      extra.innerHTML = `<button type="button" class="btn-fav" data-fav="${esc(card.dataset.tool)}" aria-pressed="${on}">${icon('i-heart')}${on ? '已收藏' : '加入收藏'}</button>`;
+    }
+  });
+  renderFavStrip();
+}
+function renderFavStrip(){
+  const strip = $('#favStrip');
+  const favs = myFavs();
+  if(!me() || !favs.length){ strip.hidden = true; strip.innerHTML = ''; return; }
+  strip.hidden = false;
+  strip.innerHTML = '<span>我的常用：</span>' + favs.map(id =>
+    `<button type="button" class="chip" data-unfav="${esc(id)}" title="点击取消收藏">${esc(toolTitle(id))} ×</button>`).join('');
+}
+
+function renderAll(){
+  renderAccountNav();
+  renderForum();
+  renderTools();
+}
+
+/* ---------- 路由 ---------- */
+const names = { home: '首页', works: '作品', tools: '工具箱', forum: '论坛' };
+const pages = $$('.page');
+const links = $$('.nav-link');
+function render(){
+  const requested = location.hash.slice(1);
+  const current = Object.hasOwn(names, requested) ? requested : 'home';
+  pages.forEach(page => { page.hidden = page.id !== current; });
+  links.forEach(link => {
+    if(link.hash === '#' + current) link.setAttribute('aria-current', 'page');
+    else link.removeAttribute('aria-current');
+  });
+  document.title = names[current] + ' · Naytia 的像素小站';
+}
+
+/* ---------- 事件绑定 ---------- */
+window.addEventListener('hashchange', () => {
+  forumState.view = 'list';
+  render();
+  renderForum();
+  window.scrollTo(0, 0);
+});
+$$('.nav-link').forEach(l => l.addEventListener('click', () => {
+  if(l.hash === '#forum' && forumState.view !== 'list'){ forumState.view = 'list'; renderForum(); }
+}));
+
+$('#forumTabs').addEventListener('click', e => {
+  const chip = e.target.closest('[data-cat]');
+  if(chip){ forumState.category = chip.dataset.cat; forumState.view = 'list'; renderForum(); }
+});
+$('#newThreadBtn').addEventListener('click', () => {
+  if(!me()){ openAuth('login', '登录后可以发帖'); return; }
+  forumState.view = 'new';
+  renderForum();
+  window.scrollTo(0, 0);
+});
+$('#forum').addEventListener('click', e => {
+  const back = e.target.closest('[data-back]');
+  if(back){ forumState.view = 'list'; renderForum(); return; }
+  const authBtn = e.target.closest('[data-open-auth]');
+  if(authBtn){ openAuth('login', '登录后可以发帖与回复'); return; }
+  const cancel = e.target.closest('[data-cancel]');
+  if(cancel){ forumState.view = 'list'; renderForum(); return; }
+  const reset = e.target.closest('[data-reset]');
+  if(reset){
+    if(window.confirm('确定清空本地演示数据（账号、帖子、收藏）并恢复示例内容吗？')){
+      try{ localStorage.removeItem(STORE_KEY); }catch(err){ /* 忽略 */ }
+      store = defaultStore();
+      forumState.view = 'list';
+      forumState.threadId = null;
+      save();
+      renderAll();
+      toast('演示数据已重置');
+    }
+    return;
+  }
+  const row = e.target.closest('.thread-row');
+  if(row){
+    forumState.view = 'thread';
+    forumState.threadId = row.dataset.id;
+    renderForum();
+    window.scrollTo(0, 0);
+  }
+});
+$('#forumBody').addEventListener('keydown', e => {
+  if((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('thread-row')){
+    e.preventDefault();
+    e.target.click();
+  }
+});
+$('#forumBody').addEventListener('submit', e => {
+  if(e.target.id === 'replyForm'){ e.preventDefault(); handleReplySubmit(e.target); }
+  if(e.target.id === 'newThreadForm'){ e.preventDefault(); handleNewThreadSubmit(e.target); }
+});
+
+$('#tools').addEventListener('click', e => {
+  const favBtn = e.target.closest('[data-fav]');
+  if(favBtn){ toggleFav(favBtn.dataset.fav); renderTools(); return; }
+  const unfav = e.target.closest('[data-unfav]');
+  if(unfav){ toggleFav(unfav.dataset.unfav); renderTools(); return; }
+  const card = e.target.closest('.tool');
+  if(card){
+    if(!me()){ openAuth('login', '登录后可以使用工具箱并收藏工具'); return; }
+    toast(`「${toolTitle(card.dataset.tool)}」为概念预览，计算功能开发中`);
+  }
+});
+
+$('#authClose').addEventListener('click', closeAuth);
+$('#authOverlay').addEventListener('click', e => { if(e.target === e.currentTarget) closeAuth(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && !$('#authOverlay').hidden) closeAuth(); });
+$('#authSwitch').addEventListener('click', e => {
+  const a = e.target.closest('[data-switch]');
+  if(a){ authMode = a.dataset.switch; renderAuthDialog(); $('#auName').focus(); }
+});
+$('#authForm').addEventListener('submit', e => { e.preventDefault(); handleAuthSubmit(); });
+
+/* ---------- 启动 ---------- */
+render();
+renderAll();
+})();
+</script>
+</body>
+</html>
