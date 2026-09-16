@@ -23,6 +23,16 @@ const currentPath = Astro.url.pathname;
 const isActive = (href: string) =>
   href === '/' ? currentPath === '/' : currentPath.startsWith(href);
 
+/**
+ * 正式域名（D05）来自构建期配置 `astro.config.mjs` 的 site ← 根目录 .env 的 SITE_URL。
+ * 静态构建不会自动生成 canonical，这里显式写出来：分享链接与搜索引擎拿到的是
+ * https://www.naytia.io/... 而不是相对路径。留空时整段不渲染，本地构建不受影响。
+ */
+const canonical = Astro.site
+  ? new URL(currentPath.endsWith('/') ? currentPath : `${currentPath}/`, Astro.site).href
+  : undefined;
+const ogImage = Astro.site ? new URL(site.avatar, Astro.site).href : undefined;
+
 const year = new Date().getFullYear();
 ---
 
@@ -35,6 +45,14 @@ const year = new Date().getFullYear();
     <meta name="theme-color" content="#ffffff" />
     <meta name="generator" content={Astro.generator} />
     <title>{title} · Naytia 的像素小站</title>
+    {canonical && <link rel="canonical" href={canonical} />}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={`${site.displayName}${site.brandSuffix}`} />
+    <meta property="og:title" content={`${title} · Naytia 的像素小站`} />
+    <meta property="og:description" content={description} />
+    {canonical && <meta property="og:url" content={canonical} />}
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta name="twitter:card" content={ogImage ? 'summary' : 'summary_large_image'} />
     <link
       rel="icon"
       type="image/svg+xml"
@@ -140,6 +158,10 @@ const year = new Date().getFullYear();
         font-size: 14px;
         color: #756e7a;
         border: 1px solid transparent;
+        /* 五项目录 + 账号角标之后，导航条刚好贴着 980px 的上限；
+           flex 子项默认可收缩，一旦收缩文字就折成两行（「首」/「页」）。
+           这里禁止折行：宁可整行略微紧一点，也不要出现竖排的两个字。 */
+        white-space: nowrap;
       }
       .nav-link .pixel { width: 16px; height: 16px; }
       .nav-link:hover { color: var(--accent); background: #fff7fa; }
@@ -182,11 +204,13 @@ const year = new Date().getFullYear();
     </style>
 
     <script>
-      // 客户端增强：登录角标 + 站点配置。失败静默回退静态默认值。
+      // 客户端增强：登录角标 + 站点配置 + 超管的「账号管理」入口。失败静默回退静态默认值。
       import { applyConfig, fetchSiteConfig, mergeConfig } from '../modules/site-config';
       import { mountAccountChip } from '../modules/account';
+      import { mountAdminNav } from '../modules/admin-users';
 
       mountAccountChip(document.getElementById('navAccount'));
+      mountAdminNav();
       fetchSiteConfig()
         .then((overrides) => applyConfig(mergeConfig(overrides)))
         .catch(() => applyConfig(mergeConfig(null)));

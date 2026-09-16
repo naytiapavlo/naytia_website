@@ -1,39 +1,45 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeading from '../../components/ui/PageHeading.astro';
-import { toolManifests } from '../../tools/manifests';
+import { toolCatalog, isAvailable } from '../../tools/catalog';
 import { isRunnable, toolStatusLabels } from '../../tools/_host/manifest';
 import '../../styles/tools.css';
 
 /**
- * 工具目录：只读 manifest（不加载任何 engine / view）。
- * status='planned' 的工具只展示说明与状态，卡片不可点击，也不出现可运行入口（01 文档第 6 节）。
+ * 工具目录：只读目录数据（不加载任何工具实现）。
+ * - 有 entryHref 的项（逆向工作台）跳到自己的界面；其余进 /tools/<slug>/。
+ * - status='planned' 的项只展示说明与状态，卡片不可点击（01 文档第 6 节）。
+ * - gate='admin' 的项默认隐藏，由客户端按会话角色显示；真正的权限在服务端。
  */
-const sorted = [...toolManifests];
-const runnableCount = sorted.filter((tool) => isRunnable(tool.status)).length;
+const entries = toolCatalog;
+const availableCount = entries.filter((entry) => isAvailable(entry)).length;
 ---
 
 <BaseLayout title="工具箱" description="少一点重复计算，多一点时间创造。">
   <PageHeading eyebrow="A FEW HANDY THINGS" heading="玩家工具箱" lead="少一点重复计算，多一点时间创造。" />
 
   <div class="tools">
-    {sorted.map((tool) => {
-      const runnable = isRunnable(tool.status);
+    {entries.map((entry) => {
+      const runnable = isAvailable(entry);
+      const href = entry.entryHref ?? `/tools/${entry.slug}/`;
       const Tag = runnable ? 'a' : 'div';
       return (
         <Tag
           class={runnable ? 'tool-link' : 'tool-link is-static'}
-          href={runnable ? `/tools/${tool.slug}/` : undefined}
+          href={runnable ? href : undefined}
+          data-gate={entry.gate ?? undefined}
+          hidden={entry.gate === 'admin' ? true : undefined}
         >
           <div class="tool-icon">
-            <svg class="pixel" aria-hidden="true"><use href={`#${tool.icon}`} /></svg>
+            <svg class="pixel" aria-hidden="true"><use href={`#${entry.icon}`} /></svg>
           </div>
           <div>
-            <h2>{tool.title}</h2>
-            <p>{tool.summary}</p>
+            <h2>{entry.title}</h2>
+            <p>{entry.summary}</p>
             <div class="tool-link-head">
-              <span class={`tool-status is-${tool.status}`}>{toolStatusLabels[tool.status]}</span>
-              <span class="tool-meta">{tool.category}</span>
+              <span class={`tool-status is-${entry.status}`}>{toolStatusLabels[entry.status]}</span>
+              <span class="tool-meta">{entry.category}</span>
+              {entry.gate === 'admin' && <span class="tool-meta">仅管理员可见</span>}
             </div>
             {runnable ? (
               <span class="tool-cta">打开工具 →</span>
@@ -47,10 +53,26 @@ const runnableCount = sorted.filter((tool) => isRunnable(tool.status)).length;
   </div>
 
   <p class="page-note">
-    共 {sorted.length} 个工具，其中 {runnableCount} 个已经可以运行；计算结果在你的浏览器里完成，不会上传输入内容。
+    共 {entries.length} 个条目，其中 {availableCount} 个可以打开；计算结果在你的浏览器里完成，不会上传输入内容。
     工具目录见 <a href="/forum/">论坛</a> 的机制研究版块，欢迎反馈算法问题。
   </p>
 </BaseLayout>
+
+<script>
+  import { currentSession } from '../../modules/account';
+
+  // 门槛项按会话角色显示/隐藏。这只是界面可见性，
+  // 真正的权限拦截在服务端（例如 /api/reverse/* 与 /ida/ 的只读降级）。
+  const gated = document.querySelectorAll<HTMLElement>('[data-gate="admin"]');
+  if (gated.length > 0) {
+    void currentSession()
+      .then((account) => {
+        const isAdmin = account?.role === 'admin' || account?.role === 'superadmin';
+        if (isAdmin) gated.forEach((node) => (node.hidden = false));
+      })
+      .catch(() => undefined);
+  }
+</script>
 
 <style>
   .tools {
@@ -73,6 +95,7 @@ const runnableCount = sorted.filter((tool) => isRunnable(tool.status)).length;
   .tool-icon .pixel { width: 23px; height: 23px; }
   .tool-link:nth-child(2) .tool-icon { color: #b97c95; background: #fff1f5; border-color: #f1dce5; }
   .tool-link:nth-child(3) .tool-icon { color: #7c9eba; background: #eef6fc; border-color: #dfeaf4; }
+  .tool-link[data-gate='admin'] .tool-icon { color: #6f7d8c; background: #f1f4f7; border-color: #e0e6ec; }
   .page-note { font-size: 12px; color: #88758f; padding-bottom: 35px; margin: 0; }
   .page-note a { color: var(--accent); }
   .page-note a:hover { text-decoration: underline; }

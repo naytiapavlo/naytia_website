@@ -11,20 +11,43 @@ import { ApiError } from '../../shared/api-client';
 import { toast } from '../../shared/toast';
 import { addFavorite, fetchFavorites, removeFavorite } from './favorites-api';
 import { isRunnable, toolStatusLabels, type ToolManifest } from './manifest';
-import { getToolModule } from '../registry';
+import { loadToolModule } from '../registry';
 import type { ErasedToolConfig, ToolResult } from './types';
 
-/** 当前正在运行的工具清理函数，切换工具/重新挂载时调用，避免遗留事件监听。 */
-let activeCleanup: (() => void) | undefined;
+/**
+ * 会话广播事件名。契约见 src/modules/README.md 第 3 条与 modules/account/ui.ts：
+ * account 模块在登录/退出时广播 `naytia:session`（detail 为账号或 null）。
+ * 这里写字面量而不是 import 常量：ui.ts 内部用的是自己的局部变量，
+ * 从模块入口再导出会被打包器当作未使用而摇掉，导致监听器永远收不到事件。
+ */
+const SESSION_EVENT = 'naytia:session';
 
-export function initToolHost(container: HTMLElement): void {
+/** 当前挂载产生的清理函数，重新挂载时统一调用，避免遗留事件监听。 */
+let activeCleanups: Array<() => void> = [];
+
+function runCleanups(): void {
+  for (const cleanup of activeCleanups) cleanup();
+  activeCleanups = [];
+}
+
+export async function initToolHost(container: HTMLElement): Promise<void> {
   const slug = container.dataset.tool ?? '';
 
   container.replaceChildren();
-  activeCleanup?.();
-  activeCleanup = undefined;
+  runCleanups();
 
-  const module = getToolModule(slug);
+  let module;
+  try {
+    // 按需加载：打开哪个工具才下载哪个工具的实现（见 tools/registry.ts）
+    module = await loadToolModule(slug);
+  } catch (error) {
+    console.error('[toolbox] 工具实现加载失败', error);
+    container.appendChild(
+      notice('工具加载失败', '这个工具的代码没能加载出来，刷新页面可以重试。'),
+    );
+    return;
+  }
+
   if (!module) {
     container.appendChild(
       notice('未找到这个工具', '注册表里没有这个 slug，链接可能已经失效。'),
@@ -50,7 +73,7 @@ export function initToolHost(container: HTMLElement): void {
 
   try {
     const cleanup = reference.mount(stage, { compute: createCompute(reference), examples: [] });
-    if (typeof cleanup === 'function') activeCleanup = cleanup;
+    if (typeof cleanup === 'function') activeCleanups.push(cleanup);
   } catch (error) {
     // 视图初始化失败只毁掉自己的结果区，不影响页面其他部分
     container.replaceChildren(
@@ -59,7 +82,7 @@ export function initToolHost(container: HTMLElement): void {
     return;
   }
 
-  void mountFavorites(actions, manifest);
+  activeCleanups.push(await mountFavorites(actions, manifest));
 }
 
 /** 把「用户原始输入」变成「结果或结构化错误」，所有工具走同一条路径。 */
@@ -90,7 +113,14 @@ function createCompute(config: ErasedToolConfig): ToolCompute {
 
 type ToolCompute = (raw: unknown) => Promise<ToolResult<unknown>>;
 
-async function mountFavorites(actions: HTMLElement, manifest: ToolManifest): Promise<void> {
+/**
+ * 收藏入口：未登录时给出清晰的登录引导，登录后按账号读写收藏。
+ * 返回清理函数——登出/重挂载时移除事件监听（02 文档第 7 节：会话是跨页面状态）。
+ */
+async function mountFavorites(
+  actions: HTMLElement,
+  manifest: ToolManifest,
+): Promise<() => void> {
   const bar = document.createElement('div');
   bar.className = 'tool-actions-bar';
 
@@ -106,6 +136,7 @@ async function mountFavorites(actions: HTMLElement, manifest: ToolManifest): Pro
 
   let signedIn = await currentSession().catch(() => null);
   let isFavorite = false;
+  let disposed = false;
 
   function paint(): void {
     if (!signedIn) {
@@ -119,19 +150,34 @@ async function mountFavorites(actions: HTMLElement, manifest: ToolManifest): Pro
     status.textContent = '收藏保存在你的账号里。';
   }
 
-  paint();
-
-  if (signedIn) {
+  async function syncFavorite(): Promise<void> {
     try {
       const list = await fetchFavorites();
+      if (disposed) return;
       isFavorite = list.tools.includes(manifest.id);
       paint();
     } catch {
-      status.textContent = '暂时读不到收藏列表（后端未启动），不影响使用工具。';
+      if (!disposed) {
+        status.textContent = '暂时读不到收藏列表（后端未启动），不影响使用工具。';
+      }
     }
   }
 
-  favorite.addEventListener('click', async () => {
+  paint();
+  if (signedIn) await syncFavorite();
+
+  // 跟随账号模块的会话广播：登录/退出后按钮立刻变成正确状态，
+  // 不需要刷新页面（模块间只通过事件通信，见 src/modules/README.md）
+  const onSession = (event: Event): void => {
+    const account = (event as CustomEvent<unknown>).detail;
+    signedIn = account && typeof account === 'object' ? (account as typeof signedIn) : null;
+    isFavorite = false;
+    paint();
+    if (signedIn) void syncFavorite();
+  };
+  window.addEventListener(SESSION_EVENT, onSession);
+
+  const onClick = async (): Promise<void> => {
     if (!signedIn) {
       // 登录入口由 account 模块的导航角标承载，这里只负责把用户带过去
       const trigger = document.querySelector<HTMLButtonElement>('#navAccount button');
@@ -161,7 +207,14 @@ async function mountFavorites(actions: HTMLElement, manifest: ToolManifest): Pro
     } finally {
       favorite.disabled = false;
     }
-  });
+  };
+  favorite.addEventListener('click', onClick);
+
+  return () => {
+    disposed = true;
+    window.removeEventListener(SESSION_EVENT, onSession);
+    favorite.removeEventListener('click', onClick);
+  };
 }
 
 function notice(title: string, body: string): HTMLElement {

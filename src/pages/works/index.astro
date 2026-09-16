@@ -1,104 +1,113 @@
 ---
+/**
+ * 作品页：封面滚动（一行）→ 研究时间轴 → B 站成果清单（纯文本）。
+ *
+ * 分工（模块约定）：页面只负责「排结构」，
+ * 展示数据在 `modules/works/data.ts`，交互增强在 `modules/works/ui.ts`，
+ * 样式在 `src/styles/works.css`（类名统一 wk- 前缀）。
+ */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeading from '../../components/ui/PageHeading.astro';
-import EmptyState from '../../components/ui/EmptyState.astro';
-import { getCollection } from 'astro:content';
-
-const works = (await getCollection('works', ({ data }) => !data.draft))
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+import ShowcaseTrack from '../../components/ui/ShowcaseTrack.astro';
+import { showcaseItems, timelineEntries, videoWorks } from '../../modules/works';
+import '../../styles/works.css';
 ---
 
 <BaseLayout title="作品" description="把想法放进方块世界，再把发现分享给你。">
+  {/* JS 可用时才启用浮现动效：脚本没跑到，时间轴内容照样完整可读 */}
+  <script is:inline>document.documentElement.classList.add('wk-js');</script>
+
   <PageHeading eyebrow="MADE WITH CURIOSITY" heading="我的作品" lead="把想法放进方块世界，再把发现分享给你。" />
 
-  {works.length === 0 ? (
-    <EmptyState message="作品整理中。" />
-  ) : (
-    <div class="work-grid">
-      {works.map((work, i) => (
-        <article class="work">
-          <div class="work-top">
-            <span class="work-number">PROJECT / {String(i + 1).padStart(2, '0')}</span>
-            <svg class="pixel" aria-hidden="true"><use href={`#${work.data.icon}`} /></svg>
-          </div>
-          <div class="work-body">
-            <span class="label">{work.data.type} · {work.data.edition}</span>
-            <h2 set:html={work.data.title.replace(' · ', '<br />')} />
-            <p>{work.data.summary}</p>
-            <div class="work-bottom">
-              <span>{work.data.tags.join(' · ') || '研究与应用'}</span>
-              {work.data.videoUrl ? (
-                <a href={work.data.videoUrl} target="_blank" rel="noopener noreferrer">{work.data.videoLabel}</a>
-              ) : (
-                <span>整理中</span>
-              )}
-            </div>
-          </div>
-        </article>
-      ))}
+  {/* ① 动态滚动的作品封面 */}
+  <section class="wk-showcase" aria-labelledby="wk-showcase-title">
+    <div class="wk-heading">
+      <svg class="pixel" aria-hidden="true"><use href="#i-grid" /></svg>
+      <h2 id="wk-showcase-title">作品封面</h2>
+      <span class="en">SCROLLING COVERS</span>
+      <span class="hint">悬停暂停 · 点封面看大图</span>
     </div>
-  )}
+    <div class="wk-marquee">
+      <div class="wk-row"><ShowcaseTrack items={showcaseItems} /></div>
+    </div>
+  </section>
+
+  {/* ② 动态时间轴 */}
+  <section class="wk-timeline-section" aria-labelledby="wk-timeline-title">
+    <div class="wk-heading">
+      <svg class="pixel" aria-hidden="true"><use href="#i-bolt" /></svg>
+      <h2 id="wk-timeline-title">研究时间轴</h2>
+      <span class="en">TIMELINE</span>
+      <span class="hint">向下滚动，进度线会跟着走</span>
+    </div>
+    <div class="wk-timeline-wrap" data-timeline>
+      <span class="wk-rail" data-timeline-rail aria-hidden="true"><span class="wk-fill" data-timeline-fill></span></span>
+      <ol class="wk-list">
+        {timelineEntries.map((entry) => (
+          <li class="wk-item" data-timeline-item>
+            <span class="wk-dot" aria-hidden="true"></span>
+            <div class="wk-body">
+              <span class="wk-date">{entry.date}</span>
+              <h3>{entry.title}</h3>
+              <p>{entry.description}</p>
+              <div class="wk-tags">
+                {entry.tags.map((tag) => <span>{tag}</span>)}
+              </div>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  {/* ③ B 站成果清单（纯文本） */}
+  <section class="wk-achievements" aria-labelledby="wk-works-title">
+    <div class="wk-heading">
+      <svg class="pixel" aria-hidden="true"><use href="#i-note" /></svg>
+      <h2 id="wk-works-title">Naytia_帕芙洛 的成果</h2>
+      <span class="en">BILIBILI WORKS</span>
+      <span class="hint">{videoWorks.length} 个视频作品</span>
+    </div>
+    <p class="wk-lead">B 站视频作品清单；封面见上方滚动区，逐条对应。</p>
+    <ul class="wk-works">
+      {videoWorks.map((work) => (
+        <li class="wk-work">
+          {work.title}
+          <span class="wk-work-meta">{work.meta}</span>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  {/* 封面灯箱：内容由 modules/works/ui.ts 填充 */}
+  <dialog class="wk-lightbox" data-lightbox aria-label="作品封面大图">
+    <div class="wk-lightbox-inner">
+      <button class="wk-lightbox-close" type="button" data-lightbox-close aria-label="关闭大图">✕</button>
+      <img data-lightbox-image src={showcaseItems[0].image} alt="" width="672" height="378" />
+      <div class="wk-lightbox-meta">
+        <div>
+          <h3 data-lightbox-title></h3>
+          <p data-lightbox-caption></p>
+          <p class="wk-lightbox-tags" data-lightbox-tags hidden></p>
+        </div>
+        <div class="wk-lightbox-actions">
+          <a class="wk-lightbox-link" data-lightbox-link hidden target="_blank" rel="noopener noreferrer">B 站视频 ↗</a>
+          <span class="wk-lightbox-count" data-lightbox-counter></span>
+          <button type="button" data-lightbox-prev aria-label="上一张">←</button>
+          <button type="button" data-lightbox-next aria-label="下一张">→</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
 </BaseLayout>
 
-<style>
-  .work-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    padding-bottom: 46px;
+<script>
+  // 客户端增强：封面灯箱 + 时间轴动效。失败就退回静态展示（去掉 wk-js）。
+  import { initWorksShowcase } from '../../modules/works';
+
+  try {
+    initWorksShowcase();
+  } catch {
+    document.documentElement.classList.remove('wk-js');
   }
-  .work {
-    border: 1px solid #ded7e1;
-    box-shadow: 4px 4px 0 #f2edf4;
-    background: white;
-    min-width: 0;
-  }
-  .work-top {
-    height: 135px;
-    background-color: #fff3f7;
-    background-image:
-      linear-gradient(#efdeea60 1px, transparent 1px),
-      linear-gradient(90deg, #efdeea60 1px, transparent 1px);
-    background-size: 16px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    color: #aa7090;
-  }
-  .work:nth-child(2) .work-top { background-color: #f3effb; color: #9980b6; }
-  .work:nth-child(3) .work-top { background-color: #edf5fc; color: #759aba; }
-  .work-top .pixel { width: 48px; height: 48px; }
-  .work-number { position: absolute; top: 12px; left: 14px; font: 12px var(--mono); color: #938196; }
-  .work-body { padding: 20px; }
-  .work h2 { font-size: 18px; margin: 7px 0 10px; line-height: 1.6; }
-  .work p { font-size: 14px; color: var(--muted); margin: 0; line-height: 1.9; }
-  .work-bottom {
-    margin-top: 22px;
-    border-top: 1px dashed var(--line);
-    padding-top: 13px;
-    font-size: 12px;
-    color: #84768b;
-    display: flex;
-    justify-content: space-between;
-    gap: 8px;
-  }
-  .work-bottom a { color: var(--accent); }
-  .work-bottom a:hover { text-decoration: underline; }
-  .label {
-    font-size: 12px;
-    display: inline-block;
-    padding: 1px 7px;
-    background: #fff2f7;
-    color: #9b5a78;
-  }
-  @media (max-width: 760px) {
-    .work-grid { grid-template-columns: 1fr; }
-    .work { display: grid; grid-template-columns: 150px 1fr; }
-    .work-top { height: 100%; min-height: 170px; }
-  }
-  @media (max-width: 500px) {
-    .work { display: block; }
-    .work-top { height: 135px; min-height: 0; }
-  }
-</style>
+</script>

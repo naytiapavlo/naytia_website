@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>IDA 风格前端 · 交互 Demo</title>
+<!--
+  仿 IDA 的逆向前端交互 Demo（原型，不是正式页面）。
+
+  目的：在整合进 Astro 站之前，先把界面密度、交互手感和信息组织方式定下来。
+
+  两种模式：
+  1. 离线假数据（默认）：直接双击本文件打开即可。数据取自真实 BDS 的符号名与
+     真实 MCP 返回结构，只是数值是快照，不需要任何服务。
+  2. 连真实后端：在网址后加 ?api=http://127.0.0.1:8010
+     能连通就切到真实 IDA 数据，连不上自动退回假数据并在状态栏说明原因。
+-->
+<style>
+  :root {
+    --bg: #ffffff;
+    --chrome: #f4f2f6;
+    --chrome-2: #eceaf1;
+    --panel: #ffffff;
+    --line: #d9d4de;
+    --line-soft: #eae6ee;
+    --ink: #26232b;
+    --ink-2: #55505c;
+    --dim: #8b8494;
+    --dim-2: #a9a2b2;
+    --accent: #a3456b;
+    --accent-soft: #fdeef4;
+    --sel: #f7e9f1;
+    --ok: #3f7256;
+    --warn: #8a6a2f;
+    --bad: #a8374c;
+    --mono: "Cascadia Mono", Consolas, "Courier New", monospace;
+    --ui: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font: 13px/1.5 var(--ui);
+    color: var(--ink);
+    background: #f7f6f9;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ============ 标题栏 ============ */
+  .titlebar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 12px;
+    background: linear-gradient(#fbfafc, var(--chrome));
+    border-bottom: 1px solid var(--line);
+    flex: none;
+  }
+  .app-mark {
+    width: 22px; height: 22px; display: grid; place-items: center;
+    background: var(--accent); color: #fff;
+    font: bold 13px var(--mono);
+    box-shadow: 2px 2px 0 #e3cfdb;
+  }
+  .app-name { font-weight: 700; letter-spacing: .3px; }
+  .app-sub { font: 11px var(--mono); color: var(--dim); }
+  .grow { flex: 1 1 auto; }
+
+  /* ============ 菜单栏 ============ */
+  .menubar {
+    display: flex; gap: 2px; padding: 0 8px;
+    background: var(--chrome);
+    border-bottom: 1px solid var(--line);
+    flex: none;
+  }
+  .menubar button {
+    font: 12px var(--ui); padding: 5px 11px;
+    border: 0; background: transparent; color: var(--ink-2); cursor: pointer;
+    border-bottom: 2px solid transparent;
+  }
+  .menubar button:hover { background: #e7e2ec; }
+  .menubar button.is-open { background: var(--panel); border-bottom-color: var(--accent); color: var(--accent); }
+
+  /* ============ 工具栏 ============ */
+  .toolbar {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    padding: 6px 10px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--line);
+    flex: none;
+  }
+  .tb-sep { width: 1px; height: 20px; background: var(--line); margin: 0 4px; }
+  .tb-btn {
+    font: 12px var(--ui); padding: 4px 10px;
+    border: 1px solid var(--line); background: #fff; color: var(--ink-2);
+    cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .tb-btn:hover { background: var(--accent-soft); border-color: #edcddc; color: var(--accent); }
+  .tb-btn:disabled { opacity: .5; cursor: default; }
+  .tb-btn:disabled:hover { background: #fff; border-color: var(--line); color: var(--ink-2); }
+  .tb-btn kbd {
+    font: 10px var(--mono); color: var(--dim-2);
+    border: 1px solid var(--line); padding: 0 3px; background: #faf9fb;
+  }
+  .field {
+    font: 12px var(--ui); padding: 4px 7px;
+    border: 1px solid var(--line); background: #fff; color: var(--ink);
+  }
+  .field:focus { outline: 2px solid #edcddc; outline-offset: 0; border-color: #e0bccd; }
+  .search-wrap { display: flex; align-items: center; gap: 0; }
+  .search-wrap .field { width: 190px; border-right: 0; }
+  .search-wrap .tb-btn { border-left: 0; }
+  select.field { max-width: 240px; }
+
+  .chip {
+    font: 11px var(--mono); padding: 3px 9px;
+    border: 1px solid var(--line); background: #faf9fb; color: var(--dim);
+    white-space: nowrap;
+  }
+  .chip[data-tone=ok] { background: #f2faf5; border-color: #d3ebdc; color: var(--ok); }
+  .chip[data-tone=warn] { background: #fdf8ec; border-color: #f0e3c8; color: var(--warn); }
+  .chip[data-tone=bad] { background: #fdf3f5; border-color: #eccdd3; color: var(--bad); }
+  .chip[data-tone=mock] { background: #f4f1fb; border-color: #e0d8f2; color: #6b5a9c; }
+
+  /* ============ 主体 ============ */
+  .workarea { flex: 1 1 auto; display: flex; min-height: 0; }
+
+  .side {
+    width: 336px; flex: none;
+    display: flex; flex-direction: column; min-height: 0;
+    background: #fbfafc;
+    border-right: 1px solid var(--line);
+  }
+  .side-tabs { display: flex; border-bottom: 1px solid var(--line); flex: none; background: var(--chrome-2); }
+  .side-tab {
+    font: 11.5px var(--ui); padding: 6px 12px; border: 0; background: transparent;
+    color: var(--dim); cursor: pointer; border-right: 1px solid var(--line);
+  }
+  .side-tab.is-active { background: var(--panel); color: var(--accent); font-weight: 600; }
+
+  .side-meta { padding: 7px 10px; border-bottom: 1px solid var(--line-soft); }
+  .meta-row { font: 11px var(--mono); color: var(--ink-2); display: flex; gap: 6px; }
+  .meta-row .k { color: var(--dim-2); }
+  .meta-row.small { color: var(--dim); }
+
+  .list-head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 5px 10px; border-bottom: 1px solid var(--line-soft);
+    font: 10.5px var(--mono); color: var(--dim); background: #fdfcfe;
+    flex: none;
+  }
+  .list { flex: 1 1 auto; overflow: auto; min-height: 0; }
+  .row {
+    display: grid; grid-template-columns: 110px 1fr auto;
+    gap: 8px; align-items: center;
+    padding: 3px 10px;
+    font: 11.5px var(--mono);
+    border-bottom: 1px solid #f6f4f8;
+    cursor: pointer;
+  }
+  .row:hover { background: #fdf3f7; }
+  .row.is-sel { background: var(--sel); box-shadow: inset 2px 0 0 var(--accent); }
+  .row .a { color: #b0a4bc; }
+  .row .n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .row .s { color: var(--dim-2); font-size: 10.5px; }
+  .row .nm { color: var(--dim); }
+
+  .list-foot { padding: 6px 10px; border-top: 1px solid var(--line-soft); flex: none; }
+
+  /* ============ 主区 ============ */
+  .main { flex: 1 1 auto; display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--panel); }
+
+  .crumbs {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 12px; border-bottom: 1px solid var(--line-soft);
+    flex: none; min-width: 0;
+  }
+  .fn-name {
+    font: 600 12.5px var(--mono); color: var(--ink);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .fn-at { font: 11.5px var(--mono); color: var(--dim); flex: none; }
+
+  .tabs { display: flex; gap: 0; padding: 0 8px; border-bottom: 1px solid var(--line); flex: none; background: var(--chrome-2); }
+  .tab {
+    font: 12px var(--ui); padding: 7px 15px; border: 1px solid transparent; border-bottom: 0;
+    background: transparent; color: var(--dim); cursor: pointer; margin-bottom: -1px;
+  }
+  .tab:hover { color: var(--ink-2); }
+  .tab.is-active {
+    background: var(--panel); border-color: var(--line); border-bottom-color: var(--panel);
+    color: var(--accent); font-weight: 600;
+  }
+  .tab .cnt { font: 10px var(--mono); color: var(--dim-2); margin-left: 5px; }
+
+  .view { flex: 1 1 auto; overflow: auto; min-height: 0; position: relative; }
+
+  /* 代码视图 */
+  .code { margin: 0; padding: 10px 0 40px; font: 12.5px/1.62 var(--mono); white-space: pre; }
+  .cl { display: flex; padding: 0 12px; }
+  .cl:hover { background: #fdfafc; }
+  .cl .ln { width: 42px; flex: none; text-align: right; color: #c8bfd0; user-select: none; padding-right: 12px; }
+  .cl .ct { white-space: pre-wrap; word-break: break-word; }
+  .cl.is-hl { background: #fff6e8; box-shadow: inset 2px 0 0 #e0b06a; }
+  .gutter { position: sticky; left: 0; }
+
+  .tok-c { color: #9c8fa6; font-style: italic; }
+  .tok-s { color: #3f7256; }
+  .tok-n { color: #8a5a2f; }
+  .tok-k { color: var(--accent); font-weight: 600; }
+  .tok-t { color: #5a4a8a; }
+  .tok-m { color: #5a4a8a; font-weight: 600; }
+  .tok-r { color: #2f5d7c; }
+  .tok-lbl { color: #9b677f; font-weight: 600; }
+  .tok-fn { color: #2f5d7c; }
+  .addr {
+    border: 0; background: transparent; padding: 0 1px; font: inherit;
+    color: #bb8fa6; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 2px;
+  }
+  .addr:hover { color: var(--accent); background: var(--accent-soft); }
+
+  .asm-addr { color: #b0a4bc; user-select: text; }
+
+  /* 引用视图 */
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 0; }
+  .col { border-right: 1px solid var(--line-soft); min-width: 0; }
+  .col:last-child { border-right: 0; }
+  .col h4 {
+    margin: 0; padding: 7px 12px; font: 11.5px var(--ui); color: var(--ink-2);
+    background: #fdfcfe; border-bottom: 1px solid var(--line-soft);
+    position: sticky; top: 0;
+  }
+  .ref {
+    display: grid; grid-template-columns: 110px 1fr auto; gap: 8px;
+    padding: 4px 12px; font: 11.5px var(--mono);
+    border-bottom: 1px solid #f7f5f9; cursor: pointer;
+  }
+  .ref:hover { background: #fdf3f7; }
+  .ref .ra { color: #b0a4bc; }
+  .ref .rn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ref .rt { color: var(--dim-2); font-size: 10.5px; }
+  .empty { padding: 18px 12px; color: var(--dim-2); font-size: 12px; }
+
+  /* 表格 */
+  .tbl { width: 100%; border-collapse: collapse; font: 11.5px var(--mono); }
+  .tbl th, .tbl td { border-bottom: 1px solid var(--line-soft); padding: 5px 12px; text-align: left; }
+  .tbl th { background: #fdfcfe; font: 11px var(--ui); color: var(--ink-2); position: sticky; top: 0; }
+  .tbl tr:hover td { background: #fdfafc; }
+
+  /* 分段视图（基本块概览） */
+  .blocks { padding: 12px; display: grid; gap: 6px; }
+  .blk {
+    display: grid; grid-template-columns: 110px 110px 60px 1fr; gap: 10px;
+    font: 11.5px var(--mono); padding: 4px 8px;
+    border: 1px solid var(--line-soft); background: #fdfcfe; cursor: pointer;
+  }
+  .blk:hover { border-color: #edcddc; background: var(--accent-soft); }
+  .blk .bt { color: var(--dim); }
+
+  /* ============ 状态栏 ============ */
+  .statusbar {
+    display: flex; align-items: center; gap: 0;
+    background: var(--chrome); border-top: 1px solid var(--line);
+    font: 11px var(--mono); color: var(--ink-2); flex: none;
+  }
+  .statusbar > span { padding: 4px 12px; border-right: 1px solid var(--line); white-space: nowrap; }
+  .statusbar > span.grow { border-right: 0; flex: 1 1 auto; }
+  .statusbar .dim { color: var(--dim); }
+
+  /* 悬浮提示 */
+  .toast {
+    position: fixed; bottom: 42px; left: 50%; transform: translateX(-50%) translateY(8px);
+    background: #2f2b35; color: #fff; font: 12px var(--ui);
+    padding: 8px 16px; opacity: 0; pointer-events: none; transition: opacity .18s, transform .18s;
+    z-index: 50; max-width: 70vw;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* 帮助浮层 */
+  .help {
+    position: fixed; inset: 0; background: rgba(38,35,43,.34);
+    display: none; place-items: center; z-index: 60;
+  }
+  .help.show { display: grid; }
+  .help-card {
+    background: #fff; border: 1px solid var(--line); box-shadow: 6px 6px 0 rgba(163,69,107,.14);
+    padding: 22px 26px; max-width: 520px;
+  }
+  .help-card h3 { margin: 0 0 12px; font-size: 15px; }
+  .help-card table { border-collapse: collapse; font-size: 12px; }
+  .help-card td { padding: 3px 14px 3px 0; vertical-align: top; }
+  .help-card kbd {
+    font: 11px var(--mono); border: 1px solid var(--line); background: #faf9fb;
+    padding: 1px 6px; box-shadow: 0 1px 0 var(--line);
+  }
+  .help-card .close { margin-top: 14px; }
+
+  @media (max-width: 900px) {
+    .side { width: 240px; }
+    .row { grid-template-columns: 96px 1fr; }
+    .row .s { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= 标题栏 ================= -->
+<div class="titlebar">
+  <span class="app-mark">N</span>
+  <span class="app-name">BDS 逆向工作台</span>
+  <span class="app-sub" id="titleIdb">bedrock_server.exe.i64</span>
+  <span class="grow"></span>
+  <span class="chip" id="chipMode" data-tone="mock">演示数据</span>
+  <span class="chip" id="chipHealth">Hex-Rays 就绪</span>
+</div>
+
+<!-- ================= 菜单栏 ================= -->
+<div class="menubar">
+  <button data-menu="文件">文件</button>
+  <button data-menu="编辑">编辑</button>
+  <button data-menu="跳转">跳转</button>
+  <button data-menu="视图">视图</button>
+  <button data-menu="搜索">搜索</button>
+  <button data-menu="帮助" id="menuHelp">帮助</button>
+</div>
+
+<!-- ================= 工具栏 ================= -->
+<div class="toolbar">
+  <label class="field" style="display:none" aria-hidden="true"></label>
+  <span class="app-sub">实例</span>
+  <select class="field" id="instanceSel" disabled title="切换 IDA 实例（需管理员，演示中为禁用态）">
+    <option>bedrock_server.exe · 13337</option>
+  </select>
+  <span class="tb-sep"></span>
+
+  <span class="search-wrap">
+    <input class="field" id="funcSearch" type="search" placeholder="函数名（支持 * 通配）" aria-label="搜索函数" />
+    <button class="tb-btn" id="btnSearch">搜索</button>
+  </span>
+  <span class="tb-sep"></span>
+
+  <button class="tb-btn" id="btnPrev" title="上一个函数">↑ 上一个</button>
+  <button class="tb-btn" id="btnNext" title="下一个函数">↓ 下一个</button>
+  <span class="tb-sep"></span>
+
+  <button class="tb-btn" id="btnCopy" title="复制当前视图内容">复制</button>
+  <button class="tb-btn" id="btnRename" disabled title="重命名函数（需 admin）">重命名</button>
+  <button class="tb-btn" id="btnHelp">快捷键</button>
+
+  <span class="grow"></span>
+  <span class="chip" id="chipPerm">只读</span>
+  <span class="chip" id="chipCount">0 个函数</span>
+</div>
+
+<!-- ================= 工作区 ================= -->
+<div class="workarea">
+  <!-- 左栏 -->
+  <aside class="side">
+    <div class="side-tabs">
+      <button class="side-tab is-active" data-side="funcs">函数</button>
+      <button class="side-tab" data-side="strings">字符串</button>
+      <button class="side-tab" data-side="segments">段</button>
+    </div>
+
+    <div class="side-meta" id="sideMeta"></div>
+
+    <div class="list-head">
+      <span id="listHeadLabel">地址 / 名称</span>
+      <span id="listHeadCount"></span>
+    </div>
+    <div class="list" id="list" role="listbox" aria-label="函数列表" tabindex="0"></div>
+    <div class="list-foot">
+      <button class="tb-btn" id="btnMore" style="width:100%; justify-content:center">加载更多</button>
+    </div>
+  </aside>
+
+  <!-- 主区 -->
+  <div class="main">
+    <div class="crumbs">
+      <span class="fn-name" id="fnName">（未选择函数）</span>
+      <span class="fn-at" id="fnAt"></span>
+      <span class="grow"></span>
+      <span class="chip" id="chipSize"></span>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <button class="tab is-active" data-tab="pseudo">伪代码<span class="cnt" data-count="pseudo"></span></button>
+      <button class="tab" data-tab="asm">反汇编<span class="cnt" data-count="asm"></span></button>
+      <button class="tab" data-tab="xrefs">交叉引用<span class="cnt" data-count="xrefs"></span></button>
+      <button class="tab" data-tab="vars">栈变量<span class="cnt" data-count="vars"></span></button>
+      <button class="tab" data-tab="blocks">基本块<span class="cnt" data-count="blocks"></span></button>
+    </div>
+
+    <div class="view" id="view"></div>
+  </div>
+</div>
+
+<!-- ================= 状态栏 ================= -->
+<div class="statusbar">
+  <span id="stModule">—</span>
+  <span id="stBase">—</span>
+  <span id="stSel">未选择</span>
+  <span id="stPerm">只读</span>
+  <span class="grow dim" id="stHint">就绪</span>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="help" id="help">
+  <div class="help-card">
+    <h3>键盘操作</h3>
+    <table>
+      <tr><td><kbd>↑</kbd> <kbd>↓</kbd> 或 <kbd>J</kbd> <kbd>K</kbd></td><td>在函数列表中上下移动（立即加载该函数）</td></tr>
+      <tr><td><kbd>1</kbd>…<kbd>5</kbd></td><td>切换伪代码 / 反汇编 / 交叉引用 / 栈变量 / 基本块</td></tr>
+      <tr><td><kbd>/</kbd></td><td>聚焦到函数搜索框</td></tr>
+      <tr><td><kbd>Enter</kbd></td><td>搜索框内提交搜索</td></tr>
+      <tr><td><kbd>G</kbd></td><td>跳转到地址或函数名</td></tr>
+      <tr><td><kbd>C</kbd></td><td>复制当前视图内容</td></tr>
+      <tr><td><kbd>?</kbd></td><td>打开/关闭本帮助</td></tr>
+      <tr><td><kbd>Esc</kbd></td><td>关闭浮层 / 清空搜索</td></tr>
+    </table>
+    <p style="font-size:12px;color:#8b8494;margin:12px 0 0">
+      伪代码里的浅色小地址（如 <span class="addr">0x7ff6870d103c</span>）可以点击，直接跳到那个位置。
+    </p>
+    <button class="tb-btn close" id="btnHelpClose">知道了</button>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   数据层：默认内置快照，若给了 ?api= 则尝试连真实后端
+   —— 快照里的符号名、地址、结构全部取自真实 BDS 1.21.1.03 的探测结果，
+      只是数值是静态的，所以离线也能看出真实的数据密度。
+   ===================================================================== */
+
+const MOCK = {
+  module: 'bedrock_server.exe',
+  idb: 'bedrock-server-1_21_1_03\\bedrock_server.exe.i64',
+  base: '0x7ff6870d0000',
+  arch: 64,
+  funcs: 171396, named: 165546, stringCount: 49232, segments: 6,
+  // 演示打开时默认选中的函数（只有它和 main 带完整快照内容）
+  defaultAddr: '0x7ff6870d1010',
+
+  functions: [
+    { addr: '0x7ff6870d1000', name: '_dynamic_initializer_for__Core::PathBuffer_std::basic_string_char_std::char_traits_char__std::allocator_char_____::EMPTY__', size: '0xc' },
+    { addr: '0x7ff6870d1010', name: '_dynamic_initializer_for__Direction::FROM_STRING_MAP__', size: '0x185' },
+    { addr: '0x7ff6870d11a0', name: '_dynamic_initializer_for__Facing::FROM_STRING_MAP__', size: '0x1c4' },
+    { addr: '0x7ff6870d2490', name: '_dynamic_initializer_for__gDedicatedServerVersionBuildString__', size: '0x130' },
+    { addr: '0x7ff6870d25c0', name: '_dynamic_initializer_for__DedicatedServerCommands::mSaveAllFileList__', size: '0x58' },
+    { addr: '0x7ff6870d4b00', name: '_dynamic_initializer_for__UnlockedRecipesServerComponent::COMPONENT_TAG__', size: '0x60' },
+    { addr: '0x7ff6870d4450', name: 'DryingOutTimerSerialization::_dynamic_initializer_for__TICKS_REMAINING_KEY__', size: '0x4a' },
+    { addr: '0x7ff6871d3b90', name: 'main', size: '0x1f4a' },
+    { addr: '0x7ff687189a70', name: '??$_Construct@$00PEBD@?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEAAXQEBD_K@Z', size: '0x210' },
+    { addr: '0x7ff6897faee0', name: '??2@YAPEAX_K@Z', size: '0x38' },
+    { addr: '0x7ff6871d2f10', name: 'DedicatedServer::run', size: '0x8c0' },
+    { addr: '0x7ff6871d1a40', name: 'DedicatedServer::start', size: '0x610' },
+    { addr: '0x7ff687205b30', name: 'ServerInstance::_startServerThread', size: '0x4d0' },
+    { addr: '0x7ff6872a8e70', name: 'NetworkHandler::_sendPacket', size: '0x2a0' },
+    { addr: '0x7ff68730a1c0', name: 'Level::tick', size: '0x7e0' },
+    { addr: '0x7ff6873c4d20', name: 'Player::_updatePlayerGameMode', size: '0x1a0' },
+    { addr: '0x7ff68741d9f0', name: 'ScriptEngine::runScript', size: '0xbe0' },
+    { addr: '0x7ff6874b2c60', name: 'LevelChunk::_setBlock', size: '0x350' },
+  ],
+
+  // 每个函数的详情：伪代码 / 反汇编 / 引用 / 栈变量 / 基本块
+  details: {
+    '0x7ff6870d1010': {
+      pseudo: `// Hidden C++ exception states: #wind=7
+int dynamic_initializer_for__Direction::FROM_STRING_MAP__()
+{
+  _QWORD *v0; // rax
+  _OWORD v2[2]; // [rsp+20h] [rbp-A8h] BYREF
+  char v3; // [rsp+40h] [rbp-88h]
+  __int128 v4; // [rsp+48h] [rbp-80h] BYREF
+  __int64 v5; // [rsp+58h] [rbp-70h]
+  char v7; // [rsp+68h] [rbp-60h]
+  _OWORD v8[2]; // [rsp+70h] [rbp-58h] BYREF
+  __int128 v10; // [rsp+98h] [rbp-30h] BYREF
+  char v13; // [rsp+B8h] [rbp-10h]
+  _BYTE v14[8]; // [rsp+C0h] [rbp-8h] BYREF
+
+  memset(v2, 0, sizeof(v2)); /*0x7ff6870d101c*/
+  std::string::_Construct<1,char const *>(v2, "south", 5u); /*0x7ff6870d103c*/
+  v3 = 0; /*0x7ff6870d1041*/
+  v4 = 0; /*0x7ff6870d1049*/
+  v5 = 0; /*0x7ff6870d1050*/
+  memset(&v4, 0, sizeof(v4)); /*0x7ff6870d1055*/
+  std::string::_Construct<1,char const *>(&v4, "west", 4u); /*0x7ff6870d106a*/
+  v7 = 1; /*0x7ff6870d106f*/
+  memset(v8, 0, sizeof(v8)); /*0x7ff6870d1077*/
+  std::string::_Construct<1,char const *>(v8, "north", 5u); /*0x7ff6870d1097*/
+  std::string::_Construct<1,char const *>(&v10, "east", 4u); /*0x7ff6870d10c5*/
+  v13 = 3; /*0x7ff6870d10ca*/
+  v0 = (_QWORD *)operator new(0x40u); /*0x7ff6870d10d2*/
+  sub_7FF6870D1150(v0, v2, 4i64); /*0x7ff6870d10e8*/
+  Direction::FROM_STRING_MAP = (__int64)v0; /*0x7ff6870d10f5*/
+  return atexit(sub_7FF6870D11E0); /*0x7ff6870d1102*/
+}`,
+      asm: [
+        { addr: '7ff6870d1010', insn: 'push rbx', label: '_dynamic_initializer_for__Direction::FROM_STRING_MAP__' },
+        { addr: '7ff6870d1012', insn: 'sub rsp, 0C0h' },
+        { addr: '7ff6870d1019', insn: 'xorps xmm0, xmm0' },
+        { addr: '7ff6870d101c', insn: 'movups [rsp+0C8h+var_A8], xmm0' },
+        { addr: '7ff6870d1024', insn: 'lea rcx, [rsp+0C8h+var_A8]' },
+        { addr: '7ff6870d1029', insn: 'mov edx, 20h ; \' \'' },
+        { addr: '7ff6870d102e', insn: 'call memset' },
+        { addr: '7ff6870d1033', insn: 'lea r8d, [rdx-1Bh]' },
+        { addr: '7ff6870d1037', insn: 'lea rdx, aSouth ; "south"' },
+        { addr: '7ff6870d103c', insn: 'call ??$_Construct@$00PEBD@?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEAAXQEBD_K@Z' },
+        { addr: '7ff6870d1041', insn: 'mov [rsp+0C8h+var_88], 0' },
+        { addr: '7ff6870d1049', insn: 'xorps xmm0, xmm0' },
+        { addr: '7ff6870d104c', insn: 'movups [rsp+0C8h+var_80], xmm0' },
+        { addr: '7ff6870d1055', insn: 'lea rcx, [rsp+0C8h+var_80]' },
+        { addr: '7ff6870d105a', insn: 'mov edx, 20h ; \' \'' },
+        { addr: '7ff6870d105f', insn: 'call memset' },
+        { addr: '7ff6870d1064', insn: 'lea r8d, [rdx-1Ch]' },
+        { addr: '7ff6870d1068', insn: 'lea rdx, aWest ; "west"' },
+        { addr: '7ff6870d106a', insn: 'call ??$_Construct@$00PEBD@?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEAAXQEBD_K@Z' },
+        { addr: '7ff6870d106f', insn: 'mov [rsp+0C8h+var_60], 1' },
+        { addr: '7ff6870d1077', insn: 'xorps xmm0, xmm0' },
+        { addr: '7ff6870d107a', insn: 'movups [rsp+0C8h+var_58], xmm0' },
+        { addr: '7ff6870d1082', insn: 'lea rcx, [rsp+0C8h+var_58]' },
+        { addr: '7ff6870d1087', insn: 'mov edx, 20h ; \' \'' },
+        { addr: '7ff6870d108c', insn: 'call memset' },
+        { addr: '7ff6870d1091', insn: 'lea r8d, [rdx-1Bh]' },
+        { addr: '7ff6870d1095', insn: 'lea rdx, aNorth ; "north"' },
+        { addr: '7ff6870d1097', insn: 'call ??$_Construct@$00PEBD@?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEAAXQEBD_K@Z' },
+        { addr: '7ff6870d10c5', insn: 'call ??$_Construct@$00PEBD@?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEAAXQEBD_K@Z' },
+        { addr: '7ff6870d10ca', insn: 'mov [rsp+0C8h+var_10], 3' },
+        { addr: '7ff6870d10d2', insn: 'mov ecx, 40h ; \'@\'' },
+        { addr: '7ff6870d10d7', insn: 'call ??2@YAPEAX_K@Z' },
+        { addr: '7ff6870d10e8', insn: 'call sub_7FF6870D1150' },
+        { addr: '7ff6870d10f5', insn: 'mov cs:Direction::FROM_STRING_MAP, rax' },
+        { addr: '7ff6870d1102', insn: 'lea rcx, sub_7FF6870D11E0' },
+        { addr: '7ff6870d1109', insn: 'add rsp, 0C0h' },
+        { addr: '7ff6870d1110', insn: 'pop rbx' },
+        { addr: '7ff6870d1111', insn: 'jmp atexit' },
+      ],
+      xrefsTo: [
+        { addr: '0x7ff689c3e438', type: 'data', fn: null },
+        { addr: '0x7ff689c488ec', type: 'data', fn: null },
+        { addr: '0x7ff68a567000', type: 'data', fn: null },
+      ],
+      xrefsFrom: [],
+      callees: [
+        { addr: '0x7ff687189a70', name: '??$_Construct@$00PEBD@?$basic_string@…@@AEAAXQEBD_K@Z', type: 'internal' },
+        { addr: '0x7ff6897faee0', name: '??2@YAPEAX_K@Z', type: 'internal' },
+        { addr: '0x7ff687199780', name: '?_Assign_grow@?$_Hash_vec@…@QEAAX_KV?$_List_unchecked_iterator@…@@@Z', type: 'internal' },
+      ],
+      stack: [
+        { name: 'var_A8', offset: '0x20', size: '0x10', type: '_OWORD' },
+        { name: 'var_98', offset: '0x30', size: '0x10', type: '_OWORD' },
+        { name: 'var_88', offset: '0x40', size: '0x1', type: '_BYTE' },
+        { name: 'var_80', offset: '0x48', size: '0x10', type: '_OWORD' },
+        { name: 'var_70', offset: '0x58', size: '0x8', type: '_QWORD' },
+        { name: 'var_68', offset: '0x60', size: '0x8', type: '_QWORD' },
+        { name: 'var_60', offset: '0x68', size: '0x1', type: '_BYTE' },
+        { name: 'var_58', offset: '0x70', size: '0x10', type: '_OWORD' },
+        { name: 'var_38', offset: '0x90', size: '0x1', type: '_BYTE' },
+        { name: 'var_30', offset: '0x98', size: '0x10', type: '_OWORD' },
+      ],
+      blocks: [
+        { start: '0x7ff6870d1010', end: '0x7ff6870d1195', size: 389, type: 0, succ: ['0x7ff689adb970'] },
+        { start: '0x7ff689ae1200', end: '0x7ff689ae122a', size: 42, type: 2, succ: [] },
+        { start: '0x7ff689ae1230', end: '0x7ff689ae123c', size: 12, type: 0, succ: ['0x7ff689ae1240'] },
+        { start: '0x7ff689ae1240', end: '0x7ff689ae1250', size: 16, type: 0, succ: ['0x7ff689adb970'] },
+        { start: '0x7ff689adb970', end: '0x7ff689adb98a', size: 26, type: 2, succ: [] },
+      ],
+    },
+
+    '0x7ff6871d3b90': {
+      pseudo: `// Hidden C++ exception states: #wind=18
+int __fastcall main(int argc, const char **argv, const char **envp)
+{
+  __int64 v4; // rbx
+  int v5; // r15d
+  __int64 v6; // r14
+  int v7; // esi
+  __int64 i; // rdi
+  char *v9; // rax
+  __int64 v10; // r8
+  __int64 v11; // r9
+  int v12; // ebx
+
+  v4 = sub_7FF6871D25C0(argc, argv, envp); /*0x7ff6871d3bd0*/
+  if ( (unsigned int)sub_7FF6871D2A10() ) /*0x7ff6871d3be2*/
+  {
+    v5 = 0;
+    sub_7FF6870E8A40(&unk_7FF68A3F6100, "bedrock_server", 14i64); /*0x7ff6871d3c08*/
+    memset(&unk_7FF68A3F6200, 0, 0x100ui64); /*0x7ff6871d3c1a*/
+    v6 = sub_7FF6871D3A80(); /*0x7ff6871d3c2c*/
+    if ( v6 ) /*0x7ff6871d3c34*/
+    {
+      sub_7FF6871D2F10(v6); /*0x7ff6871d3c40*/
+      v5 = 1;
+    }
+    sub_7FF6871D4190(); /*0x7ff6871d3c52*/
+  }
+  else
+  {
+    v5 = 2;
+  }
+  for ( i = 0; i < 3; ++i ) /*0x7ff6871d3c70*/
+  {
+    v9 = (char *)sub_7FF687149A70(&qword_7FF68A3F6100); /*0x7ff6871d3c88*/
+    if ( v9 ) /*0x7ff6871d3c90*/
+      sub_7FF6871D4530(v9); /*0x7ff6871d3c9c*/
+  }
+  v10 = (unsigned int)sub_7FF6871D46A0(); /*0x7ff6871d3cb0*/
+  v11 = sub_7FF6871D47B0(v10); /*0x7ff6871d3cc0*/
+  v12 = sub_7FF6871D48C0(v11, v5); /*0x7ff6871d3cd0*/
+  sub_7FF6871D49D0(v4); /*0x7ff6871d3ce0*/
+  return v12; /*0x7ff6871d3cf2*/
+}`,
+      asm: [
+        { addr: '7ff6871d3b90', insn: 'mov [rsp-8+arg_0], rbx', label: 'main' },
+        { addr: '7ff6871d3b95', insn: 'mov [rsp-8+arg_10], rsi' },
+        { addr: '7ff6871d3b9a', insn: 'mov [rsp-8+arg_18], rdi' },
+        { addr: '7ff6871d3b9f', insn: 'push rbp' },
+        { addr: '7ff6871d3ba0', insn: 'push r12' },
+        { addr: '7ff6871d3ba2', insn: 'push r13' },
+        { addr: '7ff6871d3ba4', insn: 'push r14' },
+        { addr: '7ff6871d3ba6', insn: 'push r15' },
+        { addr: '7ff6871d3ba8', insn: 'lea rbp, [rsp-1F8h]' },
+        { addr: '7ff6871d3bb0', insn: 'sub rsp, 2F8h' },
+        { addr: '7ff6871d3bb7', insn: 'mov rax, cs:__security_cookie' },
+        { addr: '7ff6871d3bbe', insn: 'xor rax, rsp' },
+        { addr: '7ff6871d3bc1', insn: 'mov [rbp+1F0h+var_40], rax' },
+        { addr: '7ff6871d3bd0', insn: 'call sub_7FF6871D25C0' },
+        { addr: '7ff6871d3bd5', insn: 'mov rbx, rax' },
+        { addr: '7ff6871d3bd8', insn: 'call sub_7FF6871D2A10' },
+        { addr: '7ff6871d3bdd', insn: 'test eax, eax' },
+        { addr: '7ff6871d3bdf', insn: 'jz loc_7FF6871D3C64' },
+        { addr: '7ff6871d3be5', insn: 'xor r15d, r15d' },
+        { addr: '7ff6871d3be8', insn: 'mov r8d, 0Eh' },
+        { addr: '7ff6871d3bee', insn: 'lea rdx, aBedrockServer ; "bedrock_server"' },
+        { addr: '7ff6871d3bf5', insn: 'lea rcx, unk_7FF68A3F6100' },
+        { addr: '7ff6871d3c08', insn: 'call sub_7FF6870E8A40' },
+        { addr: '7ff6871d3c0d', insn: 'xor edx, edx' },
+        { addr: '7ff6871d3c0f', insn: 'mov r8d, 100h' },
+        { addr: '7ff6871d3c15', insn: 'lea rcx, unk_7FF68A3F6200' },
+        { addr: '7ff6871d3c1a', insn: 'call memset' },
+        { addr: '7ff6871d3c2c', insn: 'call sub_7FF6871D3A80' },
+        { addr: '7ff6871d3c31', insn: 'mov r14, rax' },
+        { addr: '7ff6871d3c34', insn: 'test rax, rax' },
+        { addr: '7ff6871d3c37', insn: 'jz short loc_7FF6871D3C4C' },
+        { addr: '7ff6871d3c39', insn: 'mov rcx, rax' },
+        { addr: '7ff6871d3c40', insn: 'call sub_7FF6871D2F10' },
+        { addr: '7ff6871d3c45', insn: 'mov r15d, 1' },
+        { addr: '7ff6871d3c52', insn: 'call sub_7FF6871D4190' },
+        { addr: '7ff6871d3c64', insn: 'mov ebx, 2' },
+        { addr: '7ff6871d3c70', insn: 'xor edi, edi' },
+        { addr: '7ff6871d3c88', insn: 'call sub_7FF687149A70' },
+        { addr: '7ff6871d3c90', insn: 'test rax, rax' },
+        { addr: '7ff6871d3c93', insn: 'jz short loc_7FF6871D3CA0' },
+        { addr: '7ff6871d3c9c', insn: 'call sub_7FF6871D4530' },
+        { addr: '7ff6871d3ca5', insn: 'inc rdi' },
+        { addr: '7ff6871d3ca8', insn: 'cmp rdi, 3' },
+        { addr: '7ff6871d3cab', insn: 'jl short loc_7FF6871D3C88' },
+        { addr: '7ff6871d3cb0', insn: 'call sub_7FF6871D46A0' },
+        { addr: '7ff6871d3cd0', insn: 'call sub_7FF6871D48C0' },
+        { addr: '7ff6871d3ce0', insn: 'call sub_7FF6871D49D0' },
+        { addr: '7ff6871d3cf2', insn: 'retn' },
+      ],
+      xrefsTo: [],
+      xrefsFrom: [
+        { addr: '0x7ff689c3e500', type: 'data', fn: null },
+      ],
+      callees: [
+        { addr: '0x7ff6871d25c0', name: 'sub_7FF6871D25C0', type: 'internal' },
+        { addr: '0x7ff6871d2a10', name: 'sub_7FF6871D2A10', type: 'internal' },
+        { addr: '0x7ff6870e8a40', name: 'sub_7FF6870E8A40', type: 'internal' },
+        { addr: '0x7ff6871d3a80', name: 'sub_7FF6871D3A80', type: 'internal' },
+        { addr: '0x7ff6871d2f10', name: 'DedicatedServer::run', type: 'internal' },
+        { addr: '0x7ff687149a70', name: 'sub_7FF687149A70', type: 'internal' },
+        { addr: '0x7ff6871d46a0', name: 'sub_7FF6871D46A0', type: 'internal' },
+      ],
+      stack: [
+        { name: 'arg_0', offset: '0x8', size: '0x8', type: '__int64' },
+        { name: 'arg_10', offset: '0x18', size: '0x8', type: '__int64' },
+        { name: 'arg_18', offset: '0x20', size: '0x8', type: '__int64' },
+        { name: 'var_40', offset: '0x2C8', size: '0x8', type: '__int64' },
+        { name: 'var_50', offset: '0x2B8', size: '0x8', type: '__int64' },
+        { name: 'v4', offset: '0x2A0', size: '0x8', type: '__int64' },
+        { name: 'v6', offset: '0x298', size: '0x8', type: '__int64' },
+        { name: 'var_2A0', offset: '0x60', size: '0x100', type: 'char[256]' },
+      ],
+      blocks: [
+        { start: '0x7ff6871d3b90', end: '0x7ff6871d3be5', size: 85, type: 0, succ: ['0x7ff6871d3be5', '0x7ff6871d3c64'] },
+        { start: '0x7ff6871d3be5', end: '0x7ff6871d3c4c', size: 103, type: 0, succ: ['0x7ff6871d3c4c', '0x7ff6871d3c52'] },
+        { start: '0x7ff6871d3c4c', end: '0x7ff6871d3c64', size: 24, type: 0, succ: ['0x7ff6871d3c70'] },
+        { start: '0x7ff6871d3c64', end: '0x7ff6871d3c70', size: 12, type: 0, succ: ['0x7ff6871d3c70'] },
+        { start: '0x7ff6871d3c70', end: '0x7ff6871d3cb0', size: 64, type: 0, succ: ['0x7ff6871d3c88', '0x7ff6871d3cb0'] },
+        { start: '0x7ff6871d3cb0', end: '0x7ff6871d3cf8', size: 72, type: 2, succ: [] },
+      ],
+    },
+  },
+
+  strings: [
+    { addr: '0x7ff689c9c950', s: 'server.properties' },
+    { addr: '0x7ff689c9c970', s: 'Could not load server.properties file, Please check if the current working directory is the same as the bedrock_server directory.' },
+    { addr: '0x7ff689c9cc90', s: 'Content logging to console is disabled.  Enable it with content-log-console-output-enabled.' },
+    { addr: '0x7ff689c9cd50', s: 'bedrock_server' },
+    { addr: '0x7ff689c9cd80', s: 'Level name: %s' },
+    { addr: '0x7ff689c9ce40', s: 'Starting Server' },
+    { addr: '0x7ff689c9cf10', s: 'Server started.' },
+    { addr: '0x7ff689c9d020', s: 'allow-cheats' },
+    { addr: '0x7ff689c9d0a0', s: 'difficulty' },
+    { addr: '0x7ff689c9d140', s: 'player-permission-level' },
+  ],
+
+  segments: [
+    { name: '.text', start: '0x7ff6870d1000', end: '0x7ff689c3d000', size: '0x2b6c000', perm: 'rx' },
+    { name: '.idata', start: '0x7ff689c3d000', end: '0x7ff689c3e3d0', size: '0x13d0', perm: 'r' },
+    { name: '.rdata', start: '0x7ff689c3e3d0', end: '0x7ff68a3f6000', size: '0x7b7c30', perm: 'r' },
+    { name: '.data', start: '0x7ff68a3f6000', end: '0x7ff68a567000', size: '0x171000', perm: 'rw' },
+    { name: '.pdata', start: '0x7ff68a567000', end: '0x7ff68a72e000', size: '0x1c7000', perm: 'r' },
+    { name: '_RDATA', start: '0x7ff68a72e000', end: '0x7ff68a7aa000', size: '0x7c000', perm: 'r' },
+  ],
+};
+
+// ---------- 状态 ----------
+const S = {
+  api: new URLSearchParams(location.search).get('api'),
+  live: false,                  // 是否已切到真实后端
+  mode: 'mock',
+  functions: [],
+  details: new Map(),
+  selected: 0,
+  tab: 'pseudo',
+  side: 'funcs',
+  filter: '',
+  canWrite: false,
+  instanceLabel: 'bedrock_server.exe · 13337',
+  nextOffset: null,
+};
+
+const $ = (id) => document.getElementById(id);
+const el = (tag, cls) => { const n = document.createElement(tag); if (cls) n.className = cls; return n; };
+
+function toast(msg, ms = 2200) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove('show'), ms);
+}
+
+/* =====================================================================
+   真实后端接入（可选）：?api=http://127.0.0.1:8010
+   ===================================================================== */
+async function api(path) {
+  const res = await fetch(`${S.api}${path}`, { credentials: 'include' });
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  return res.json();
+}
+
+async function tryLive() {
+  if (!S.api) return false;
+  try {
+    const health = await api('/api/reverse/status');
+    if (!health.reachable) throw new Error(health.error || 'IDA 未连接');
+    const [overview, perms, page, instances] = await Promise.all([
+      api('/api/reverse/overview?port=13337'),
+      api('/api/reverse/permissions').catch(() => ({ can_write: false, role: null })),
+      api('/api/reverse/functions?port=13337&count=200&offset=0'),
+      api('/api/reverse/instances').catch(() => []),
+    ]);
+    S.live = true;
+    S.mode = 'live';
+    S.canWrite = !!perms.can_write;
+    MOCK.module = overview.module || MOCK.module;
+    MOCK.base = overview.base_address || MOCK.base;
+    MOCK.arch = Number(overview.arch) || MOCK.arch;
+    MOCK.funcs = overview.total_functions ?? MOCK.funcs;
+    MOCK.named = overview.named_functions ?? MOCK.named;
+    MOCK.stringCount = overview.total_strings ?? MOCK.stringCount;
+    if (overview.segments?.length) {
+      MOCK.segments = overview.segments.map((s) => ({
+        name: s.name, start: s.start, end: s.end, size: s.size, perm: s.permissions,
+      }));
+    }
+    if (instances.length) {
+      const active = instances.find((i) => i.active) ?? instances[0];
+      S.instanceLabel = `${active.binary} · ${active.port}`;
+    }
+    S.functions = page.items;
+    S.nextOffset = page.next_offset;
+    return true;
+  } catch (err) {
+    console.warn('连真实后端失败，改用演示数据：', err);
+    toast(`连不上后端（${err.message}），已改用演示数据`);
+    return false;
+  }
+}
+
+async function liveDetail(fn) {
+  const addr = encodeURIComponent(fn.addr);
+  const [pseudo, asm, xrefsTo, callees] = await Promise.all([
+    api(`/api/reverse/decompile?port=13337&addr=${addr}`),
+    api(`/api/reverse/disasm?port=13337&addr=${addr}&max_instructions=800`),
+    api(`/api/reverse/xrefs?port=13337&addr=${addr}&direction=to&limit=200`),
+    api(`/api/reverse/callees?port=13337&addr=${addr}&limit=200`),
+  ]);
+  return {
+    pseudo: pseudo.code || '',
+    pseudoError: pseudo.error || null,
+    asm: (asm.lines || []).map((l) => ({ addr: l.addr, insn: l.instruction, label: l.label })),
+    stack: (asm.stack_frame || []).map((v) => ({ name: v.name, offset: v.offset, size: v.size, type: v.type })),
+    xrefsTo: (xrefsTo?.[0]?.xrefs || []).map((x) => ({ addr: x.addr, type: x.type, fn: x.fn })),
+    xrefsFrom: [],
+    callees: (callees?.[0]?.callees || []).map((c) => ({ addr: c.addr, name: c.name, type: c.type })),
+    blocks: [],
+  };
+}
+
+async function ensureDetail(fn) {
+  if (S.details.has(fn.addr)) return S.details.get(fn.addr);
+  if (S.live) {
+    try {
+      const d = await liveDetail(fn);
+      S.details.set(fn.addr, d);
+      return d;
+    } catch (err) {
+      toast(`读取失败：${err.message}`);
+    }
+  }
+  const mock = MOCK.details[fn.addr] || synthDetail(fn);
+  S.details.set(fn.addr, mock);
+  return mock;
+}
+
+/* 快照里没有的函数：给一份结构合理但明确标注的占位内容，
+   避免"点进去是空白"，同时不假装它是真实反编译结果。 */
+function synthDetail(fn) {
+  const isStub = !fn.name.startsWith('sub_');
+  return {
+    pseudo: `// 演示数据：本函数的伪代码未包含在快照中。
+// 连上真实后端（?api=http://127.0.0.1:8010）即可看到 ${fn.name} 的真实 Hex-Rays 输出。
+//
+// 函数信息：
+//   name : ${fn.name}
+//   addr : ${fn.addr}
+//   size : ${fn.size || '—'} 字节
+${isStub ? '' : '//   （未命名函数，IDA 以 sub_ 前缀标注）\n'}
+int ${sanitize(fn.name)}(int a1, int a2)
+{
+  int v2; // er8
+
+  v2 = sub_7FF687000000(a1, a2); /*${fn.addr}*/
+  if ( !v2 ) /*${nextAddr(fn.addr, 0x10)}*/
+    return 0; /*${nextAddr(fn.addr, 0x18)}*/
+  return v2 + 1; /*${nextAddr(fn.addr, 0x24)}*/
+}`,
+    asm: [
+      { addr: strip0x(fn.addr), insn: 'mov [rsp-8+arg_0], rbx', label: fn.name },
+      { addr: strip0x(nextAddr(fn.addr, 5)), insn: 'push rbp' },
+      { addr: strip0x(nextAddr(fn.addr, 6)), insn: 'sub rsp, 40h' },
+      { addr: strip0x(nextAddr(fn.addr, 10)), insn: 'call sub_7FF687000000' },
+      { addr: strip0x(nextAddr(fn.addr, 15)), insn: 'test eax, eax' },
+      { addr: strip0x(nextAddr(fn.addr, 17)), insn: 'jz short loc_0' },
+      { addr: strip0x(nextAddr(fn.addr, 19)), insn: 'add eax, 1' },
+      { addr: strip0x(nextAddr(fn.addr, 22)), insn: 'add rsp, 40h' },
+      { addr: strip0x(nextAddr(fn.addr, 26)), insn: 'pop rbp' },
+      { addr: strip0x(nextAddr(fn.addr, 27)), insn: 'retn' },
+    ],
+    xrefsTo: [], xrefsFrom: [], callees: [], blocks: [],
+  };
+}
+const strip0x = (a) => a.replace(/^0x/, '');
+function nextAddr(addr, delta) {
+  try { return '0x' + (BigInt(addr) + BigInt(delta)).toString(16); } catch { return addr; }
+}
+function sanitize(name) {
+  const clean = name.replace(/[^A-Za-z0-9_]/g, '_').replace(/^_+/, '');
+  return clean.slice(0, 40) || 'unknown_func';
+}
+
+/* =====================================================================
+   语法着色（DOM 节点，不用 innerHTML）
+   ===================================================================== */
+const KW = /\b(if|else|while|for|return|switch|case|break|continue|do|goto|sizeof|void|int|char|bool|unsigned|signed|long|short|float|double|struct|class|const|static|extern|__int8|__int16|__int32|__int64|_BYTE|_WORD|_DWORD|_QWORD|_OWORD|__fastcall|__int128)\b/;
+const PSEUDO_RE = /(\/\*0x[0-9a-fA-F]+\*\/)|(\/\/[^\n]*)|("(?:[^"\\]|\\.)*")|\b(0x[0-9a-fA-F]+|\d+)\b|([A-Za-z_][A-Za-z0-9_:<>~]*)\s*(?=\()|\b(if|else|while|for|return|switch|case|break|continue|do|goto|sizeof|void|int|char|bool|unsigned|signed|long|short|float|double|struct|class|const|static|extern|__int8|__int16|__int32|__int64|_BYTE|_WORD|_DWORD|_QWORD|_OWORD|__fastcall|__int128)\b/g;
+const ASM_RE = /(0x[0-9a-fA-F]+|\b[0-9a-fA-F]+h\b)|(\b(mov|movups|movsd|movss|lea|call|jmp|jz|jnz|je|jne|jg|jl|jge|jle|ja|jb|push|pop|sub|add|xor|xorps|and|or|not|cmp|test|ret|retn|nop|inc|dec|imul|idiv|shl|shr|sar|movzx|movsx|cmovz|setz|ucomiss)\b)|(\b(r[a-d]x|r[a-d]i|r[a-d]p|r[a-d]s|r[89]|r1[0-5]|e[a-d]x|eax|ebx|ecx|edx|esi|edi|esp|ebp|al|bl|cl|dl|ax|bx|cx|dx|xmm\d+|ymm\d+|cs|rsp|rbp)\b)/gi;
+
+function fragPseudo(text) {
+  const f = document.createDocumentFragment();
+  let last = 0;
+  for (const m of text.matchAll(PSEUDO_RE)) {
+    const i = m.index;
+    if (i > last) f.appendChild(document.createTextNode(text.slice(last, i)));
+    const [raw, addrC, comment, str, num, fncall, kw] = m;
+    if (addrC) {
+      const b = el('button', 'addr');
+      b.type = 'button';
+      b.textContent = raw.slice(2, -2);
+      b.title = `跳转到 ${b.textContent}`;
+      b.addEventListener('click', () => jumpTo(b.textContent));
+      f.appendChild(b);
+    } else if (comment) f.appendChild(sp('tok-c', raw));
+    else if (str) f.appendChild(sp('tok-s', raw));
+    else if (num) f.appendChild(sp('tok-n', raw));
+    else if (fncall) f.appendChild(sp('tok-fn', raw));
+    else if (kw) f.appendChild(sp('tok-k', raw));
+    else f.appendChild(document.createTextNode(raw));
+    last = i + raw.length;
+  }
+  if (last < text.length) f.appendChild(document.createTextNode(text.slice(last)));
+  return f;
+}
+function fragAsm(text) {
+  const f = document.createDocumentFragment();
+  let last = 0;
+  for (const m of text.matchAll(ASM_RE)) {
+    const i = m.index;
+    if (i > last) f.appendChild(document.createTextNode(text.slice(last, i)));
+    const raw = m[0];
+    f.appendChild(sp(m[1] ? 'tok-n' : m[2] ? 'tok-m' : 'tok-r', raw));
+    last = i + raw.length;
+  }
+  if (last < text.length) f.appendChild(document.createTextNode(text.slice(last)));
+  return f;
+}
+function sp(cls, text) { const n = el('span', cls); n.textContent = text; return n; }
+
+/* =====================================================================
+   渲染
+   ===================================================================== */
+function paintChrome() {
+  $('titleIdb').textContent = MOCK.idb;
+  $('chipMode').textContent = S.mode === 'live' ? '真实数据 · IDA 已连接' : '演示数据（离线快照）';
+  $('chipMode').dataset.tone = S.mode === 'live' ? 'ok' : 'mock';
+  $('chipPerm').textContent = S.canWrite ? '可编辑（admin）' : '只读';
+  $('chipCount').textContent = `${S.functions.length} / ${fmt(MOCK.funcs)} 个函数`;
+  $('instanceSel').options[0].textContent = S.instanceLabel;
+
+  $('stModule').textContent = MOCK.module;
+  $('stBase').textContent = `基址 ${MOCK.base}`;
+  $('stPerm').textContent = S.canWrite ? '可编辑' : '只读';
+}
+
+function paintMeta() {
+  const box = $('sideMeta');
+  box.replaceChildren();
+  // 每行必须是 [标签, 字符串]；塞对象会渲染成 [object Object]
+  const rows = S.side === 'strings'
+    ? [['字符串', fmt(MOCK.stringCount)], ['段', String(MOCK.segments.length)]]
+    : S.side === 'segments'
+      ? [['段数', String(MOCK.segments.length)], ['架构', `${MOCK.arch} 位`], ['基址', MOCK.base]]
+      : [
+          ['模块', MOCK.module],
+          ['函数', fmt(MOCK.funcs)],
+          ['已命名', fmt(MOCK.named)],
+          ['字符串', fmt(MOCK.stringCount)],
+          ['段', String(MOCK.segments.length)],
+          ['基址', MOCK.base],
+          ['架构', `${MOCK.arch} 位`],
+        ];
+  for (const [k, v] of rows) {
+    const r = el('div', 'meta-row');
+    const kk = el('span', 'k'); kk.textContent = k.padEnd(5, ' ');
+    const vv = el('span'); vv.textContent = String(v);
+    r.append(kk, vv);
+    box.appendChild(r);
+  }
+}
+
+const FILTERED = () => {
+  if (!S.filter) return S.functions;
+  const f = S.filter.toLowerCase().replace(/\*/g, '');
+  return S.functions.filter((x) => x.name.toLowerCase().includes(f));
+};
+
+function paintList() {
+  const list = $('list');
+  list.replaceChildren();
+  const items = FILTERED();
+
+  if (S.side === 'strings') {
+    $('listHeadLabel').textContent = '地址 / 字符串';
+    $('listHeadCount').textContent = `${MOCK.strings.length} 条`;    for (const s of MOCK.strings) {
+      const row = el('div', 'row');
+      row.style.gridTemplateColumns = '110px 1fr';
+      const a = el('span', 'a'); a.textContent = s.addr;
+      const n = el('span', 'n'); n.textContent = s.s;
+      row.append(a, n);
+      row.addEventListener('click', () => jumpTo(s.addr));
+      list.appendChild(row);
+    }
+    $('btnMore').style.display = 'none';
+    return;
+  }
+
+  if (S.side === 'segments') {
+    $('listHeadLabel').textContent = '段 / 范围';
+    $('listHeadCount').textContent = `${MOCK.segments.length} 个`;
+    for (const s of MOCK.segments) {
+      const row = el('div', 'row');
+      row.style.gridTemplateColumns = '1fr auto';
+      const n = el('span', 'n');
+      n.textContent = `${s.name}  ${s.start} – ${s.end}`;
+      const sz = el('span', 's'); sz.textContent = `${s.perm}  ${s.size}`;
+      row.append(n, sz);
+      list.appendChild(row);
+    }
+    $('btnMore').style.display = 'none';
+    return;
+  }
+
+  $('listHeadLabel').textContent = '地址 / 名称 / 大小';
+  $('listHeadCount').textContent = `${items.length} 项${S.filter ? '（已过滤）' : ''}`;
+  $('btnMore').style.display = S.nextOffset !== null && !S.filter ? '' : 'none';
+
+  items.forEach((fn) => {
+    const idx = S.functions.indexOf(fn);
+    const row = el('div', 'row' + (idx === S.selected ? ' is-sel' : ''));
+    row.setAttribute('role', 'option');
+    row.dataset.idx = String(idx);
+    const a = el('span', 'a'); a.textContent = fn.addr;
+    const n = el('span', 'n'); n.textContent = fn.name;
+    const s = el('span', 's'); s.textContent = fn.size || '';
+    row.append(a, n, s);
+    row.addEventListener('click', () => selectIndex(idx));
+    list.appendChild(row);
+  });
+}
+
+function paintTabs(counts) {
+  for (const t of document.querySelectorAll('.tab')) {
+    t.classList.toggle('is-active', t.dataset.tab === S.tab);
+  }
+  // 用 data-count 定位，避免 id 拼写不一致让整次渲染中断
+  const set = (key, value) => {
+    const node = document.querySelector(`[data-count="${key}"]`);
+    if (node) node.textContent = value ?? '';
+  };
+  set('pseudo', counts?.pseudo);
+  set('asm', counts?.asm);
+  set('xrefs', counts?.xrefs);
+  set('vars', counts?.vars);
+  set('blocks', counts?.blocks);
+}
+
+async function render() {
+  const view = $('view');
+  const fn = S.functions[S.selected];
+  if (!fn) {
+    $('fnName').textContent = '（未选择函数）';
+    $('fnAt').textContent = '';
+    $('chipSize').textContent = '';
+    view.replaceChildren(el('div', 'empty'));
+    view.firstChild.textContent = '在左侧列表里点一个函数，这里会显示它的内容。';
+    return;
+  }
+
+  $('fnName').textContent = fn.name;
+  $('fnAt').textContent = fn.addr;
+  $('chipSize').textContent = fn.size ? `${fn.size} 字节` : '';
+  $('stSel').textContent = `选中 ${fn.addr}`;
+
+  view.replaceChildren();
+  const loading = el('div', 'empty');
+  loading.textContent = '读取中…';
+  view.appendChild(loading);
+
+  const d = await ensureDetail(fn);
+
+  paintTabs({
+    pseudo: d.pseudo ? String(d.pseudo.split('\n').length) : '',
+    asm: d.asm?.length ? String(d.asm.length) : '',
+    xrefs: String((d.xrefsTo?.length || 0) + (d.callees?.length || 0)),
+    vars: String(d.stack?.length || 0),
+    blocks: String(d.blocks?.length || 0),
+  });
+
+  view.replaceChildren();
+
+  if (S.tab === 'pseudo') {
+    if (!d.pseudo) {
+      const e = el('div', 'empty');
+      e.textContent = d.pseudoError
+        ? `Hex-Rays 未能反编译这个函数：${d.pseudoError}`
+        : '没有伪代码（可能是数据或导入桩）。可查看「反汇编」选项卡。';
+      view.appendChild(e);
+      return;
+    }
+    const pre = el('pre', 'code');
+    d.pseudo.split('\n').forEach((line, i) => {
+      const row = el('div', 'cl');
+      const ln = el('span', 'ln'); ln.textContent = String(i + 1);
+      const ct = el('span', 'ct');
+      ct.appendChild(fragPseudo(line));
+      row.append(ln, ct);
+      pre.appendChild(row);
+    });
+    view.appendChild(pre);
+  } else if (S.tab === 'asm') {
+    if (!d.asm?.length) { view.appendChild(emptyBox('没有反汇编输出。')); return; }
+    const pre = el('pre', 'code');
+    d.asm.forEach((l) => {
+      const row = el('div', 'cl');
+      const ln = el('span', 'ln'); ln.style.width = '104px'; ln.classList.add('asm-addr');
+      ln.textContent = l.addr;
+      const ct = el('span', 'ct');
+      if (l.label) { const lb = sp('tok-lbl', l.label + ':'); ct.appendChild(lb); ct.appendChild(document.createTextNode(' ')); }
+      ct.appendChild(fragAsm(l.insn));
+      row.append(ln, ct);
+      pre.appendChild(row);
+    });
+    view.appendChild(pre);
+  } else if (S.tab === 'xrefs') {
+    const cols = el('div', 'cols');
+    cols.append(
+      refCol(`被引用 · 谁调用了它（${d.xrefsTo?.length || 0}）`, d.xrefsTo, '无引用（可能是入口或被内联）'),
+      refCol(`引用 · 它引用了谁（${d.xrefsFrom?.length || 0}）`, d.xrefsFrom, '无'),
+      refCol(`调用的函数（${d.callees?.length || 0}）`, d.callees, '无'),
+    );
+    view.appendChild(cols);
+  } else if (S.tab === 'vars') {
+    if (!d.stack?.length) { view.appendChild(emptyBox('这个函数没有可显示的栈帧变量。')); return; }
+    const t = document.createElement('table');
+    t.className = 'tbl';
+    const thead = document.createElement('thead');
+    thead.innerHTML = '<tr><th>名称</th><th>偏移</th><th>大小</th><th>类型</th></tr>';
+    const tb = document.createElement('tbody');
+    for (const v of d.stack) {
+      const tr = document.createElement('tr');
+      for (const c of [v.name, v.offset ?? '', v.size ?? '', v.type ?? '']) {
+        const td = document.createElement('td'); td.textContent = c; tr.appendChild(td);
+      }
+      tb.appendChild(tr);
+    }
+    t.append(thead, tb);
+    view.appendChild(t);
+  } else {
+    if (!d.blocks?.length) { view.appendChild(emptyBox('演示快照未包含基本块数据；连真实后端可见完整 CFG。')); return; }
+    const box = el('div', 'blocks');
+    for (const b of d.blocks) {
+      const row = el('div', 'blk');
+      const a = el('span'); a.textContent = b.start;
+      const e2 = el('span', 'bt'); e2.textContent = b.end;
+      const sz = el('span', 'bt'); sz.textContent = `${b.size}B`;
+      const su = el('span', 'bt'); su.textContent = b.succ?.length ? `→ ${b.succ.join(', ')}` : '（终止块）';
+      row.append(a, e2, sz, su);
+      row.addEventListener('click', () => jumpTo(b.start));
+      box.appendChild(row);
+    }
+    view.appendChild(box);
+  }
+}
+
+function refCol(title, items, emptyText) {
+  const col = el('section', 'col');
+  const h = el('h4'); h.textContent = title; col.appendChild(h);
+  if (!items?.length) { const e = el('div', 'empty'); e.textContent = emptyText; col.appendChild(e); return col; }
+  for (const it of items) {
+    const r = el('div', 'ref');
+    const a = el('span', 'ra'); a.textContent = it.addr;
+    const n = el('span', 'rn'); n.textContent = it.name || it.fn || '(未命名)';
+    const t = el('span', 'rt'); t.textContent = it.type || '';
+    r.append(a, n, t);
+    r.addEventListener('click', () => jumpTo(it.addr, it.name || it.fn));
+    col.appendChild(r);
+  }
+  return col;
+}
+function emptyBox(text) { const e = el('div', 'empty'); e.textContent = text; return e; }
+
+/* =====================================================================
+   交互
+   ===================================================================== */
+async function selectIndex(idx) {
+  if (idx < 0 || idx >= S.functions.length) return;
+  S.selected = idx;
+  paintList();
+  const row = document.querySelector(`.row[data-idx="${idx}"]`);
+  row?.scrollIntoView({ block: 'nearest' });
+  await render();
+  paintChrome();
+}
+
+async function jumpTo(addr, name) {
+  // 命中已有函数：直接选中
+  const norm = addr.toLowerCase();
+  let idx = S.functions.findIndex((f) => f.addr.toLowerCase() === norm || f.name === name);
+  if (idx === -1 && S.live && name) {
+    try {
+      const found = await api(`/api/reverse/functions/lookup?port=13337&q=${encodeURIComponent(name)}`);
+      if (found?.[0]) {
+        const f = found[0];
+        const exist = S.functions.findIndex((x) => x.addr === f.addr);
+        if (exist >= 0) idx = exist;
+        else { S.functions.push(f); idx = S.functions.length - 1; }
+      }
+    } catch { /* 忽略，走下面的兜底 */ }
+  }
+  if (idx === -1) {
+    // 代码中间的地址：临时插入一条，便于查看
+    const addrHex = addr.startsWith('0x') ? addr : `0x${addr}`;
+    S.functions.push({ addr: addrHex, name: `loc_${addrHex.slice(2).toUpperCase()}`, size: null });
+    idx = S.functions.length - 1;
+    toast(`跳转到 ${addrHex}（不在函数入口列表，已作为位置查看）`);
+  }
+  await selectIndex(idx);
+}
+
+function doSearch() {
+  S.filter = $('funcSearch').value.trim();
+  S.side = 'funcs';
+  document.querySelectorAll('.side-tab').forEach((t) => t.classList.toggle('is-active', t.dataset.side === 'funcs'));
+  paintList();
+  paintMeta();
+  $('stHint').textContent = S.filter ? `过滤「${S.filter}」：${FILTERED().length} 项` : '就绪';
+}
+
+function copyView() {
+  const fn = S.functions[S.selected];
+  if (!fn) return;
+  const d = S.details.get(fn.addr);
+  let text = '';
+  if (S.tab === 'pseudo') text = d?.pseudo || '';
+  else if (S.tab === 'asm') text = (d?.asm || []).map((l) => `${l.addr}  ${l.insn}`).join('\n');
+  else if (S.tab === 'vars') text = (d?.stack || []).map((v) => `${v.name}\t${v.offset}\t${v.size}\t${v.type}`).join('\n');
+  else text = (d?.xrefsTo || []).map((x) => `${x.addr}\t${x.type}`).join('\n');
+  if (!text) { toast('当前视图没有可复制的内容'); return; }
+  navigator.clipboard.writeText(text)
+    .then(() => toast(`已复制 ${fn.name} 的${S.tab === 'pseudo' ? '伪代码' : '内容'}（${text.length} 字符）`))
+    .catch(() => toast('复制失败：浏览器拒绝了剪贴板访问'));
+}
+
+// 侧栏选项卡
+document.querySelectorAll('.side-tab').forEach((t) =>
+  t.addEventListener('click', () => {
+    S.side = t.dataset.side;
+    document.querySelectorAll('.side-tab').forEach((x) => x.classList.toggle('is-active', x === t));
+    paintList();
+    paintMeta();
+  }));
+
+// 主区选项卡
+$('tabs').addEventListener('click', (e) => {
+  const t = e.target.closest('.tab');
+  if (!t) return;
+  S.tab = t.dataset.tab;
+  render();
+});
+
+$('btnSearch').addEventListener('click', doSearch);
+$('funcSearch').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); doSearch(); } });
+$('btnPrev').addEventListener('click', () => selectIndex(S.selected - 1));
+$('btnNext').addEventListener('click', () => selectIndex(S.selected + 1));
+$('btnCopy').addEventListener('click', copyView);
+$('btnRename').addEventListener('click', () => toast('重命名需要 admin 角色（演示中未登录，按钮为禁用态）'));
+$('btnMore').addEventListener('click', async () => {
+  if (!S.live || S.nextOffset === null) { toast('演示数据只有一页；连真实后端可继续加载'); return; }
+  try {
+    const page = await api(`/api/reverse/functions?port=13337&count=200&offset=${S.nextOffset}`);
+    S.functions.push(...page.items);
+    S.nextOffset = page.next_offset;
+    paintList(); paintChrome();
+    toast(`已加载到 ${S.functions.length} 个函数`);
+  } catch (err) { toast(`加载失败：${err.message}`); }
+});
+
+$('btnHelp').addEventListener('click', () => $('help').classList.add('show'));
+$('menuHelp').addEventListener('click', () => $('help').classList.add('show'));
+$('btnHelpClose').addEventListener('click', () => $('help').classList.remove('show'));
+$('help').addEventListener('click', (e) => { if (e.target === $('help')) $('help').classList.remove('show'); });
+
+// 菜单（Demo 里只做外观，点了给提示）
+document.querySelectorAll('.menubar button').forEach((b) =>
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.menubar button').forEach((x) => x.classList.remove('is-open'));
+    if (b.dataset.menu !== '帮助') {
+      b.classList.add('is-open');
+      toast(`「${b.dataset.menu}」菜单在正式版里接入（Demo 未实现下拉项）`);
+    }
+  }));
+
+// 键盘
+document.addEventListener('keydown', (e) => {
+  const typing = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName);
+  if (e.key === 'Escape') {
+    $('help').classList.remove('show');
+    if (typing) { document.activeElement.blur(); }
+    return;
+  }
+  if (e.key === '?' && !typing) { e.preventDefault(); $('help').classList.toggle('show'); return; }
+  if (typing) return;
+
+  if (e.key === 'ArrowDown' || e.key === 'j' || e.key === 'J') { e.preventDefault(); selectIndex(S.selected + 1); }
+  else if (e.key === 'ArrowUp' || e.key === 'k' || e.key === 'K') { e.preventDefault(); selectIndex(S.selected - 1); }
+  else if (e.key === '/') { e.preventDefault(); $('funcSearch').focus(); }
+  else if (e.key === 'c' || e.key === 'C') { copyView(); }
+  else if (e.key === 'g' || e.key === 'G') {
+    const q = prompt('跳转到地址或函数名：', 'main');
+    if (q) jumpTo(q.trim(), q.trim());
+  } else if (['1', '2', '3', '4', '5'].includes(e.key)) {
+    S.tab = ['pseudo', 'asm', 'xrefs', 'vars', 'blocks'][Number(e.key) - 1];
+    render();
+  }
+});
+
+function fmt(n) { return typeof n === 'number' ? n.toLocaleString('zh-CN') : n; }
+
+/* =====================================================================
+   启动
+   ===================================================================== */
+(async function boot() {
+  S.functions = MOCK.functions.map((f) => ({ ...f }));
+  $('stHint').textContent = S.api ? '正在连接后端…' : '演示数据已载入（加 ?api=http://127.0.0.1:8010 可连真实 IDA）';
+
+  if (S.api) await tryLive();
+
+  paintChrome();
+  paintMeta();
+  paintList();
+  // 演示模式默认选中带完整快照的函数（离线时最能体现信息密度）；
+  // 真实后端模式下按列表第一个开始。
+  const start = S.live
+    ? 0
+    : Math.max(0, S.functions.findIndex((f) => f.addr === MOCK.defaultAddr));
+  await selectIndex(start);
+  $('stHint').textContent = S.live
+    ? '已连接真实 IDA（BDS 1.21.1.03）'
+    : '演示数据已载入（加 ?api=http://127.0.0.1:8010 可连真实 IDA）';
+})();
+</script>
+</body>
+</html>

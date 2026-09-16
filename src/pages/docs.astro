@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/docs.css';
+
+/**
+ * 文档树（知识库）：访客可读，管理员可投稿，超管审核后公开。
+ *
+ * 为什么是独立页面而不是 /tools/<slug>/ 详情页：
+ * 目录树 + 正文需要整屏宽度（980px 的工具容器放不下三栏），
+ * 所以工具箱目录里的卡片只是一个入口（entryHref），工作区在本页。
+ *
+ * 权限：界面按会话角色显示控件，但真正的拦截在服务端
+ * （/api/docs/* 的 require_staff / superadmin 判定）。前端隐藏按钮不作为安全边界。
+ */
+---
+
+<BaseLayout
+  title="文档树"
+  description="Minecraft 基岩版机制研究、漏洞分析与逆向笔记的文档树：访客可读，管理员投稿，站长审核后公开。"
+>
+  <div class="docs-page">
+    <div id="docs-root" class="docs-root">
+      <p class="docs-boot">正在加载文档目录…</p>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  import { initDocsView } from '../modules/docs';
+
+  const root = document.getElementById('docs-root');
+  if (root) {
+    root.replaceChildren();
+    initDocsView(root);
+  }
+</script>

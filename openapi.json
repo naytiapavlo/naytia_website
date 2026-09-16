@@ -1,0 +1,7798 @@
+{
+ "openapi": "3.1.0",
+ "info": {
+  "title": "Naytia 像素小站 API",
+  "description": "账号 / 论坛 / 工具箱收藏。契约见 docs/plans/03。",
+  "version": "0.1.0"
+ },
+ "paths": {
+  "/api/auth/register": {
+   "post": {
+    "tags": [
+     "auth"
+    ],
+    "summary": "Register",
+    "operationId": "register_api_auth_register_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AccountCreate"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "201": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AccountSummary"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/auth/login": {
+   "post": {
+    "tags": [
+     "auth"
+    ],
+    "summary": "Login",
+    "operationId": "login_api_auth_login_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/LoginRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AccountSummary"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/auth/logout": {
+   "post": {
+    "tags": [
+     "auth"
+    ],
+    "summary": "Logout",
+    "operationId": "logout_api_auth_logout_post",
+    "responses": {
+     "204": {
+      "description": "Successful Response"
+     }
+    }
+   }
+  },
+  "/api/auth/me": {
+   "get": {
+    "tags": [
+     "auth"
+    ],
+    "summary": "Me",
+    "operationId": "me_api_auth_me_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "anyOf": [
+          {
+           "$ref": "#/components/schemas/AccountSummary"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "title": "Response Me Api Auth Me Get"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/forum/categories": {
+   "get": {
+    "tags": [
+     "forum"
+    ],
+    "summary": "版块清单（前端不硬编码版块名）",
+    "description": "版块是站点级配置（01 文档第 7 节）。\n\n单独开一个只读端点，是为了让前端的版块下拉与后端的校验用同一份来源——\n前端硬编码一份版块名，改配置时就会出现「下拉里有、提交被拒」的错位。",
+    "operationId": "list_categories_api_forum_categories_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "type": "object",
+         "title": "Response List Categories Api Forum Categories Get"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/forum/threads": {
+   "get": {
+    "tags": [
+     "forum"
+    ],
+    "summary": "List Threads",
+    "operationId": "list_threads_api_forum_threads_get",
+    "parameters": [
+     {
+      "name": "category",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Category"
+      }
+     },
+     {
+      "name": "cursor",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Cursor"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PageResult"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "post": {
+    "tags": [
+     "forum"
+    ],
+    "summary": "Create Thread",
+    "operationId": "create_thread_api_forum_threads_post",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ThreadCreate"
+       }
+      }
+     }
+    },
+    "responses": {
+     "201": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ThreadDetail"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/forum/threads/with-attachments": {
+   "post": {
+    "tags": [
+     "forum"
+    ],
+    "summary": "发帖并随帖上传附件（结构文件 / 封面，multipart）",
+    "description": "一次请求完成「发帖 +（可选）上传结构文件 +（可选）上传封面」。\n\n做成一个端点是为了一致性：任何一个附件被拒时帖子都不会被创建，\n用户拿到的是一条明确的错误，而不是「帖子发出去了但附件没了」这种半成品。\n\n**两个附件都可选**，所以原来那个只能传结构文件的\n`/threads/with-structure` 被它取代了：一个帖子现在可以有四种组合\n（纯文字 / 只带结构 / 只带封面 / 都带），拆成多个端点会让前端按组合去猜该调哪个。",
+    "operationId": "create_thread_with_attachments_api_forum_threads_with_attachments_post",
+    "requestBody": {
+     "content": {
+      "multipart/form-data": {
+       "schema": {
+        "$ref": "#/components/schemas/Body_create_thread_with_attachments_api_forum_threads_with_attachments_post"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "201": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ThreadDetail"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/forum/threads/{thread_id}": {
+   "get": {
+    "tags": [
+     "forum"
+    ],
+    "summary": "Get Thread",
+    "operationId": "get_thread_api_forum_threads__thread_id__get",
+    "parameters": [
+     {
+      "name": "thread_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Thread Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ThreadDetail"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "delete": {
+    "tags": [
+     "forum"
+    ],
+    "summary": "Delete Thread",
+    "operationId": "delete_thread_api_forum_threads__thread_id__delete",
+    "parameters": [
+     {
+      "name": "thread_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Thread Id"
+      }
+     }
+    ],
+    "responses": {
+     "204": {
+      "description": "Successful Response"
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/forum/threads/{thread_id}/replies": {
+   "post": {
+    "tags": [
+     "forum"
+    ],
+    "summary": "Create Reply",
+    "operationId": "create_reply_api_forum_threads__thread_id__replies_post",
+    "parameters": [
+     {
+      "name": "thread_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Thread Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ReplyCreate"
+       }
+      }
+     }
+    },
+    "responses": {
+     "201": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ReplySummary"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/forum/threads/{thread_id}/structure": {
+   "get": {
+    "tags": [
+     "forum"
+    ],
+    "summary": "结构附件摘要与材料清单",
+    "operationId": "get_thread_structure_api_forum_threads__thread_id__structure_get",
+    "parameters": [
+     {
+      "name": "thread_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Thread Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ThreadStructure"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/forum/threads/{thread_id}/cover": {
+   "get": {
+    "tags": [
+     "forum"
+    ],
+    "summary": "帖子封面图",
+    "description": "直接返回封面图片字节。\n\n这是全站**唯一**把用户上传的字节当「可直接渲染的内容」发出去的地方，\n所以这里的三道防线都不能省：\n\n1. `Content-Type` 取自**入库时按字节判定的结果**（`forum_covers.content_type`），\n   不是用户给的文件名——上传时认不出文件头的文件根本进不了库；\n2. `X-Content-Type-Options: nosniff`，禁止浏览器「猜」成别的类型；\n3. `Content-Security-Policy: default-src 'none'; sandbox`，\n   万一有人直接打开图片地址，它也只能作为一张图存在，不能变成可执行文档。\n\n图片用 `inline`（不是 attachment）：它就是要在页面里显示的内容。",
+    "operationId": "get_cover_api_forum_threads__thread_id__cover_get",
+    "parameters": [
+     {
+      "name": "thread_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Thread Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "delete": {
+    "tags": [
+     "forum"
+    ],
+    "summary": "删除帖子封面（作者或管理员）",
+    "description": "能传就要能撤：传错图之后如果没有删除入口，那张图就永久留在帖子上了。\n\n权限与删帖、删回复同一套：作者本人，或 admin / superadmin。",
+    "operationId": "delete_cover_api_forum_threads__thread_id__cover_delete",
+    "parameters": [
+     {
+      "name": "thread_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Thread Id"
+      }
+     }
+    ],
+    "responses": {
+     "204": {
+      "description": "Successful Response"
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/forum/threads/{thread_id}/structure/file": {
+   "get": {
+    "tags": [
+     "forum"
+    ],
+    "summary": "下载原始 .mcstructure",
+    "description": "下载帖子里那份原始文件。\n\n用户上传的是自己的建筑，愿意公开就该能被人拿走继续用。响应头固定\n`application/octet-stream` + `Content-Disposition: attachment` +\n`X-Content-Type-Options: nosniff`：即使有人把伪装成 .mcstructure 的\nHTML 传上来（解析器会拒），浏览器也不会按网页执行它。",
+    "operationId": "download_structure_api_forum_threads__thread_id__structure_file_get",
+    "parameters": [
+     {
+      "name": "thread_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Thread Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/forum/threads/{thread_id}/structure/render": {
+   "get": {
+    "tags": [
+     "forum"
+    ],
+    "summary": "3D 预览载荷",
+    "description": "返回浏览器端渲染 3D 预览所需的最小数据。\n\n载荷在**上传时**就 gzip 落盘（见 forum_storage.save_render），这里按\n客户端的 `Accept-Encoding` 决定是直接回压缩字节还是解压后回 JSON：\n大结构的载荷未压缩有几百 KB 到几 MB，而论坛帖子会被反复打开，\n每次都重新压一遍纯属浪费。",
+    "operationId": "get_render_payload_api_forum_threads__thread_id__structure_render_get",
+    "parameters": [
+     {
+      "name": "thread_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Thread Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/StructureRenderPayload"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/forum/replies/{reply_id}": {
+   "delete": {
+    "tags": [
+     "forum"
+    ],
+    "summary": "Delete Reply",
+    "operationId": "delete_reply_api_forum_replies__reply_id__delete",
+    "parameters": [
+     {
+      "name": "reply_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Reply Id"
+      }
+     }
+    ],
+    "responses": {
+     "204": {
+      "description": "Successful Response"
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/favorites": {
+   "get": {
+    "tags": [
+     "favorites"
+    ],
+    "summary": "List Favorites",
+    "operationId": "list_favorites_api_favorites_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/FavoriteList"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/favorites/{tool_id}": {
+   "put": {
+    "tags": [
+     "favorites"
+    ],
+    "summary": "Add Favorite",
+    "operationId": "add_favorite_api_favorites__tool_id__put",
+    "parameters": [
+     {
+      "name": "tool_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Tool Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/FavoriteList"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "delete": {
+    "tags": [
+     "favorites"
+    ],
+    "summary": "Remove Favorite",
+    "operationId": "remove_favorite_api_favorites__tool_id__delete",
+    "parameters": [
+     {
+      "name": "tool_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Tool Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/FavoriteList"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/admin/accounts": {
+   "get": {
+    "tags": [
+     "admin"
+    ],
+    "summary": "List Accounts",
+    "description": "账号列表，可选按用户名模糊搜索（`q`，大小写不敏感的子串匹配）。\n\n搜索放在服务端而不是前端过滤：这一页是**管理**界面，账号数会随时间增长，\n而「搜不到」在管理场景下是错误结论（以为这个人不存在）。用 SQL 过滤，\n前端拿到的永远是与搜索词匹配的那一批，不依赖已加载的那一页。\n\n不传 `q` 时仍然按 id 升序返回全部——注册最早的账号排在最前，\n也就是超管自己（引导规则，ADR-002）在最上面。\n\n`max_length` 给得比用户名上限宽：搜索词比任何用户名都长时结果自然为空，\n那是个正常结果，不该回一个 422 让使用者去猜自己做错了什么。",
+    "operationId": "list_accounts_api_admin_accounts_get",
+    "parameters": [
+     {
+      "name": "q",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string",
+         "maxLength": 64
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Q"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/AccountSummary"
+         },
+         "title": "Response List Accounts Api Admin Accounts Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/admin/accounts/{account_id}/admin": {
+   "put": {
+    "tags": [
+     "admin"
+    ],
+    "summary": "Toggle Admin",
+    "description": "授予 / 收回管理员（admin ↔ member）。\n\n单独开一个接口而不是让前端去调 `role` 那个：`role` 接口按契约收任何角色，\n一个只该「开关管理员」的界面不该顺手拥有把别人提成超管的能力。\n超管档位只由引导规则与邀请码产生（ADR-002）。",
+    "operationId": "toggle_admin_api_admin_accounts__account_id__admin_put",
+    "parameters": [
+     {
+      "name": "account_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Account Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RoleToggle"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AccountSummary"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/admin/accounts/{account_id}/role": {
+   "put": {
+    "tags": [
+     "admin"
+    ],
+    "summary": "Update Role",
+    "operationId": "update_role_api_admin_accounts__account_id__role_put",
+    "parameters": [
+     {
+      "name": "account_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Account Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RoleUpdate"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AccountSummary"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/site-config": {
+   "get": {
+    "tags": [
+     "site-config"
+    ],
+    "summary": "Get Site Config",
+    "operationId": "get_site_config_api_site_config_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "title": "Response Get Site Config Api Site Config Get"
+        }
+       }
+      }
+     }
+    }
+   },
+   "put": {
+    "tags": [
+     "site-config"
+    ],
+    "summary": "Put Site Config",
+    "operationId": "put_site_config_api_site_config_put",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SiteConfigUpdate"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "title": "Response Put Site Config Api Site Config Put"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/mcstructure/info": {
+   "get": {
+    "tags": [
+     "mcstructure"
+    ],
+    "summary": "接口说明与当前限制",
+    "description": "返回本接口的能力边界，便于前端显示「我们到底做了什么、没做什么」。",
+    "operationId": "info_api_mcstructure_info_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "title": "Response Info Api Mcstructure Info Get"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/mcstructure/parse": {
+   "post": {
+    "tags": [
+     "mcstructure"
+    ],
+    "summary": "上传 .mcstructure 并解析",
+    "operationId": "parse_structure_api_mcstructure_parse_post",
+    "parameters": [
+     {
+      "name": "include_voxels",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "boolean",
+       "description": "是否返回完整方块索引数组",
+       "default": false,
+       "title": "Include Voxels"
+      },
+      "description": "是否返回完整方块索引数组"
+     },
+     {
+      "name": "include_raw",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "boolean",
+       "description": "是否返回完整根 NBT",
+       "default": false,
+       "title": "Include Raw"
+      },
+      "description": "是否返回完整根 NBT"
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "multipart/form-data": {
+       "schema": {
+        "$ref": "#/components/schemas/Body_parse_structure_api_mcstructure_parse_post"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/StructureResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/mcstructure/voxels": {
+   "post": {
+    "tags": [
+     "mcstructure"
+    ],
+    "summary": "只取完整方块索引数组",
+    "operationId": "get_voxels_api_mcstructure_voxels_post",
+    "requestBody": {
+     "content": {
+      "multipart/form-data": {
+       "schema": {
+        "$ref": "#/components/schemas/Body_get_voxels_api_mcstructure_voxels_post"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "items": {
+          "$ref": "#/components/schemas/VoxelLayer"
+         },
+         "type": "array",
+         "title": "Response Get Voxels Api Mcstructure Voxels Post"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/mcstructure/slice": {
+   "post": {
+    "tags": [
+     "mcstructure"
+    ],
+    "summary": "取某一层薄片",
+    "operationId": "get_slice_api_mcstructure_slice_post",
+    "parameters": [
+     {
+      "name": "axis",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "pattern": "^[xyz]$",
+       "description": "切片轴",
+       "default": "y",
+       "title": "Axis"
+      },
+      "description": "切片轴"
+     },
+     {
+      "name": "at",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "description": "该轴上的坐标（结构内坐标，从 0 开始）",
+       "title": "At"
+      },
+      "description": "该轴上的坐标（结构内坐标，从 0 开始）"
+     },
+     {
+      "name": "layer",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "minimum": 0,
+       "description": "层号：0 主层 / 1 次层",
+       "default": 0,
+       "title": "Layer"
+      },
+      "description": "层号：0 主层 / 1 次层"
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "multipart/form-data": {
+       "schema": {
+        "$ref": "#/components/schemas/Body_get_slice_api_mcstructure_slice_post"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/VoxelSlice"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/mcstructure/position": {
+   "post": {
+    "tags": [
+     "mcstructure"
+    ],
+    "summary": "坐标 ↔ 位置下标互查",
+    "operationId": "lookup_position_api_mcstructure_position_post",
+    "parameters": [
+     {
+      "name": "x",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "description": "结构内 X（从 0 开始）",
+       "title": "X"
+      },
+      "description": "结构内 X（从 0 开始）"
+     },
+     {
+      "name": "y",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "description": "结构内 Y（从 0 开始）",
+       "title": "Y"
+      },
+      "description": "结构内 Y（从 0 开始）"
+     },
+     {
+      "name": "z",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "description": "结构内 Z（从 0 开始）",
+       "title": "Z"
+      },
+      "description": "结构内 Z（从 0 开始）"
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "multipart/form-data": {
+       "schema": {
+        "$ref": "#/components/schemas/Body_lookup_position_api_mcstructure_position_post"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PositionLookup"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/mcstructure/blocks": {
+   "post": {
+    "tags": [
+     "mcstructure"
+    ],
+    "summary": "方块实体 / 实体分页列表",
+    "operationId": "list_blocks_api_mcstructure_blocks_post",
+    "parameters": [
+     {
+      "name": "kind",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "pattern": "^(block_entities|entities)$",
+       "description": "block_entities = 方块实体；entities = 实体",
+       "default": "block_entities",
+       "title": "Kind"
+      },
+      "description": "block_entities = 方块实体；entities = 实体"
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "minimum": 0,
+       "default": 0,
+       "title": "Offset"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 1000,
+       "minimum": 1,
+       "default": 100,
+       "title": "Limit"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "multipart/form-data": {
+       "schema": {
+        "$ref": "#/components/schemas/Body_list_blocks_api_mcstructure_blocks_post"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/BlockEntityPage"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/docs/info": {
+   "get": {
+    "tags": [
+     "docs"
+    ],
+    "summary": "接口能力与限制（公开）",
+    "operationId": "info_api_docs_info_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DocsInfo"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/docs/permissions": {
+   "get": {
+    "tags": [
+     "docs"
+    ],
+    "summary": "当前账号在本工具的能力",
+    "operationId": "permissions_api_docs_permissions_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DocsPermissions"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/docs/tree": {
+   "get": {
+    "tags": [
+     "docs"
+    ],
+    "summary": "目录树（公开只给已发布内容）",
+    "operationId": "tree_api_docs_tree_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TreeResponse"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/docs/search": {
+   "get": {
+    "tags": [
+     "docs"
+    ],
+    "summary": "全文搜索（只搜有权阅读的内容）",
+    "operationId": "search_api_docs_search_get",
+    "parameters": [
+     {
+      "name": "q",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "minLength": 1,
+       "maxLength": 100,
+       "description": "关键词",
+       "title": "Q"
+      },
+      "description": "关键词"
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 200,
+       "minimum": 0,
+       "default": 0,
+       "title": "Limit"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SearchResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/docs/documents/{document_id}": {
+   "get": {
+    "tags": [
+     "docs"
+    ],
+    "summary": "读取正文",
+    "operationId": "read_document_api_docs_documents__document_id__get",
+    "parameters": [
+     {
+      "name": "document_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Document Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DocumentDetail"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "delete": {
+    "tags": [
+     "docs"
+    ],
+    "summary": "删除文档（超管，立即生效）",
+    "operationId": "delete_document_now_api_docs_documents__document_id__delete",
+    "parameters": [
+     {
+      "name": "document_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Document Id"
+      }
+     },
+     {
+      "name": "note",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "maxLength": 500,
+       "default": "",
+       "title": "Note"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DirectActionOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/docs/files/{file_id}/download": {
+   "get": {
+    "tags": [
+     "docs"
+    ],
+    "summary": "下载原始文件",
+    "description": "下载走这里而不是静态目录：先判定这篇文件是否挂在某篇可读文档上。\n\n固定 `application/octet-stream` + `attachment`：下载就是下载，\n不在这个响应里给浏览器「顺便渲染一下」的机会。",
+    "operationId": "download_file_api_docs_files__file_id__download_get",
+    "parameters": [
+     {
+      "name": "file_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "File Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/docs/files/{file_id}/content": {
+   "get": {
+    "tags": [
+     "docs"
+    ],
+    "summary": "内联读取原始文件（txt/json 的原始查看；按可见性判定）",
+    "description": "读取原始文件字节。\n\n默认 `attachment`（下载）；`inline` 用于 txt/json 的「原始文本」视图——\n前端仍以 `<pre>` 纯文本展示，不把服务端返回的内容当 HTML 执行，\n并且这里固定带上 `nosniff`，避免浏览器把内容嗅探成可执行类型。",
+    "operationId": "file_content_api_docs_files__file_id__content_get",
+    "parameters": [
+     {
+      "name": "file_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "File Id"
+      }
+     },
+     {
+      "name": "disposition",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "pattern": "^(attachment|inline)$",
+       "default": "attachment",
+       "title": "Disposition"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/docs/uploads": {
+   "post": {
+    "tags": [
+     "docs"
+    ],
+    "summary": "开始一次分块上传（staff）",
+    "operationId": "init_upload_api_docs_uploads_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/UploadInitIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UploadInitOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/docs/uploads/{upload_id}/chunks": {
+   "post": {
+    "tags": [
+     "docs"
+    ],
+    "summary": "上传一个分片",
+    "description": "写入第 index 片。同一分片重传时直接覆盖，拼接顺序由文件名保证。",
+    "operationId": "upload_chunk_api_docs_uploads__upload_id__chunks_post",
+    "parameters": [
+     {
+      "name": "upload_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Upload Id"
+      }
+     },
+     {
+      "name": "index",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Index"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "multipart/form-data": {
+       "schema": {
+        "$ref": "#/components/schemas/Body_upload_chunk_api_docs_uploads__upload_id__chunks_post"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UploadChunkOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/docs/uploads/{upload_id}/finish": {
+   "post": {
+    "tags": [
+     "docs"
+    ],
+    "summary": "完成上传",
+    "operationId": "finish_upload_api_docs_uploads__upload_id__finish_post",
+    "parameters": [
+     {
+      "name": "upload_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Upload Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "schema": {
+        "$ref": "#/components/schemas/Body_finish_upload_api_docs_uploads__upload_id__finish_post"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/FileUploadOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/docs/uploads/direct": {
+   "post": {
+    "tags": [
+     "docs"
+    ],
+    "summary": "一次性上传（小文件，staff）",
+    "description": "给脚本与小文件用的简化入口：不分块，直接整体落盘。",
+    "operationId": "upload_direct_api_docs_uploads_direct_post",
+    "requestBody": {
+     "content": {
+      "multipart/form-data": {
+       "schema": {
+        "$ref": "#/components/schemas/Body_upload_direct_api_docs_uploads_direct_post"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/FileUploadOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/docs/submissions": {
+   "post": {
+    "tags": [
+     "docs"
+    ],
+    "summary": "提交变更单（staff）",
+    "operationId": "create_submission_api_docs_submissions_post",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SubmitIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "201": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SubmissionOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "tags": [
+     "docs"
+    ],
+    "summary": "我的提交单 / 待审列表",
+    "description": "scope=mine 看自己提交的；scope=pending 看全部待审（超管；admin 只看自己的）。",
+    "operationId": "list_submissions_api_docs_submissions_get",
+    "parameters": [
+     {
+      "name": "scope",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "pattern": "^(mine|pending)$",
+       "default": "mine",
+       "title": "Scope"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SubmissionListOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/docs/submissions/{submission_id}/withdraw": {
+   "post": {
+    "tags": [
+     "docs"
+    ],
+    "summary": "撤回自己的待审提交单",
+    "operationId": "withdraw_submission_api_docs_submissions__submission_id__withdraw_post",
+    "parameters": [
+     {
+      "name": "submission_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Submission Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SubmissionOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/docs/review/{submission_id}": {
+   "post": {
+    "tags": [
+     "docs"
+    ],
+    "summary": "审核（超管）",
+    "description": "批准后立刻发布；批准时目标可能已被别人改动，此时标成 rejected 并说明原因。",
+    "operationId": "review_submission_api_docs_review__submission_id__post",
+    "parameters": [
+     {
+      "name": "submission_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Submission Id"
+      }
+     },
+     {
+      "name": "decision",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "pattern": "^(approve|reject)$",
+       "title": "Decision"
+      }
+     },
+     {
+      "name": "note",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "maxLength": 500,
+       "default": "",
+       "title": "Note"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SubmissionOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/docs/documents/{document_id}/move": {
+   "post": {
+    "tags": [
+     "docs"
+    ],
+    "summary": "移动文档到某个文件夹（超管，立即生效）",
+    "operationId": "move_document_now_api_docs_documents__document_id__move_post",
+    "parameters": [
+     {
+      "name": "document_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Document Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/MoveIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DirectActionOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/docs/documents/{document_id}/rename": {
+   "post": {
+    "tags": [
+     "docs"
+    ],
+    "summary": "改文档标题（超管，立即生效）",
+    "operationId": "rename_document_now_api_docs_documents__document_id__rename_post",
+    "parameters": [
+     {
+      "name": "document_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Document Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RenameIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DirectActionOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/docs/folders/{folder_id}/move": {
+   "post": {
+    "tags": [
+     "docs"
+    ],
+    "summary": "移动文件夹（连同子树，超管，立即生效）",
+    "operationId": "move_folder_now_api_docs_folders__folder_id__move_post",
+    "parameters": [
+     {
+      "name": "folder_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Folder Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/MoveIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DirectActionOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/docs/folders/{folder_id}/rename": {
+   "post": {
+    "tags": [
+     "docs"
+    ],
+    "summary": "重命名文件夹（连同子树的路径，超管，立即生效）",
+    "operationId": "rename_folder_now_api_docs_folders__folder_id__rename_post",
+    "parameters": [
+     {
+      "name": "folder_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Folder Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RenameIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DirectActionOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/docs/folders/{folder_id}": {
+   "delete": {
+    "tags": [
+     "docs"
+    ],
+    "summary": "删除文件夹及其内容（超管，立即生效）",
+    "operationId": "delete_folder_now_api_docs_folders__folder_id__delete",
+    "parameters": [
+     {
+      "name": "folder_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Folder Id"
+      }
+     },
+     {
+      "name": "note",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "maxLength": 500,
+       "default": "",
+       "title": "Note"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DirectActionOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/reverse/status": {
+   "get": {
+    "tags": [
+     "reverse"
+    ],
+    "summary": "Get Status",
+    "description": "MCP 不可达时返回 reachable=False，而不是报错——前端据此显示降级提示。",
+    "operationId": "get_status_api_reverse_status_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/IdaStatus"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/reverse/instances": {
+   "get": {
+    "tags": [
+     "reverse"
+    ],
+    "summary": "List Instances",
+    "operationId": "list_instances_api_reverse_instances_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "items": {
+          "$ref": "#/components/schemas/IdaInstance"
+         },
+         "type": "array",
+         "title": "Response List Instances Api Reverse Instances Get"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/reverse/overview": {
+   "get": {
+    "tags": [
+     "reverse"
+    ],
+    "summary": "Get Overview",
+    "operationId": "get_overview_api_reverse_overview_get",
+    "parameters": [
+     {
+      "name": "port",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "IDA 实例端口；省略则用当前实例",
+       "title": "Port"
+      },
+      "description": "IDA 实例端口；省略则用当前实例"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/BinaryOverview"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/reverse/functions": {
+   "get": {
+    "tags": [
+     "reverse"
+    ],
+    "summary": "List Functions",
+    "operationId": "list_functions_api_reverse_functions_get",
+    "parameters": [
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "minimum": 0,
+       "default": 0,
+       "title": "Offset"
+      }
+     },
+     {
+      "name": "count",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 1000,
+       "minimum": 1,
+       "default": 100,
+       "title": "Count"
+      }
+     },
+     {
+      "name": "filter",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string",
+         "maxLength": 200
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "名称 glob，如 *Player*",
+       "title": "Filter"
+      },
+      "description": "名称 glob，如 *Player*"
+     },
+     {
+      "name": "port",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Port"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/FunctionPage"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/reverse/functions/lookup": {
+   "get": {
+    "tags": [
+     "reverse"
+    ],
+    "summary": "Lookup Functions",
+    "operationId": "lookup_functions_api_reverse_functions_lookup_get",
+    "parameters": [
+     {
+      "name": "q",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "array",
+       "items": {
+        "type": "string"
+       },
+       "minItems": 1,
+       "maxItems": 50,
+       "description": "地址或函数名，可重复",
+       "title": "Q"
+      },
+      "description": "地址或函数名，可重复"
+     },
+     {
+      "name": "port",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Port"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/FunctionSummary"
+         },
+         "title": "Response Lookup Functions Api Reverse Functions Lookup Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/reverse/decompile": {
+   "get": {
+    "tags": [
+     "reverse"
+    ],
+    "summary": "Decompile",
+    "operationId": "decompile_api_reverse_decompile_get",
+    "parameters": [
+     {
+      "name": "addr",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "minLength": 1,
+       "maxLength": 200,
+       "description": "函数地址或名称",
+       "title": "Addr"
+      },
+      "description": "函数地址或名称"
+     },
+     {
+      "name": "include_addresses",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "boolean",
+       "default": true,
+       "title": "Include Addresses"
+      }
+     },
+     {
+      "name": "port",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Port"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Pseudocode"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/reverse/disasm": {
+   "get": {
+    "tags": [
+     "reverse"
+    ],
+    "summary": "Disasm",
+    "operationId": "disasm_api_reverse_disasm_get",
+    "parameters": [
+     {
+      "name": "addr",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "minLength": 1,
+       "maxLength": 200,
+       "title": "Addr"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "minimum": 0,
+       "default": 0,
+       "title": "Offset"
+      }
+     },
+     {
+      "name": "max_instructions",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 50000,
+       "minimum": 1,
+       "default": 2000,
+       "title": "Max Instructions"
+      }
+     },
+     {
+      "name": "port",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Port"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Disassembly"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/reverse/xrefs": {
+   "get": {
+    "tags": [
+     "reverse"
+    ],
+    "summary": "Xrefs",
+    "operationId": "xrefs_api_reverse_xrefs_get",
+    "parameters": [
+     {
+      "name": "addr",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "minLength": 1,
+       "maxLength": 200,
+       "title": "Addr"
+      }
+     },
+     {
+      "name": "direction",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "pattern": "^(to|from|both)$",
+       "default": "to",
+       "title": "Direction"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 1000,
+       "minimum": 1,
+       "default": 100,
+       "title": "Limit"
+      }
+     },
+     {
+      "name": "port",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Port"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/XrefGroup"
+         },
+         "title": "Response Xrefs Api Reverse Xrefs Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/reverse/callees": {
+   "get": {
+    "tags": [
+     "reverse"
+    ],
+    "summary": "Callees",
+    "operationId": "callees_api_reverse_callees_get",
+    "parameters": [
+     {
+      "name": "addr",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "minLength": 1,
+       "maxLength": 200,
+       "title": "Addr"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 500,
+       "minimum": 1,
+       "default": 200,
+       "title": "Limit"
+      }
+     },
+     {
+      "name": "port",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Port"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/CalleeGroup"
+         },
+         "title": "Response Callees Api Reverse Callees Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/reverse/blocks": {
+   "get": {
+    "tags": [
+     "reverse"
+    ],
+    "summary": "Blocks",
+    "operationId": "blocks_api_reverse_blocks_get",
+    "parameters": [
+     {
+      "name": "addr",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "minLength": 1,
+       "maxLength": 200,
+       "title": "Addr"
+      }
+     },
+     {
+      "name": "max_blocks",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 10000,
+       "minimum": 1,
+       "default": 500,
+       "title": "Max Blocks"
+      }
+     },
+     {
+      "name": "port",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Port"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/BlockGroup"
+         },
+         "title": "Response Blocks Api Reverse Blocks Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/reverse/search/strings": {
+   "get": {
+    "tags": [
+     "reverse"
+    ],
+    "summary": "Search Strings",
+    "operationId": "search_strings_api_reverse_search_strings_get",
+    "parameters": [
+     {
+      "name": "pattern",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "minLength": 1,
+       "maxLength": 200,
+       "title": "Pattern"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 500,
+       "minimum": 1,
+       "default": 50,
+       "title": "Limit"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "minimum": 0,
+       "default": 0,
+       "title": "Offset"
+      }
+     },
+     {
+      "name": "port",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Port"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/StringSearchResult"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/reverse/search/text": {
+   "get": {
+    "tags": [
+     "reverse"
+    ],
+    "summary": "Search Text",
+    "operationId": "search_text_api_reverse_search_text_get",
+    "parameters": [
+     {
+      "name": "pattern",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "minLength": 2,
+       "maxLength": 200,
+       "title": "Pattern"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 500,
+       "minimum": 1,
+       "default": 50,
+       "title": "Limit"
+      }
+     },
+     {
+      "name": "start",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string",
+         "maxLength": 200
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Start"
+      }
+     },
+     {
+      "name": "regex",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "boolean",
+       "default": false,
+       "title": "Regex"
+      }
+     },
+     {
+      "name": "port",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Port"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TextSearchResult"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/reverse/functions/rename": {
+   "post": {
+    "tags": [
+     "reverse"
+    ],
+    "summary": "Rename Function",
+    "description": "重命名函数。权限在服务端判定（01 文档第 7 节）；前端隐藏按钮不算权限控制。",
+    "operationId": "rename_function_api_reverse_functions_rename_post",
+    "parameters": [
+     {
+      "name": "addr",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "minLength": 1,
+       "maxLength": 200,
+       "title": "Addr"
+      }
+     },
+     {
+      "name": "port",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Port"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RenameRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "title": "Response Rename Function Api Reverse Functions Rename Post"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/reverse/permissions": {
+   "get": {
+    "tags": [
+     "reverse"
+    ],
+    "summary": "Permissions",
+    "description": "前端据此决定是否显示编辑类控件；真正的拦截仍在各写入路由上。",
+    "operationId": "permissions_api_reverse_permissions_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "title": "Response Permissions Api Reverse Permissions Get"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/ai/quota": {
+   "get": {
+    "tags": [
+     "ai"
+    ],
+    "summary": "Quota",
+    "description": "当前还剩几轮。前端进页面就调一次，用来显示配额与\"未配置\"状态。",
+    "operationId": "quota_api_ai_quota_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/QuotaInfo"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/ai/chat": {
+   "post": {
+    "tags": [
+     "ai"
+    ],
+    "summary": "Chat",
+    "operationId": "chat_api_ai_chat_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ChatRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ChatResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/tools": {
+   "get": {
+    "tags": [
+     "public-v1"
+    ],
+    "summary": "List Tools",
+    "operationId": "list_tools_api_v1_tools_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "title": "Response List Tools Api V1 Tools Get"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/tools/{tool_id}": {
+   "get": {
+    "tags": [
+     "public-v1"
+    ],
+    "summary": "Get Tool",
+    "operationId": "get_tool_api_v1_tools__tool_id__get",
+    "parameters": [
+     {
+      "name": "tool_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Tool Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "title": "Response Get Tool Api V1 Tools  Tool Id  Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/tools/{tool_id}/run": {
+   "post": {
+    "tags": [
+     "public-v1"
+    ],
+    "summary": "Run Tool",
+    "operationId": "run_tool_api_v1_tools__tool_id__run_post",
+    "parameters": [
+     {
+      "name": "tool_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Tool Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RunRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "title": "Response Run Tool Api V1 Tools  Tool Id  Run Post"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/admin/api-keys": {
+   "get": {
+    "tags": [
+     "public-v1-admin"
+    ],
+    "summary": "List Keys",
+    "operationId": "list_keys_api_admin_api_keys_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "title": "Response List Keys Api Admin Api Keys Get"
+        }
+       }
+      }
+     }
+    }
+   },
+   "post": {
+    "tags": [
+     "public-v1-admin"
+    ],
+    "summary": "Create Key",
+    "operationId": "create_key_api_admin_api_keys_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ApiKeyCreate"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "201": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "title": "Response Create Key Api Admin Api Keys Post"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/admin/api-keys/{key_id}": {
+   "delete": {
+    "tags": [
+     "public-v1-admin"
+    ],
+    "summary": "Disable Key",
+    "operationId": "disable_key_api_admin_api_keys__key_id__delete",
+    "parameters": [
+     {
+      "name": "key_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Key Id"
+      }
+     }
+    ],
+    "responses": {
+     "204": {
+      "description": "Successful Response"
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/health": {
+   "get": {
+    "tags": [
+     "meta"
+    ],
+    "summary": "Health",
+    "operationId": "health_api_health_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": {
+          "type": "string"
+         },
+         "type": "object",
+         "title": "Response Health Api Health Get"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "components": {
+  "schemas": {
+   "AccountCreate": {
+    "properties": {
+     "username": {
+      "type": "string",
+      "maxLength": 16,
+      "minLength": 2,
+      "pattern": "^[A-Za-z0-9_\\u4e00-\\u9fa5]{2,16}$",
+      "title": "Username",
+      "description": "2-16 位字母、数字、下划线或中文"
+     },
+     "password": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 6,
+      "title": "Password"
+     },
+     "code": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 64
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Code"
+     }
+    },
+    "type": "object",
+    "required": [
+     "username",
+     "password"
+    ],
+    "title": "AccountCreate"
+   },
+   "AccountSummary": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "username": {
+      "type": "string",
+      "title": "Username"
+     },
+     "role": {
+      "type": "string",
+      "title": "Role"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "username",
+     "role",
+     "created_at"
+    ],
+    "title": "AccountSummary"
+   },
+   "ApiKeyCreate": {
+    "properties": {
+     "name": {
+      "type": "string",
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Name"
+     }
+    },
+    "type": "object",
+    "required": [
+     "name"
+    ],
+    "title": "ApiKeyCreate"
+   },
+   "BackgroundConfig": {
+    "properties": {
+     "mode": {
+      "type": "string",
+      "pattern": "^(none|image)$",
+      "title": "Mode",
+      "default": "none"
+     },
+     "url": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 2048
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Url"
+     },
+     "overlay": {
+      "type": "number",
+      "maximum": 0.9,
+      "minimum": 0.0,
+      "title": "Overlay",
+      "default": 0.35
+     }
+    },
+    "type": "object",
+    "title": "BackgroundConfig",
+    "description": "主页背景：image 模式直接用 URL，支持 GIF/WebP/APNG 等动图格式（ADR-002）。"
+   },
+   "BasicBlock": {
+    "properties": {
+     "start": {
+      "type": "string",
+      "title": "Start"
+     },
+     "end": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "End"
+     },
+     "size": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Size"
+     },
+     "type": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Type"
+     },
+     "successors": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Successors"
+     },
+     "predecessors": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Predecessors"
+     }
+    },
+    "type": "object",
+    "required": [
+     "start"
+    ],
+    "title": "BasicBlock"
+   },
+   "BinaryOverview": {
+    "properties": {
+     "module": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Module"
+     },
+     "path": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Path"
+     },
+     "arch": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Arch"
+     },
+     "base_address": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Base Address"
+     },
+     "image_size": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Image Size"
+     },
+     "total_functions": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Total Functions"
+     },
+     "named_functions": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Named Functions"
+     },
+     "library_functions": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Library Functions"
+     },
+     "unnamed_functions": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Unnamed Functions"
+     },
+     "total_strings": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Total Strings"
+     },
+     "total_segments": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Total Segments"
+     },
+     "segments": {
+      "items": {
+       "$ref": "#/components/schemas/SegmentInfo"
+      },
+      "type": "array",
+      "title": "Segments"
+     }
+    },
+    "type": "object",
+    "title": "BinaryOverview",
+    "description": "survey_binary 的归一化结果。"
+   },
+   "BlockCountEntry": {
+    "properties": {
+     "index": {
+      "type": "integer",
+      "title": "Index",
+      "description": "调色板下标"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "states": {
+      "type": "object",
+      "title": "States"
+     },
+     "count": {
+      "type": "integer",
+      "title": "Count",
+      "description": "出现次数（含所有层）"
+     },
+     "ratio": {
+      "type": "number",
+      "title": "Ratio",
+      "description": "占非 void 方块总数的比例，0~1"
+     }
+    },
+    "type": "object",
+    "required": [
+     "index",
+     "name",
+     "count",
+     "ratio"
+    ],
+    "title": "BlockCountEntry"
+   },
+   "BlockEntityEntry": {
+    "properties": {
+     "index": {
+      "type": "integer",
+      "title": "Index",
+      "description": "位置下标（ZYX 顺序）；用 /position 可换算成坐标"
+     },
+     "x": {
+      "type": "integer",
+      "title": "X"
+     },
+     "y": {
+      "type": "integer",
+      "title": "Y"
+     },
+     "z": {
+      "type": "integer",
+      "title": "Z"
+     },
+     "identifier": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Identifier",
+      "description": "block_entity_data.id"
+     },
+     "block_entity_data": {
+      "anyOf": [
+       {
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Block Entity Data",
+      "description": "方块实体 NBT 原文（箱子内容、告示牌文字等）"
+     },
+     "tick_queue_data": {
+      "items": {},
+      "type": "array",
+      "title": "Tick Queue Data",
+      "description": "计划刻队列（如珊瑚死亡、水流更新）"
+     }
+    },
+    "type": "object",
+    "required": [
+     "index",
+     "x",
+     "y",
+     "z"
+    ],
+    "title": "BlockEntityEntry",
+    "description": "block_position_data 的一条：方块实体 NBT 与计划刻队列。"
+   },
+   "BlockEntityPage": {
+    "properties": {
+     "total": {
+      "type": "integer",
+      "title": "Total"
+     },
+     "offset": {
+      "type": "integer",
+      "title": "Offset"
+     },
+     "limit": {
+      "type": "integer",
+      "title": "Limit"
+     },
+     "items": {
+      "items": {
+       "type": "object"
+      },
+      "type": "array",
+      "title": "Items"
+     }
+    },
+    "type": "object",
+    "required": [
+     "total",
+     "offset",
+     "limit",
+     "items"
+    ],
+    "title": "BlockEntityPage",
+    "description": "方块实体 / 实体列表的分页结果（大结构里可能有上万条）。"
+   },
+   "BlockGroup": {
+    "properties": {
+     "addr": {
+      "type": "string",
+      "title": "Addr"
+     },
+     "blocks": {
+      "items": {
+       "$ref": "#/components/schemas/BasicBlock"
+      },
+      "type": "array",
+      "title": "Blocks"
+     },
+     "count": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Count"
+     },
+     "total_blocks": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Total Blocks"
+     },
+     "error": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Error"
+     }
+    },
+    "type": "object",
+    "required": [
+     "addr"
+    ],
+    "title": "BlockGroup"
+   },
+   "BlockStateEntry": {
+    "properties": {
+     "index": {
+      "type": "integer",
+      "title": "Index",
+      "description": "在调色板中的下标；block_indices 里的值就是它"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name",
+      "description": "方块标识，如 minecraft:stone"
+     },
+     "states": {
+      "type": "object",
+      "title": "States",
+      "description": "方块状态。值类型随状态而定：字符串 / 整数 / 字节（布尔）"
+     },
+     "version": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Version",
+      "description": "该方块的兼容版本号"
+     }
+    },
+    "type": "object",
+    "required": [
+     "index",
+     "name"
+    ],
+    "title": "BlockStateEntry",
+    "description": "调色板里的一个方块排列（block_palette 的一项）。"
+   },
+   "Body_create_thread_with_attachments_api_forum_threads_with_attachments_post": {
+    "properties": {
+     "category": {
+      "type": "string",
+      "title": "Category",
+      "description": "版块名，取值见 GET /api/forum/categories"
+     },
+     "title": {
+      "type": "string",
+      "title": "Title",
+      "description": "标题，2-60 字"
+     },
+     "body": {
+      "type": "string",
+      "title": "Body",
+      "description": "正文，2-2000 字"
+     },
+     "structure": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "binary"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Structure",
+      "description": ".mcstructure 文件（可选），不超过 10 MB"
+     },
+     "cover": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "binary"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Cover",
+      "description": "封面图片（可选，PNG/JPEG/GIF/WebP），不超过 5 MB"
+     }
+    },
+    "type": "object",
+    "required": [
+     "category",
+     "title",
+     "body"
+    ],
+    "title": "Body_create_thread_with_attachments_api_forum_threads_with_attachments_post"
+   },
+   "Body_finish_upload_api_docs_uploads__upload_id__finish_post": {
+    "properties": {
+     "filename": {
+      "type": "string",
+      "title": "Filename",
+      "description": "原始文件名"
+     },
+     "total_bytes": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Total Bytes"
+     }
+    },
+    "type": "object",
+    "required": [
+     "filename"
+    ],
+    "title": "Body_finish_upload_api_docs_uploads__upload_id__finish_post"
+   },
+   "Body_get_slice_api_mcstructure_slice_post": {
+    "properties": {
+     "file": {
+      "type": "string",
+      "format": "binary",
+      "title": "File",
+      "description": ".mcstructure 文件"
+     }
+    },
+    "type": "object",
+    "required": [
+     "file"
+    ],
+    "title": "Body_get_slice_api_mcstructure_slice_post"
+   },
+   "Body_get_voxels_api_mcstructure_voxels_post": {
+    "properties": {
+     "file": {
+      "type": "string",
+      "format": "binary",
+      "title": "File",
+      "description": ".mcstructure 文件"
+     }
+    },
+    "type": "object",
+    "required": [
+     "file"
+    ],
+    "title": "Body_get_voxels_api_mcstructure_voxels_post"
+   },
+   "Body_list_blocks_api_mcstructure_blocks_post": {
+    "properties": {
+     "file": {
+      "type": "string",
+      "format": "binary",
+      "title": "File",
+      "description": ".mcstructure 文件"
+     }
+    },
+    "type": "object",
+    "required": [
+     "file"
+    ],
+    "title": "Body_list_blocks_api_mcstructure_blocks_post"
+   },
+   "Body_lookup_position_api_mcstructure_position_post": {
+    "properties": {
+     "file": {
+      "type": "string",
+      "format": "binary",
+      "title": "File",
+      "description": ".mcstructure 文件"
+     }
+    },
+    "type": "object",
+    "required": [
+     "file"
+    ],
+    "title": "Body_lookup_position_api_mcstructure_position_post"
+   },
+   "Body_parse_structure_api_mcstructure_parse_post": {
+    "properties": {
+     "file": {
+      "type": "string",
+      "format": "binary",
+      "title": "File",
+      "description": ".mcstructure 文件"
+     }
+    },
+    "type": "object",
+    "required": [
+     "file"
+    ],
+    "title": "Body_parse_structure_api_mcstructure_parse_post"
+   },
+   "Body_upload_chunk_api_docs_uploads__upload_id__chunks_post": {
+    "properties": {
+     "chunk": {
+      "type": "string",
+      "format": "binary",
+      "title": "Chunk",
+      "description": "分片内容"
+     }
+    },
+    "type": "object",
+    "required": [
+     "chunk"
+    ],
+    "title": "Body_upload_chunk_api_docs_uploads__upload_id__chunks_post"
+   },
+   "Body_upload_direct_api_docs_uploads_direct_post": {
+    "properties": {
+     "file": {
+      "type": "string",
+      "format": "binary",
+      "title": "File",
+      "description": "md / json / txt 文件"
+     }
+    },
+    "type": "object",
+    "required": [
+     "file"
+    ],
+    "title": "Body_upload_direct_api_docs_uploads_direct_post"
+   },
+   "CalleeGroup": {
+    "properties": {
+     "addr": {
+      "type": "string",
+      "title": "Addr"
+     },
+     "callees": {
+      "items": {
+       "$ref": "#/components/schemas/CalleeItem"
+      },
+      "type": "array",
+      "title": "Callees"
+     },
+     "more": {
+      "type": "boolean",
+      "title": "More",
+      "default": false
+     },
+     "error": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Error"
+     }
+    },
+    "type": "object",
+    "required": [
+     "addr"
+    ],
+    "title": "CalleeGroup"
+   },
+   "CalleeItem": {
+    "properties": {
+     "addr": {
+      "type": "string",
+      "title": "Addr"
+     },
+     "name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Name"
+     },
+     "type": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Type"
+     }
+    },
+    "type": "object",
+    "required": [
+     "addr"
+    ],
+    "title": "CalleeItem"
+   },
+   "ChatMessage": {
+    "properties": {
+     "role": {
+      "type": "string",
+      "enum": [
+       "user",
+       "assistant",
+       "tool"
+      ],
+      "title": "Role"
+     },
+     "content": {
+      "type": "string",
+      "maxLength": 20000,
+      "title": "Content",
+      "default": ""
+     },
+     "tool_calls": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "object"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Tool Calls"
+     },
+     "tool_call_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Tool Call Id"
+     }
+    },
+    "type": "object",
+    "required": [
+     "role"
+    ],
+    "title": "ChatMessage",
+    "description": "对话历史里的一条。tool 角色的消息由服务端生成，前端只需原样回传。"
+   },
+   "ChatRequest": {
+    "properties": {
+     "message": {
+      "type": "string",
+      "maxLength": 4000,
+      "minLength": 1,
+      "title": "Message",
+      "description": "用户这一轮的问题"
+     },
+     "history": {
+      "items": {
+       "$ref": "#/components/schemas/ChatMessage"
+      },
+      "type": "array",
+      "maxItems": 40,
+      "title": "History",
+      "description": "之前的对话（原样回传，服务端会截断）"
+     },
+     "context": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/WorkspaceContext"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "port": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Port",
+      "description": "IDA 实例端口；省略则用当前实例"
+     }
+    },
+    "type": "object",
+    "required": [
+     "message"
+    ],
+    "title": "ChatRequest"
+   },
+   "ChatResponse": {
+    "properties": {
+     "reply": {
+      "type": "string",
+      "title": "Reply"
+     },
+     "messages": {
+      "items": {
+       "$ref": "#/components/schemas/ChatMessage"
+      },
+      "type": "array",
+      "title": "Messages",
+      "description": "更新后的对话历史，前端存下来下次回传"
+     },
+     "tool_calls": {
+      "items": {
+       "$ref": "#/components/schemas/ToolCallInfo"
+      },
+      "type": "array",
+      "title": "Tool Calls"
+     },
+     "remaining": {
+      "type": "integer",
+      "title": "Remaining",
+      "description": "本窗口内还剩几轮"
+     },
+     "limit": {
+      "type": "integer",
+      "title": "Limit",
+      "description": "窗口内的总轮数上限"
+     },
+     "reset_in": {
+      "type": "number",
+      "title": "Reset In",
+      "description": "最早一次使用还有多少秒出窗口"
+     },
+     "truncated": {
+      "type": "boolean",
+      "title": "Truncated",
+      "description": "是否因工具调用轮数用尽而中断",
+      "default": false
+     }
+    },
+    "type": "object",
+    "required": [
+     "reply",
+     "remaining",
+     "limit",
+     "reset_in"
+    ],
+    "title": "ChatResponse"
+   },
+   "DirectActionOut": {
+    "properties": {
+     "ok": {
+      "type": "boolean",
+      "title": "Ok"
+     },
+     "message": {
+      "type": "string",
+      "title": "Message"
+     },
+     "document_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Document Id"
+     },
+     "folder_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Folder Id"
+     },
+     "path": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Path"
+     },
+     "affected_documents": {
+      "type": "integer",
+      "title": "Affected Documents",
+      "default": 0
+     }
+    },
+    "type": "object",
+    "required": [
+     "ok",
+     "message"
+    ],
+    "title": "DirectActionOut",
+    "description": "超管直接执行的结果。`submission` 为 null 表示没有走提交单（直接生效）。"
+   },
+   "DisasmLine": {
+    "properties": {
+     "addr": {
+      "type": "string",
+      "title": "Addr"
+     },
+     "instruction": {
+      "type": "string",
+      "title": "Instruction"
+     },
+     "label": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Label"
+     }
+    },
+    "type": "object",
+    "required": [
+     "addr",
+     "instruction"
+    ],
+    "title": "DisasmLine"
+   },
+   "Disassembly": {
+    "properties": {
+     "addr": {
+      "type": "string",
+      "title": "Addr"
+     },
+     "name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Name"
+     },
+     "start_ea": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Start Ea"
+     },
+     "segment": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Segment"
+     },
+     "lines": {
+      "items": {
+       "$ref": "#/components/schemas/DisasmLine"
+      },
+      "type": "array",
+      "title": "Lines"
+     },
+     "stack_frame": {
+      "items": {
+       "$ref": "#/components/schemas/StackVar"
+      },
+      "type": "array",
+      "title": "Stack Frame"
+     },
+     "total": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Total"
+     }
+    },
+    "type": "object",
+    "required": [
+     "addr"
+    ],
+    "title": "Disassembly"
+   },
+   "DocsInfo": {
+    "properties": {
+     "allowed_extensions": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Allowed Extensions"
+     },
+     "max_bytes": {
+      "type": "integer",
+      "title": "Max Bytes"
+     },
+     "max_bytes_label": {
+      "type": "string",
+      "title": "Max Bytes Label"
+     },
+     "storage_dir": {
+      "type": "string",
+      "title": "Storage Dir"
+     },
+     "search_limit": {
+      "type": "integer",
+      "title": "Search Limit"
+     },
+     "review_required": {
+      "type": "boolean",
+      "title": "Review Required"
+     },
+     "notes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Notes"
+     }
+    },
+    "type": "object",
+    "required": [
+     "allowed_extensions",
+     "max_bytes",
+     "max_bytes_label",
+     "storage_dir",
+     "search_limit",
+     "review_required",
+     "notes"
+    ],
+    "title": "DocsInfo",
+    "description": "能力边界与限制，便于界面如实交代「我们做了什么、没做什么」。"
+   },
+   "DocsPermissions": {
+    "properties": {
+     "role": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Role"
+     },
+     "can_read_drafts": {
+      "type": "boolean",
+      "title": "Can Read Drafts"
+     },
+     "can_upload": {
+      "type": "boolean",
+      "title": "Can Upload"
+     },
+     "can_submit": {
+      "type": "boolean",
+      "title": "Can Submit"
+     },
+     "can_review": {
+      "type": "boolean",
+      "title": "Can Review"
+     },
+     "can_publish_directly": {
+      "type": "boolean",
+      "title": "Can Publish Directly"
+     },
+     "can_organize": {
+      "type": "boolean",
+      "title": "Can Organize"
+     },
+     "can_delete": {
+      "type": "boolean",
+      "title": "Can Delete"
+     }
+    },
+    "type": "object",
+    "required": [
+     "role",
+     "can_read_drafts",
+     "can_upload",
+     "can_submit",
+     "can_review",
+     "can_publish_directly",
+     "can_organize",
+     "can_delete"
+    ],
+    "title": "DocsPermissions",
+    "description": "当前账号在本工具里的能力。前端据此决定显示哪些按钮；服务端另有强制校验。"
+   },
+   "DocumentDetail": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "parent_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Parent Id"
+     },
+     "slug": {
+      "type": "string",
+      "title": "Slug"
+     },
+     "title": {
+      "type": "string",
+      "title": "Title"
+     },
+     "summary": {
+      "type": "string",
+      "title": "Summary"
+     },
+     "doc_format": {
+      "type": "string",
+      "enum": [
+       "md",
+       "txt",
+       "json"
+      ],
+      "title": "Doc Format"
+     },
+     "visibility": {
+      "type": "string",
+      "enum": [
+       "public",
+       "members",
+       "staff"
+      ],
+      "title": "Visibility"
+     },
+     "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Updated At"
+     },
+     "published": {
+      "type": "boolean",
+      "title": "Published"
+     },
+     "file": {
+      "$ref": "#/components/schemas/FileRefOut"
+     },
+     "body": {
+      "type": "string",
+      "title": "Body"
+     },
+     "revision_no": {
+      "type": "integer",
+      "title": "Revision No"
+     },
+     "revision_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Revision At"
+     },
+     "byte_size": {
+      "type": "integer",
+      "title": "Byte Size"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "parent_id",
+     "slug",
+     "title",
+     "summary",
+     "doc_format",
+     "visibility",
+     "updated_at",
+     "published",
+     "file",
+     "body",
+     "revision_no",
+     "revision_at",
+     "byte_size"
+    ],
+    "title": "DocumentDetail",
+    "description": "文档详情：多出正文与版本信息。"
+   },
+   "DocumentOut": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "parent_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Parent Id"
+     },
+     "slug": {
+      "type": "string",
+      "title": "Slug"
+     },
+     "title": {
+      "type": "string",
+      "title": "Title"
+     },
+     "summary": {
+      "type": "string",
+      "title": "Summary"
+     },
+     "doc_format": {
+      "type": "string",
+      "enum": [
+       "md",
+       "txt",
+       "json"
+      ],
+      "title": "Doc Format"
+     },
+     "visibility": {
+      "type": "string",
+      "enum": [
+       "public",
+       "members",
+       "staff"
+      ],
+      "title": "Visibility"
+     },
+     "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Updated At"
+     },
+     "published": {
+      "type": "boolean",
+      "title": "Published"
+     },
+     "file": {
+      "$ref": "#/components/schemas/FileRefOut"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "parent_id",
+     "slug",
+     "title",
+     "summary",
+     "doc_format",
+     "visibility",
+     "updated_at",
+     "published",
+     "file"
+    ],
+    "title": "DocumentOut"
+   },
+   "EntityEntry": {
+    "properties": {
+     "index": {
+      "type": "integer",
+      "title": "Index",
+      "description": "在 entities 列表中的序号"
+     },
+     "block_position": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/StructureSize"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "保存时的方块坐标（相对结构）；Pos 是绝对世界坐标，加载时会被替换"
+     },
+     "identifier": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Identifier",
+      "description": "实体标识，如 minecraft:armor_stand"
+     },
+     "data": {
+      "type": "object",
+      "title": "Data",
+      "description": "实体 NBT 原文，含 Pos / UniqueID / 自定义字段"
+     }
+    },
+    "type": "object",
+    "required": [
+     "index"
+    ],
+    "title": "EntityEntry",
+    "description": "structure.entities 的一条：完整实体 NBT。"
+   },
+   "FavoriteList": {
+    "properties": {
+     "tools": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Tools"
+     }
+    },
+    "type": "object",
+    "required": [
+     "tools"
+    ],
+    "title": "FavoriteList"
+   },
+   "FileRefOut": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "doc_format": {
+      "type": "string",
+      "enum": [
+       "md",
+       "txt",
+       "json"
+      ],
+      "title": "Doc Format"
+     },
+     "byte_size": {
+      "type": "integer",
+      "title": "Byte Size"
+     },
+     "sha256": {
+      "type": "string",
+      "title": "Sha256"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "name",
+     "doc_format",
+     "byte_size",
+     "sha256",
+     "created_at"
+    ],
+    "title": "FileRefOut",
+    "description": "上传文件的可公开元数据。storage_path 永不外泄，只给下载用的 id。"
+   },
+   "FileUploadOut": {
+    "properties": {
+     "file": {
+      "$ref": "#/components/schemas/FileRefOut"
+     },
+     "doc_format": {
+      "type": "string",
+      "enum": [
+       "md",
+       "txt",
+       "json"
+      ],
+      "title": "Doc Format"
+     },
+     "text_content": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Text Content"
+     },
+     "preview_lines": {
+      "type": "integer",
+      "title": "Preview Lines"
+     }
+    },
+    "type": "object",
+    "required": [
+     "file",
+     "doc_format",
+     "text_content",
+     "preview_lines"
+    ],
+    "title": "FileUploadOut"
+   },
+   "FolderNode": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "parent_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Parent Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "path": {
+      "type": "string",
+      "title": "Path"
+     },
+     "visibility": {
+      "type": "string",
+      "enum": [
+       "public",
+       "members",
+       "staff"
+      ],
+      "title": "Visibility"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     },
+     "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Updated At"
+     },
+     "published": {
+      "type": "boolean",
+      "title": "Published"
+     },
+     "children": {
+      "items": {
+       "$ref": "#/components/schemas/FolderNode"
+      },
+      "type": "array",
+      "title": "Children"
+     },
+     "documents": {
+      "items": {
+       "$ref": "#/components/schemas/DocumentOut"
+      },
+      "type": "array",
+      "title": "Documents"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "parent_id",
+     "name",
+     "path",
+     "visibility",
+     "created_at",
+     "updated_at",
+     "published"
+    ],
+    "title": "FolderNode",
+    "description": "目录树节点：children 是子文件夹，documents 是本层文档（不含正文）。"
+   },
+   "FunctionPage": {
+    "properties": {
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/FunctionSummary"
+      },
+      "type": "array",
+      "title": "Items"
+     },
+     "next_offset": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Next Offset"
+     },
+     "total": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Total"
+     }
+    },
+    "type": "object",
+    "title": "FunctionPage"
+   },
+   "FunctionSummary": {
+    "properties": {
+     "addr": {
+      "type": "string",
+      "title": "Addr"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "size": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Size"
+     }
+    },
+    "type": "object",
+    "required": [
+     "addr",
+     "name"
+    ],
+    "title": "FunctionSummary"
+   },
+   "HTTPValidationError": {
+    "properties": {
+     "detail": {
+      "items": {
+       "$ref": "#/components/schemas/ValidationError"
+      },
+      "type": "array",
+      "title": "Detail"
+     }
+    },
+    "type": "object",
+    "title": "HTTPValidationError"
+   },
+   "IdaInstance": {
+    "properties": {
+     "host": {
+      "type": "string",
+      "title": "Host"
+     },
+     "port": {
+      "type": "integer",
+      "title": "Port"
+     },
+     "pid": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Pid"
+     },
+     "binary": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Binary"
+     },
+     "idb_path": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Idb Path"
+     },
+     "started_at": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Started At"
+     },
+     "reachable": {
+      "type": "boolean",
+      "title": "Reachable",
+      "default": false
+     },
+     "active": {
+      "type": "boolean",
+      "title": "Active",
+      "default": false
+     }
+    },
+    "type": "object",
+    "required": [
+     "host",
+     "port"
+    ],
+    "title": "IdaInstance"
+   },
+   "IdaStatus": {
+    "properties": {
+     "reachable": {
+      "type": "boolean",
+      "title": "Reachable"
+     },
+     "error": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Error"
+     },
+     "code": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Code"
+     },
+     "idb_path": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Idb Path"
+     },
+     "module": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Module"
+     },
+     "input_path": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Input Path"
+     },
+     "imagebase": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Imagebase"
+     },
+     "auto_analysis_ready": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Auto Analysis Ready"
+     },
+     "hexrays_ready": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Hexrays Ready"
+     },
+     "strings_cache_ready": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Strings Cache Ready"
+     },
+     "uptime_sec": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Uptime Sec"
+     }
+    },
+    "type": "object",
+    "required": [
+     "reachable"
+    ],
+    "title": "IdaStatus",
+    "description": "工作台顶栏状态。MCP 不可达时 reachable=False，其余字段为 None。"
+   },
+   "LayerStats": {
+    "properties": {
+     "layer": {
+      "type": "integer",
+      "title": "Layer",
+      "description": "0 = 主层，1 = 次层（共位方块，如水下的水+水草）"
+     },
+     "filled": {
+      "type": "integer",
+      "title": "Filled",
+      "description": "该层中非 void 的方块数"
+     },
+     "void": {
+      "type": "integer",
+      "title": "Void",
+      "description": "该层中 void(-1) 的数量"
+     },
+     "fill_ratio": {
+      "type": "number",
+      "title": "Fill Ratio",
+      "description": "filled / 总格数，0~1"
+     }
+    },
+    "type": "object",
+    "required": [
+     "layer",
+     "filled",
+     "void",
+     "fill_ratio"
+    ],
+    "title": "LayerStats"
+   },
+   "LoginRequest": {
+    "properties": {
+     "username": {
+      "type": "string",
+      "title": "Username"
+     },
+     "password": {
+      "type": "string",
+      "title": "Password"
+     }
+    },
+    "type": "object",
+    "required": [
+     "username",
+     "password"
+    ],
+    "title": "LoginRequest"
+   },
+   "MaterialEntry": {
+    "properties": {
+     "index": {
+      "type": "integer",
+      "title": "Index",
+      "description": "在结构调色板中的下标"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name",
+      "description": "方块标识，如 minecraft:stone"
+     },
+     "states": {
+      "additionalProperties": true,
+      "type": "object",
+      "title": "States",
+      "description": "方块状态原文（值类型随状态而变：字符串 / 整数 / 字节），不做推断"
+     },
+     "count": {
+      "type": "integer",
+      "title": "Count",
+      "description": "出现次数（主层 + 次层）"
+     },
+     "ratio": {
+      "type": "number",
+      "title": "Ratio",
+      "description": "占非空方块总数的比例，0~1"
+     }
+    },
+    "type": "object",
+    "required": [
+     "index",
+     "name",
+     "states",
+     "count",
+     "ratio"
+    ],
+    "title": "MaterialEntry",
+    "description": "材料清单的一行。\n\n统计单位是**调色板条目**而不是方块名：同一个 `minecraft:oak_stairs`\n带不同朝向是两个条目，清单里也分开列——玩家要的是「这份图纸要多少块\n什么朝向的楼梯」，不是模糊的名字汇总。"
+   },
+   "MoveIn": {
+    "properties": {
+     "document_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Document Id"
+     },
+     "folder_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Folder Id"
+     },
+     "parent_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Parent Id"
+     },
+     "note": {
+      "type": "string",
+      "maxLength": 500,
+      "title": "Note",
+      "default": ""
+     }
+    },
+    "type": "object",
+    "title": "MoveIn",
+    "description": "把文档或文件夹移到另一个目录。`parent_id=None` 表示移到根目录。"
+   },
+   "PageResult": {
+    "properties": {
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/ThreadSummary"
+      },
+      "type": "array",
+      "title": "Items"
+     },
+     "next_cursor": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Next Cursor"
+     }
+    },
+    "type": "object",
+    "required": [
+     "items"
+    ],
+    "title": "PageResult",
+    "description": "稳定分页语义（03 文档第 3 节）。"
+   },
+   "PositionLookup": {
+    "properties": {
+     "x": {
+      "type": "integer",
+      "title": "X"
+     },
+     "y": {
+      "type": "integer",
+      "title": "Y"
+     },
+     "z": {
+      "type": "integer",
+      "title": "Z"
+     },
+     "index": {
+      "type": "integer",
+      "title": "Index",
+      "description": "位置下标 = x*(sy*sz) + y*sz + z"
+     },
+     "size": {
+      "$ref": "#/components/schemas/StructureSize"
+     },
+     "layers": {
+      "items": {
+       "type": "object"
+      },
+      "type": "array",
+      "title": "Layers",
+      "description": "每层在这一格的方块：layer 与调色板下标；-1 表示 void"
+     }
+    },
+    "type": "object",
+    "required": [
+     "x",
+     "y",
+     "z",
+     "index",
+     "size"
+    ],
+    "title": "PositionLookup",
+    "description": "坐标 <-> 位置下标互查结果。"
+   },
+   "Pseudocode": {
+    "properties": {
+     "addr": {
+      "type": "string",
+      "title": "Addr"
+     },
+     "code": {
+      "type": "string",
+      "title": "Code",
+      "default": ""
+     },
+     "error": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Error"
+     }
+    },
+    "type": "object",
+    "required": [
+     "addr"
+    ],
+    "title": "Pseudocode"
+   },
+   "QuotaInfo": {
+    "properties": {
+     "configured": {
+      "type": "boolean",
+      "title": "Configured",
+      "description": "服务端是否配了 DeepSeek API key"
+     },
+     "limit": {
+      "type": "integer",
+      "title": "Limit"
+     },
+     "used": {
+      "type": "integer",
+      "title": "Used"
+     },
+     "remaining": {
+      "type": "integer",
+      "title": "Remaining"
+     },
+     "reset_in": {
+      "type": "number",
+      "title": "Reset In"
+     },
+     "identity": {
+      "type": "string",
+      "enum": [
+       "account",
+       "ip"
+      ],
+      "title": "Identity"
+     }
+    },
+    "type": "object",
+    "required": [
+     "configured",
+     "limit",
+     "used",
+     "remaining",
+     "reset_in",
+     "identity"
+    ],
+    "title": "QuotaInfo"
+   },
+   "RenameIn": {
+    "properties": {
+     "title": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 200
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Title"
+     },
+     "name": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 120
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Name"
+     },
+     "note": {
+      "type": "string",
+      "maxLength": 500,
+      "title": "Note",
+      "default": ""
+     }
+    },
+    "type": "object",
+    "title": "RenameIn",
+    "description": "重命名文档标题 / 文件夹名称（路径键会跟着更新，并连带改写子树）。"
+   },
+   "RenameRequest": {
+    "properties": {
+     "name": {
+      "type": "string",
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Name"
+     },
+     "dry_run": {
+      "type": "boolean",
+      "title": "Dry Run",
+      "default": false
+     }
+    },
+    "type": "object",
+    "required": [
+     "name"
+    ],
+    "title": "RenameRequest"
+   },
+   "ReplyCreate": {
+    "properties": {
+     "body": {
+      "type": "string",
+      "maxLength": 2000,
+      "minLength": 2,
+      "title": "Body"
+     }
+    },
+    "type": "object",
+    "required": [
+     "body"
+    ],
+    "title": "ReplyCreate"
+   },
+   "ReplySummary": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "author": {
+      "type": "string",
+      "title": "Author"
+     },
+     "body": {
+      "type": "string",
+      "title": "Body"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "author",
+     "body",
+     "created_at"
+    ],
+    "title": "ReplySummary"
+   },
+   "RoleToggle": {
+    "properties": {
+     "enabled": {
+      "type": "boolean",
+      "title": "Enabled",
+      "description": "true = 授予 admin；false = 退回 member"
+     }
+    },
+    "type": "object",
+    "required": [
+     "enabled"
+    ],
+    "title": "RoleToggle",
+    "description": "「设为管理员 / 取消管理员」的语义化入参（/api/admin/accounts/{id}/admin）。\n\n为什么不复用 RoleUpdate：那个接口收的是**任意角色**，包括 superadmin——\n一个「给不给管理员」的开关，不应该具备把别人提成超管的能力。\n这里的 `enabled` 只映射到 admin 与 member 两档，超管只能由引导规则或邀请码产生。"
+   },
+   "RoleUpdate": {
+    "properties": {
+     "role": {
+      "type": "string",
+      "pattern": "^(member|admin|superadmin)$",
+      "title": "Role"
+     }
+    },
+    "type": "object",
+    "required": [
+     "role"
+    ],
+    "title": "RoleUpdate"
+   },
+   "RunRequest": {
+    "properties": {
+     "input": {
+      "type": "object",
+      "title": "Input"
+     },
+     "ruleset_id": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 64
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Ruleset Id"
+     }
+    },
+    "type": "object",
+    "title": "RunRequest"
+   },
+   "SearchHit": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "title": {
+      "type": "string",
+      "title": "Title"
+     },
+     "path": {
+      "type": "string",
+      "title": "Path"
+     },
+     "doc_format": {
+      "type": "string",
+      "enum": [
+       "md",
+       "txt",
+       "json"
+      ],
+      "title": "Doc Format"
+     },
+     "snippet": {
+      "type": "string",
+      "title": "Snippet"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "title",
+     "path",
+     "doc_format",
+     "snippet"
+    ],
+    "title": "SearchHit"
+   },
+   "SearchResponse": {
+    "properties": {
+     "query": {
+      "type": "string",
+      "title": "Query"
+     },
+     "total": {
+      "type": "integer",
+      "title": "Total"
+     },
+     "truncated": {
+      "type": "boolean",
+      "title": "Truncated"
+     },
+     "hits": {
+      "items": {
+       "$ref": "#/components/schemas/SearchHit"
+      },
+      "type": "array",
+      "title": "Hits"
+     }
+    },
+    "type": "object",
+    "required": [
+     "query",
+     "total",
+     "truncated",
+     "hits"
+    ],
+    "title": "SearchResponse"
+   },
+   "SegmentInfo": {
+    "properties": {
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "start": {
+      "type": "string",
+      "title": "Start"
+     },
+     "end": {
+      "type": "string",
+      "title": "End"
+     },
+     "size": {
+      "type": "string",
+      "title": "Size"
+     },
+     "permissions": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Permissions"
+     }
+    },
+    "type": "object",
+    "required": [
+     "name",
+     "start",
+     "end",
+     "size"
+    ],
+    "title": "SegmentInfo"
+   },
+   "SiteConfigUpdate": {
+    "properties": {
+     "display_name": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 24,
+        "minLength": 1
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Display Name"
+     },
+     "intro": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 400
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Intro"
+     },
+     "avatar_url": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 2048
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Avatar Url"
+     },
+     "background": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/BackgroundConfig"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    },
+    "type": "object",
+    "title": "SiteConfigUpdate",
+    "description": "超级管理员可修改的主页内容；None 字段表示不修改。"
+   },
+   "StackVar": {
+    "properties": {
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "offset": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Offset"
+     },
+     "size": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Size"
+     },
+     "type": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Type"
+     }
+    },
+    "type": "object",
+    "required": [
+     "name"
+    ],
+    "title": "StackVar"
+   },
+   "StringMatch": {
+    "properties": {
+     "addr": {
+      "type": "string",
+      "title": "Addr"
+     },
+     "string": {
+      "type": "string",
+      "title": "String"
+     }
+    },
+    "type": "object",
+    "required": [
+     "addr",
+     "string"
+    ],
+    "title": "StringMatch"
+   },
+   "StringSearchResult": {
+    "properties": {
+     "total": {
+      "type": "integer",
+      "title": "Total",
+      "default": 0
+     },
+     "matches": {
+      "items": {
+       "$ref": "#/components/schemas/StringMatch"
+      },
+      "type": "array",
+      "title": "Matches"
+     }
+    },
+    "type": "object",
+    "title": "StringSearchResult"
+   },
+   "StructureDimensions": {
+    "properties": {
+     "x": {
+      "type": "integer",
+      "title": "X",
+      "description": "X 方向尺寸（方块数）"
+     },
+     "y": {
+      "type": "integer",
+      "title": "Y",
+      "description": "Y 方向尺寸（方块数）"
+     },
+     "z": {
+      "type": "integer",
+      "title": "Z",
+      "description": "Z 方向尺寸（方块数）"
+     }
+    },
+    "type": "object",
+    "required": [
+     "x",
+     "y",
+     "z"
+    ],
+    "title": "StructureDimensions"
+   },
+   "StructureLayout": {
+    "properties": {
+     "size": {
+      "$ref": "#/components/schemas/StructureSize"
+     },
+     "voxel_count": {
+      "type": "integer",
+      "title": "Voxel Count",
+      "description": "size 的乘积"
+     },
+     "world_origin": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/StructureSize"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "structure_world_origin：保存时的世界原点"
+     },
+     "world_origin_source": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "World Origin Source",
+      "description": "原点取自哪里。真实文件放在根层级（'root'），bedrock.dev 文档写在 structure 内部（'structure'）；缺失时为 null"
+     },
+     "coordinate_order": {
+      "type": "string",
+      "title": "Coordinate Order",
+      "description": "位置下标的排列顺序；换算公式见 /position 接口说明",
+      "default": "zyx"
+     }
+    },
+    "type": "object",
+    "required": [
+     "size",
+     "voxel_count"
+    ],
+    "title": "StructureLayout"
+   },
+   "StructureRenderPayload": {
+    "properties": {
+     "version": {
+      "type": "integer",
+      "title": "Version"
+     },
+     "size": {
+      "$ref": "#/components/schemas/StructureDimensions"
+     },
+     "voxel_count": {
+      "type": "integer",
+      "title": "Voxel Count"
+     },
+     "solid_count": {
+      "type": "integer",
+      "title": "Solid Count"
+     },
+     "index_bits": {
+      "type": "integer",
+      "title": "Index Bits",
+      "description": "8 或 16：indices 里每个下标的位宽（小端）"
+     },
+     "palette": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Palette",
+      "description": "按调色板下标顺序的方块名"
+     },
+     "occupancy": {
+      "type": "string",
+      "title": "Occupancy",
+      "description": "占用位图 base64：第 i 格有方块 ⟺ occupancy[i>>3] >> (i&7) & 1（LSB-first）"
+     },
+     "indices": {
+      "type": "string",
+      "title": "Indices",
+      "description": "按位置下标升序排列的非空格子调色板下标，base64，小端整数"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Note"
+     }
+    },
+    "type": "object",
+    "required": [
+     "version",
+     "size",
+     "voxel_count",
+     "solid_count",
+     "index_bits",
+     "palette",
+     "occupancy",
+     "indices"
+    ],
+    "title": "StructureRenderPayload",
+    "description": "/structure/render 的响应：浏览器直接照着画的最小数据。\n\n两个大数组都是 base64。布局（version 1）见\n`backend/app/parsers/mcstructure_render.py` 的模块说明——那里是唯一事实源。"
+   },
+   "StructureRenderStatus": {
+    "properties": {
+     "available": {
+      "type": "boolean",
+      "title": "Available",
+      "description": "是否生成了 3D 预览载荷"
+     },
+     "reason": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Reason",
+      "description": "不可用时的人话原因"
+     },
+     "version": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Version",
+      "description": "载荷格式版本，前端据此决定能否解码"
+     },
+     "bytes": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Bytes",
+      "description": "载荷未压缩时的字节数"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Note",
+      "description": "可展示的提示（例如方块很多，只画外表面）"
+     }
+    },
+    "type": "object",
+    "required": [
+     "available"
+    ],
+    "title": "StructureRenderStatus",
+    "description": "/structure/render 能不能用、以及为什么。"
+   },
+   "StructureResponse": {
+    "properties": {
+     "layout": {
+      "$ref": "#/components/schemas/StructureLayout"
+     },
+     "format_version": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Format Version"
+     },
+     "compression": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Compression",
+      "description": "检测到的压缩方式：null / gzip / zlib"
+     },
+     "file_bytes": {
+      "type": "integer",
+      "title": "File Bytes",
+      "description": "上传文件字节数"
+     },
+     "palette": {
+      "items": {
+       "$ref": "#/components/schemas/BlockStateEntry"
+      },
+      "type": "array",
+      "title": "Palette"
+     },
+     "block_entities": {
+      "items": {
+       "$ref": "#/components/schemas/BlockEntityEntry"
+      },
+      "type": "array",
+      "title": "Block Entities"
+     },
+     "entities": {
+      "items": {
+       "$ref": "#/components/schemas/EntityEntry"
+      },
+      "type": "array",
+      "title": "Entities"
+     },
+     "stats": {
+      "$ref": "#/components/schemas/StructureStats"
+     },
+     "extra_root_fields": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Extra Root Fields",
+      "description": "未建模但已保留的根字段名（不丢数据）"
+     },
+     "raw_nbt": {
+      "anyOf": [
+       {
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Raw Nbt",
+      "description": "完整根 NBT（?include_raw=true 时返回）"
+     },
+     "layer_sizes": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array",
+      "title": "Layer Sizes",
+      "description": "各层的格数，供 /voxels 分页判断"
+     },
+     "voxels": {
+      "anyOf": [
+       {
+        "items": {
+         "$ref": "#/components/schemas/VoxelLayer"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Voxels",
+      "description": "完整方块索引。默认不返回；?include_voxels=true 时返回"
+     }
+    },
+    "type": "object",
+    "required": [
+     "layout",
+     "file_bytes",
+     "palette",
+     "block_entities",
+     "entities",
+     "stats",
+     "extra_root_fields",
+     "layer_sizes"
+    ],
+    "title": "StructureResponse",
+    "description": "/parse 的响应：索引 + 可选的完整体素数组。"
+   },
+   "StructureSize": {
+    "properties": {
+     "x": {
+      "type": "integer",
+      "title": "X",
+      "description": "X 方向尺寸（方块数）"
+     },
+     "y": {
+      "type": "integer",
+      "title": "Y",
+      "description": "Y 方向尺寸（方块数）"
+     },
+     "z": {
+      "type": "integer",
+      "title": "Z",
+      "description": "Z 方向尺寸（方块数）"
+     }
+    },
+    "type": "object",
+    "required": [
+     "x",
+     "y",
+     "z"
+    ],
+    "title": "StructureSize"
+   },
+   "StructureStats": {
+    "properties": {
+     "total_voxels": {
+      "type": "integer",
+      "title": "Total Voxels",
+      "description": "size 的乘积，等于每层的格数"
+     },
+     "filled": {
+      "type": "integer",
+      "title": "Filled",
+      "description": "非 void 方块总数（含两层，可能大于格数）"
+     },
+     "void_slots": {
+      "type": "integer",
+      "title": "Void Slots",
+      "description": "主层的 void 数量"
+     },
+     "primary_filled": {
+      "type": "integer",
+      "title": "Primary Filled"
+     },
+     "secondary_filled": {
+      "type": "integer",
+      "title": "Secondary Filled"
+     },
+     "out_of_range_indices": {
+      "type": "integer",
+      "title": "Out Of Range Indices",
+      "description": "越界调色板下标数量。游戏加载时按空气处理，这里如实计数",
+      "default": 0
+     },
+     "palette_used": {
+      "type": "integer",
+      "title": "Palette Used",
+      "description": "实际被引用到的调色板条目数"
+     },
+     "blocks": {
+      "items": {
+       "$ref": "#/components/schemas/BlockCountEntry"
+      },
+      "type": "array",
+      "title": "Blocks",
+      "description": "按数量降序"
+     },
+     "layers": {
+      "items": {
+       "$ref": "#/components/schemas/LayerStats"
+      },
+      "type": "array",
+      "title": "Layers"
+     }
+    },
+    "type": "object",
+    "required": [
+     "total_voxels",
+     "filled",
+     "void_slots",
+     "primary_filled",
+     "secondary_filled",
+     "palette_used",
+     "blocks",
+     "layers"
+    ],
+    "title": "StructureStats"
+   },
+   "SubmissionListOut": {
+    "properties": {
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/SubmissionOut"
+      },
+      "type": "array",
+      "title": "Items"
+     },
+     "pending_total": {
+      "type": "integer",
+      "title": "Pending Total"
+     }
+    },
+    "type": "object",
+    "required": [
+     "items",
+     "pending_total"
+    ],
+    "title": "SubmissionListOut"
+   },
+   "SubmissionOut": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "action": {
+      "type": "string",
+      "enum": [
+       "create_doc",
+       "update_doc",
+       "move_doc",
+       "create_folder",
+       "move_folder",
+       "delete_doc",
+       "delete_folder"
+      ],
+      "title": "Action"
+     },
+     "status": {
+      "type": "string",
+      "enum": [
+       "pending",
+       "approved",
+       "rejected",
+       "withdrawn"
+      ],
+      "title": "Status"
+     },
+     "target_kind": {
+      "type": "string",
+      "title": "Target Kind"
+     },
+     "document_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Document Id"
+     },
+     "folder_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Folder Id"
+     },
+     "parent_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Parent Id"
+     },
+     "parent_path": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Parent Path"
+     },
+     "target_path": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Target Path"
+     },
+     "title": {
+      "type": "string",
+      "title": "Title"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "summary": {
+      "type": "string",
+      "title": "Summary"
+     },
+     "visibility": {
+      "type": "string",
+      "enum": [
+       "public",
+       "members",
+       "staff"
+      ],
+      "title": "Visibility"
+     },
+     "note": {
+      "type": "string",
+      "title": "Note"
+     },
+     "file": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/FileRefOut"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "body_preview": {
+      "type": "string",
+      "title": "Body Preview"
+     },
+     "submitted_by": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Submitted By"
+     },
+     "submitted_by_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Submitted By Name"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     },
+     "reviewed_by": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Reviewed By"
+     },
+     "reviewed_by_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Reviewed By Name"
+     },
+     "review_note": {
+      "type": "string",
+      "title": "Review Note"
+     },
+     "reviewed_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Reviewed At"
+     },
+     "applied_document_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Applied Document Id"
+     },
+     "applied_folder_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Applied Folder Id"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "action",
+     "status",
+     "target_kind",
+     "document_id",
+     "folder_id",
+     "parent_id",
+     "parent_path",
+     "target_path",
+     "title",
+     "name",
+     "summary",
+     "visibility",
+     "note",
+     "file",
+     "body_preview",
+     "submitted_by",
+     "submitted_by_name",
+     "created_at",
+     "reviewed_by",
+     "reviewed_by_name",
+     "review_note",
+     "reviewed_at",
+     "applied_document_id",
+     "applied_folder_id"
+    ],
+    "title": "SubmissionOut"
+   },
+   "SubmitIn": {
+    "properties": {
+     "action": {
+      "type": "string",
+      "enum": [
+       "create_doc",
+       "update_doc",
+       "move_doc",
+       "create_folder",
+       "move_folder",
+       "delete_doc",
+       "delete_folder"
+      ],
+      "title": "Action"
+     },
+     "parent_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Parent Id"
+     },
+     "document_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Document Id"
+     },
+     "folder_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Folder Id"
+     },
+     "title": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 200
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Title"
+     },
+     "name": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 120
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Name"
+     },
+     "summary": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 500
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Summary"
+     },
+     "visibility": {
+      "type": "string",
+      "enum": [
+       "public",
+       "members",
+       "staff"
+      ],
+      "title": "Visibility",
+      "default": "public"
+     },
+     "file_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "File Id"
+     },
+     "body": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Body"
+     },
+     "note": {
+      "type": "string",
+      "maxLength": 500,
+      "title": "Note",
+      "default": ""
+     }
+    },
+    "type": "object",
+    "required": [
+     "action"
+    ],
+    "title": "SubmitIn",
+    "description": "一次变更提交。\n\n- action=create_doc：需要 `file_id` 或 `body`，`parent_id` 指定目录（None=根）\n- action=create_folder：需要 `name`\n- action=move_doc / move_folder：需要 `document_id` / `folder_id` 与目标 `parent_id`\n  （`parent_id=None` 表示移到根目录）\n- action=update_doc / delete_doc / delete_folder：需要 `document_id` / `folder_id`"
+   },
+   "TextSearchHit": {
+    "properties": {
+     "addr": {
+      "type": "string",
+      "title": "Addr"
+     },
+     "text": {
+      "type": "string",
+      "title": "Text"
+     },
+     "kind": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Kind"
+     }
+    },
+    "type": "object",
+    "required": [
+     "addr",
+     "text"
+    ],
+    "title": "TextSearchHit"
+   },
+   "TextSearchResult": {
+    "properties": {
+     "hits": {
+      "items": {
+       "$ref": "#/components/schemas/TextSearchHit"
+      },
+      "type": "array",
+      "title": "Hits"
+     },
+     "next_start": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Next Start"
+     }
+    },
+    "type": "object",
+    "title": "TextSearchResult"
+   },
+   "ThreadCover": {
+    "properties": {
+     "original_name": {
+      "type": "string",
+      "title": "Original Name"
+     },
+     "byte_size": {
+      "type": "integer",
+      "title": "Byte Size"
+     },
+     "sha256": {
+      "type": "string",
+      "title": "Sha256",
+      "description": "图片内容的 sha256，下载后可自行核对"
+     },
+     "content_type": {
+      "type": "string",
+      "title": "Content Type",
+      "description": "由字节判定出的 MIME（image/png 等），不受用户文件名影响"
+     },
+     "width": {
+      "type": "integer",
+      "title": "Width",
+      "description": "像素宽"
+     },
+     "height": {
+      "type": "integer",
+      "title": "Height",
+      "description": "像素高"
+     },
+     "aspect_ratio": {
+      "type": "number",
+      "title": "Aspect Ratio",
+      "description": "宽/高。前端用它给图片预留位置，避免加载完成时页面跳动"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     }
+    },
+    "type": "object",
+    "required": [
+     "original_name",
+     "byte_size",
+     "sha256",
+     "content_type",
+     "width",
+     "height",
+     "aspect_ratio",
+     "created_at"
+    ],
+    "title": "ThreadCover",
+    "description": "帖子封面。宽高来自图片字节本身，不是文件名或用户输入。"
+   },
+   "ThreadCreate": {
+    "properties": {
+     "category": {
+      "type": "string",
+      "title": "Category"
+     },
+     "title": {
+      "type": "string",
+      "maxLength": 60,
+      "minLength": 2,
+      "title": "Title"
+     },
+     "body": {
+      "type": "string",
+      "maxLength": 2000,
+      "minLength": 2,
+      "title": "Body"
+     }
+    },
+    "type": "object",
+    "required": [
+     "category",
+     "title",
+     "body"
+    ],
+    "title": "ThreadCreate"
+   },
+   "ThreadDetail": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "category": {
+      "type": "string",
+      "title": "Category"
+     },
+     "title": {
+      "type": "string",
+      "title": "Title"
+     },
+     "author": {
+      "type": "string",
+      "title": "Author"
+     },
+     "reply_count": {
+      "type": "integer",
+      "title": "Reply Count"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     },
+     "last_activity_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Last Activity At"
+     },
+     "has_structure": {
+      "type": "boolean",
+      "title": "Has Structure",
+      "description": "是否附带 .mcstructure 结构文件（列表页据此显示徽标）",
+      "default": false
+     },
+     "has_cover": {
+      "type": "boolean",
+      "title": "Has Cover",
+      "description": "是否有封面图（列表页据此显示缩略图）",
+      "default": false
+     },
+     "body": {
+      "type": "string",
+      "title": "Body"
+     },
+     "replies": {
+      "items": {
+       "$ref": "#/components/schemas/ReplySummary"
+      },
+      "type": "array",
+      "title": "Replies"
+     },
+     "structure": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/ThreadStructure"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "随帖上传的结构文件摘要与材料清单；没有附件时为 null"
+     },
+     "cover": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/ThreadCover"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "帖子封面；没有封面时为 null"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "category",
+     "title",
+     "author",
+     "reply_count",
+     "created_at",
+     "last_activity_at",
+     "body",
+     "replies"
+    ],
+    "title": "ThreadDetail"
+   },
+   "ThreadStructure": {
+    "properties": {
+     "original_name": {
+      "type": "string",
+      "title": "Original Name"
+     },
+     "byte_size": {
+      "type": "integer",
+      "title": "Byte Size"
+     },
+     "sha256": {
+      "type": "string",
+      "title": "Sha256",
+      "description": "文件内容的 sha256，下载后可自行核对"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     },
+     "format_version": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Format Version"
+     },
+     "compression": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Compression",
+      "description": "检测到的压缩方式"
+     },
+     "size": {
+      "$ref": "#/components/schemas/StructureDimensions"
+     },
+     "voxel_count": {
+      "type": "integer",
+      "title": "Voxel Count",
+      "description": "size 的乘积（整卷格数，含空气）"
+     },
+     "world_origin": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "integer"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "World Origin",
+      "description": "保存时的世界原点"
+     },
+     "world_origin_source": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "World Origin Source",
+      "description": "'root' / 'structure' / null"
+     },
+     "layer_count": {
+      "type": "integer",
+      "title": "Layer Count"
+     },
+     "solid_cells": {
+      "type": "integer",
+      "title": "Solid Cells",
+      "description": "有方块的格子数（不含空气），等于 3D 预览里会出现的方块数"
+     },
+     "placed_blocks": {
+      "type": "integer",
+      "title": "Placed Blocks",
+      "description": "两层合计放置的方块数（含空气，与 /api/mcstructure/parse 口径一致）"
+     },
+     "air_cells": {
+      "type": "integer",
+      "title": "Air Cells",
+      "description": "索引里写了方块、但那些方块全是空气的格子数"
+     },
+     "air_blocks": {
+      "type": "integer",
+      "title": "Air Blocks",
+      "description": "被算作空气的方块数（材料清单里已排除）"
+     },
+     "coincident_cells": {
+      "type": "integer",
+      "title": "Coincident Cells",
+      "description": "两层都有方块的格子数"
+     },
+     "out_of_range_indices": {
+      "type": "integer",
+      "title": "Out Of Range Indices",
+      "description": "越界调色板下标数量（游戏按空气处理）"
+     },
+     "palette_size": {
+      "type": "integer",
+      "title": "Palette Size"
+     },
+     "materials": {
+      "items": {
+       "$ref": "#/components/schemas/MaterialEntry"
+      },
+      "type": "array",
+      "title": "Materials",
+      "description": "按数量降序；已排除空气方块"
+     },
+     "materials_total": {
+      "type": "integer",
+      "title": "Materials Total",
+      "description": "不同方块排列的总数（截断前，不含空气）"
+     },
+     "materials_truncated": {
+      "type": "boolean",
+      "title": "Materials Truncated",
+      "description": "清单是否被截断（只保留数量最多的若干条）",
+      "default": false
+     },
+     "block_entities": {
+      "type": "integer",
+      "title": "Block Entities"
+     },
+     "entities": {
+      "type": "integer",
+      "title": "Entities"
+     },
+     "extra_root_fields": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Extra Root Fields",
+      "description": "未建模但已保留的根字段名（响应里一定给，不会是 undefined）"
+     },
+     "render": {
+      "$ref": "#/components/schemas/StructureRenderStatus"
+     }
+    },
+    "type": "object",
+    "required": [
+     "original_name",
+     "byte_size",
+     "sha256",
+     "created_at",
+     "size",
+     "voxel_count",
+     "layer_count",
+     "solid_cells",
+     "placed_blocks",
+     "air_cells",
+     "air_blocks",
+     "coincident_cells",
+     "out_of_range_indices",
+     "palette_size",
+     "materials",
+     "materials_total",
+     "block_entities",
+     "entities",
+     "extra_root_fields",
+     "render"
+    ],
+    "title": "ThreadStructure",
+    "description": "帖子附带的结构文件摘要（材料清单在这里）。"
+   },
+   "ThreadSummary": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "category": {
+      "type": "string",
+      "title": "Category"
+     },
+     "title": {
+      "type": "string",
+      "title": "Title"
+     },
+     "author": {
+      "type": "string",
+      "title": "Author"
+     },
+     "reply_count": {
+      "type": "integer",
+      "title": "Reply Count"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     },
+     "last_activity_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Last Activity At"
+     },
+     "has_structure": {
+      "type": "boolean",
+      "title": "Has Structure",
+      "description": "是否附带 .mcstructure 结构文件（列表页据此显示徽标）",
+      "default": false
+     },
+     "has_cover": {
+      "type": "boolean",
+      "title": "Has Cover",
+      "description": "是否有封面图（列表页据此显示缩略图）",
+      "default": false
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "category",
+     "title",
+     "author",
+     "reply_count",
+     "created_at",
+     "last_activity_at"
+    ],
+    "title": "ThreadSummary"
+   },
+   "ToolCallInfo": {
+    "properties": {
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "label": {
+      "type": "string",
+      "title": "Label"
+     },
+     "args": {
+      "type": "object",
+      "title": "Args"
+     },
+     "ok": {
+      "type": "boolean",
+      "title": "Ok",
+      "default": true
+     }
+    },
+    "type": "object",
+    "required": [
+     "name",
+     "label"
+    ],
+    "title": "ToolCallInfo"
+   },
+   "TreeResponse": {
+    "properties": {
+     "root": {
+      "$ref": "#/components/schemas/FolderNode"
+     },
+     "stats": {
+      "$ref": "#/components/schemas/TreeStats"
+     },
+     "viewer_role": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Viewer Role"
+     }
+    },
+    "type": "object",
+    "required": [
+     "root",
+     "stats",
+     "viewer_role"
+    ],
+    "title": "TreeResponse",
+    "description": "目录树。visitor 是「你现在以什么身份看这份树」，用于前端提示。"
+   },
+   "TreeStats": {
+    "properties": {
+     "folders": {
+      "type": "integer",
+      "title": "Folders"
+     },
+     "documents": {
+      "type": "integer",
+      "title": "Documents"
+     },
+     "published_documents": {
+      "type": "integer",
+      "title": "Published Documents"
+     },
+     "total_bytes": {
+      "type": "integer",
+      "title": "Total Bytes"
+     }
+    },
+    "type": "object",
+    "required": [
+     "folders",
+     "documents",
+     "published_documents",
+     "total_bytes"
+    ],
+    "title": "TreeStats"
+   },
+   "UploadChunkOut": {
+    "properties": {
+     "upload_id": {
+      "type": "string",
+      "title": "Upload Id"
+     },
+     "received_bytes": {
+      "type": "integer",
+      "title": "Received Bytes"
+     },
+     "chunks": {
+      "type": "integer",
+      "title": "Chunks"
+     }
+    },
+    "type": "object",
+    "required": [
+     "upload_id",
+     "received_bytes",
+     "chunks"
+    ],
+    "title": "UploadChunkOut"
+   },
+   "UploadInitIn": {
+    "properties": {
+     "filename": {
+      "type": "string",
+      "maxLength": 255,
+      "minLength": 1,
+      "title": "Filename"
+     },
+     "total_bytes": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "minimum": 0.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Total Bytes"
+     },
+     "chunk_size": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "minimum": 1.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Chunk Size"
+     }
+    },
+    "type": "object",
+    "required": [
+     "filename"
+    ],
+    "title": "UploadInitIn"
+   },
+   "UploadInitOut": {
+    "properties": {
+     "upload_id": {
+      "type": "string",
+      "title": "Upload Id"
+     },
+     "chunk_size": {
+      "type": "integer",
+      "title": "Chunk Size"
+     },
+     "max_bytes": {
+      "type": "integer",
+      "title": "Max Bytes"
+     },
+     "doc_format": {
+      "type": "string",
+      "enum": [
+       "md",
+       "txt",
+       "json"
+      ],
+      "title": "Doc Format"
+     }
+    },
+    "type": "object",
+    "required": [
+     "upload_id",
+     "chunk_size",
+     "max_bytes",
+     "doc_format"
+    ],
+    "title": "UploadInitOut"
+   },
+   "ValidationError": {
+    "properties": {
+     "loc": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "integer"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Location"
+     },
+     "msg": {
+      "type": "string",
+      "title": "Message"
+     },
+     "type": {
+      "type": "string",
+      "title": "Error Type"
+     }
+    },
+    "type": "object",
+    "required": [
+     "loc",
+     "msg",
+     "type"
+    ],
+    "title": "ValidationError"
+   },
+   "VoxelLayer": {
+    "properties": {
+     "layer": {
+      "type": "integer",
+      "title": "Layer"
+     },
+     "indices": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array",
+      "title": "Indices",
+      "description": "长度 = size 的乘积，按 ZYX 顺序（从底部西北角到顶部东南角）"
+     }
+    },
+    "type": "object",
+    "required": [
+     "layer",
+     "indices"
+    ],
+    "title": "VoxelLayer",
+    "description": "一层的方块索引数组（值 = 调色板下标，-1 表示 void）。"
+   },
+   "VoxelSlice": {
+    "properties": {
+     "axis": {
+      "type": "string",
+      "title": "Axis",
+      "description": "切片轴：x / y / z"
+     },
+     "layer": {
+      "type": "integer",
+      "title": "Layer",
+      "description": "层号：0 主层 / 1 次层"
+     },
+     "at": {
+      "type": "integer",
+      "title": "At",
+      "description": "该轴上的坐标"
+     },
+     "plane_size": {
+      "$ref": "#/components/schemas/StructureSize",
+      "description": "薄片的尺寸（该轴恒为 1）"
+     },
+     "indices": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array",
+      "title": "Indices",
+      "description": "按 ZYX 顺序展开的调色板下标；-1 表示 void"
+     },
+     "blocks": {
+      "items": {
+       "$ref": "#/components/schemas/BlockCountEntry"
+      },
+      "type": "array",
+      "title": "Blocks",
+      "description": "该薄片的方块统计"
+     }
+    },
+    "type": "object",
+    "required": [
+     "axis",
+     "layer",
+     "at",
+     "plane_size",
+     "indices"
+    ],
+    "title": "VoxelSlice",
+    "description": "一次薄片查询的结果。坐标为结构内坐标（从 0 开始）。"
+   },
+   "WorkspaceContext": {
+    "properties": {
+     "module": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 200
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Module"
+     },
+     "base_address": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 40
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Base Address"
+     },
+     "selected_name": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 400
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Selected Name"
+     },
+     "selected_addr": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 40
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Selected Addr"
+     },
+     "total_functions": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Total Functions"
+     }
+    },
+    "type": "object",
+    "title": "WorkspaceContext",
+    "description": "前端把当前工作台状态一起传上来，模型就能直接用，不用先问\"你在看哪个函数\"。"
+   },
+   "XrefGroup": {
+    "properties": {
+     "addr": {
+      "type": "string",
+      "title": "Addr"
+     },
+     "xrefs": {
+      "items": {
+       "$ref": "#/components/schemas/XrefItem"
+      },
+      "type": "array",
+      "title": "Xrefs"
+     },
+     "more": {
+      "type": "boolean",
+      "title": "More",
+      "default": false
+     },
+     "error": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Error"
+     }
+    },
+    "type": "object",
+    "required": [
+     "addr"
+    ],
+    "title": "XrefGroup"
+   },
+   "XrefItem": {
+    "properties": {
+     "addr": {
+      "type": "string",
+      "title": "Addr"
+     },
+     "type": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Type"
+     },
+     "fn": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Fn"
+     },
+     "fn_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Fn Name"
+     }
+    },
+    "type": "object",
+    "required": [
+     "addr"
+    ],
+    "title": "XrefItem"
+   }
+  }
+ }
+}

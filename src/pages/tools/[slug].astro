@@ -1,8 +1,9 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { toolManifests } from '../../tools/manifests';
+import { toolManifests, type ToolPageDefinition } from '../../tools/manifests';
 import { isRunnable, toolStatusLabels } from '../../tools/_host/manifest';
 import '../../styles/tools.css';
+import '../../styles/mcstructure.css';
 
 /**
  * 工具详情（阶段 3）：每个注册工具一个静态路由。
@@ -16,16 +17,9 @@ export function getStaticPaths() {
   }));
 }
 
-const { manifest } = Astro.props;
+const { manifest } = Astro.props as { manifest: ToolPageDefinition };
 const runnable = isRunnable(manifest.status);
 const related = manifest.relatedContent;
-
-// 传给客户端脚本的唯一数据；只放渲染需要的字段。
-const clientPayload = {
-  slug: manifest.slug,
-  title: manifest.title,
-  status: manifest.status,
-};
 ---
 
 <BaseLayout title={manifest.title} description={manifest.summary}>
@@ -49,7 +43,6 @@ const clientPayload = {
         id="tool-workbench"
         data-tool={manifest.slug}
         data-tool-title={manifest.title}
-        data-tool-payload={JSON.stringify(clientPayload)}
       >
         <p class="tool-state">正在加载工具界面…</p>
       </div>
@@ -125,17 +118,8 @@ const clientPayload = {
 
   const workbench = document.getElementById('tool-workbench');
   if (workbench) {
-    const payload = workbench.dataset.toolPayload;
-    if (payload) {
-      // 元数据已在服务端渲染；这里只是让宿主能读到状态并决定是否挂载
-      try {
-        const parsed = JSON.parse(payload) as { slug: string };
-        workbench.dataset.tool = parsed.slug;
-      } catch {
-        // 解析失败时保留服务端渲染的 slug，宿主仍能按 data-tool 查表
-      }
-    }
-    initToolHost(workbench);
+    // 宿主自己按 data-tool 查表并懒加载对应工具的实现
+    void initToolHost(workbench);
   }
 </script>
 

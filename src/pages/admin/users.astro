@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeading from '../../components/ui/PageHeading.astro';
+import '../../styles/admin-users.css';
+
+/**
+ * 账号管理（/admin/users/）：超级管理员管理用户列表。
+ *
+ * 为什么是独立页面而不是主页那个悬浮面板：列表要显示用户名、角色、注册时间
+ * 与操作按钮，横着排得下一整行；主页右下角的 340px 面板塞不进表格，
+ * 而把主页改成两栏会牺牲首页本身的内容。
+ *
+ * 权限：本页 HTML 对所有人可构建（静态站没有服务端渲染的会话），
+ * 界面在拿到会话后按角色分流——非超管看到说明文字，且**不会**发出任何请求；
+ * 真正的判定始终在服务端（/api/admin/* 的 require_superadmin）。
+ * 前端隐藏按钮不作为安全边界（01 文档第 7 节）。
+ */
+---
+
+<BaseLayout
+  title="账号管理"
+  description="站点账号管理：按名字搜索用户，授予或取消管理员。"
+>
+  <PageHeading
+    eyebrow="USER MANAGEMENT"
+    heading="账号管理"
+    lead="按名字找到用户，决定谁能审核站里的内容。"
+  />
+
+  <div class="admin-users-page">
+    <div id="admin-users-root">
+      <p class="au-boot">正在确认登录状态…</p>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  import { initAdminUsers } from '../../modules/admin-users';
+
+  const root = document.getElementById('admin-users-root');
+  if (root) initAdminUsers(root);
+</script>

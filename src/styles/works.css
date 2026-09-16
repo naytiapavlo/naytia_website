@@ -1,0 +1,250 @@
+/**
+ * 作品页（/works/）样式：封面滚动、研究时间轴、B 站成果清单、封面灯箱。
+ *
+ * 放在 src/styles 而不是页面作用域 <style>：与 tools.css / forum.css / ida.css 一致，
+ * 类名统一 wk- 前缀，避免与其它页面的全局样式相撞。
+ * 设计变量只取 tokens.css 中的值（02 文档：颜色与字体不在组件里硬编码新值）。
+ */
+
+/* ---------- 小节标题（与首页 .section-heading 同一视觉） ---------- */
+.wk-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 17px;
+}
+.wk-heading .pixel { color: #ab7996; width: 18px; height: 18px; }
+.wk-heading h2 { font-size: 19px; margin: 0; letter-spacing: 1px; }
+.wk-heading .en { color: #8c7e93; font: 12px var(--mono); letter-spacing: 1px; margin-left: 5px; }
+.wk-heading .hint { margin-left: auto; color: #817385; font-size: 12px; }
+.wk-lead { color: var(--muted); font-size: 14px; margin: -6px 0 16px; }
+
+/* ---------- 封面滚动 ---------- */
+.wk-showcase { padding: 4px 0 40px; }
+.wk-marquee { display: grid; gap: 14px; }
+.wk-row {
+  position: relative;
+  overflow: hidden;
+  /* 两侧淡出：滚动看起来是流入流出，而不是被硬切断 */
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 52px, #000 calc(100% - 52px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 52px, #000 calc(100% - 52px), transparent 100%);
+}
+.wk-track {
+  display: flex;
+  width: max-content;
+  animation: wk-marquee 40s linear infinite;
+}
+.wk-group { display: flex; gap: 14px; padding-right: 14px; }
+@keyframes wk-marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+/* 悬停或键盘聚焦时暂停，方便看清与点击 */
+.wk-row:hover .wk-track,
+.wk-row:focus-within .wk-track { animation-play-state: paused; }
+
+.wk-card {
+  display: block;
+  width: 268px;
+  flex: none;
+  padding: 0;
+  border: 1px solid #e2dbe6;
+  background: #fff;
+  box-shadow: 4px 4px 0 #f4eff6;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+.wk-card.is-clone { cursor: default; }
+.wk-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: #f7f2f8;
+  border-bottom: 1px solid #efe9f2;
+}
+.wk-card-text { display: block; padding: 9px 29px 10px 11px; }
+.wk-card-text b {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wk-card-text small {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: #8d8194;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wk-card:not(.is-clone):hover {
+  transform: translateY(-3px);
+  border-color: var(--accent-line);
+  box-shadow: 5px 5px 0 var(--shadow-pink);
+}
+.wk-card:not(.is-clone):hover b { color: var(--accent); }
+
+/* ---------- 研究时间轴 ---------- */
+.wk-timeline-section { padding: 40px 0 42px; }
+.wk-timeline-wrap { position: relative; padding: 4px 0 6px; }
+.wk-rail {
+  position: absolute;
+  left: 9px;
+  top: 12px;
+  bottom: 12px;
+  width: 2px;
+  background: #f1ecf3;
+  overflow: hidden;
+}
+.wk-fill { display: none; width: 100%; height: 0; background: linear-gradient(180deg, #f3b3cd, var(--accent)); }
+.wk-js .wk-fill { display: block; }
+.wk-list { list-style: none; margin: 0; padding: 0; }
+.wk-item { position: relative; padding: 0 0 24px 44px; }
+.wk-item:last-child { padding-bottom: 0; }
+.wk-dot {
+  position: absolute;
+  left: 4px;
+  top: 22px;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border: 2px solid #e7cede;
+}
+.wk-item.wk-active .wk-dot {
+  background: var(--accent);
+  border-color: #f4cddd;
+  box-shadow: 0 0 0 4px #fdf1f6;
+}
+.wk-body {
+  border: 1px solid #e6e0e9;
+  background: #fff;
+  box-shadow: 4px 4px 0 #f5f1f7;
+  padding: 17px 20px 18px;
+}
+.wk-item.wk-active .wk-body { border-color: var(--accent-line); box-shadow: 5px 5px 0 var(--shadow-pink); }
+.wk-date {
+  display: inline-block;
+  font: 12px var(--mono);
+  letter-spacing: 1px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-line);
+  padding: 1px 9px;
+}
+.wk-body h3 { font-size: 16px; margin: 9px 0 7px; letter-spacing: 0.5px; }
+.wk-body p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.95; }
+.wk-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+.wk-tags span {
+  font-size: 11px;
+  color: #8a7c92;
+  background: #f8f5fa;
+  border: 1px solid #efe9f2;
+  padding: 1px 8px;
+}
+/* 浮现动效：只有在 JS 可用（html.wk-js）时才隐藏，脚本失败内容照样可读 */
+.wk-js .wk-item { opacity: 0; transform: translateY(14px); transition: opacity 0.45s ease, transform 0.45s ease; }
+.wk-js .wk-item.wk-visible { opacity: 1; transform: none; }
+
+/* ---------- B 站成果清单（纯文本，一行一条） ---------- */
+.wk-achievements { padding: 6px 0 46px; }
+.wk-works { list-style: none; margin: 0; padding: 0; max-width: 760px; }
+.wk-work { font-size: 14px; line-height: 2.15; }
+.wk-work-meta { color: var(--muted); font-size: 13px; }
+.wk-work-meta::before { content: ' —— '; color: #cbbcc6; }
+
+/* ---------- 封面灯箱 ---------- */
+.wk-lightbox {
+  margin: auto;
+  padding: 0;
+  border: none;
+  background: transparent;
+  /* 封面原图只有 672px 宽，灯箱不再往上放大，避免糊掉 */
+  max-width: min(700px, 94vw);
+  max-height: 94vh;
+  color: var(--ink);
+}
+.wk-lightbox::backdrop { background: rgba(56, 52, 60, 0.6); }
+.wk-lightbox-inner {
+  position: relative;
+  background: #fff;
+  border: 1px solid #e2dae6;
+  box-shadow: 7px 7px 0 rgba(163, 69, 107, 0.22);
+  padding: 13px;
+}
+.wk-lightbox img {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #f7f2f8;
+  border: 1px solid #efe9f2;
+}
+.wk-lightbox-meta { display: flex; align-items: flex-end; gap: 14px; margin-top: 12px; }
+.wk-lightbox-meta h3 { margin: 0 0 3px; font-size: 16px; }
+.wk-lightbox-meta p { margin: 0; font-size: 13px; color: var(--muted); }
+.wk-lightbox-tags { font: 11px var(--mono); color: #a1899b; margin: 6px 0 0; }
+.wk-lightbox-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; flex: none; }
+.wk-lightbox-actions button,
+.wk-lightbox-close {
+  font: 13px var(--font-body);
+  cursor: pointer;
+  background: #fff;
+  border: 1px solid var(--line);
+  color: #6f6474;
+  padding: 6px 13px;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.wk-lightbox-actions button:hover,
+.wk-lightbox-close:hover { color: var(--accent); border-color: var(--accent-line); background: #fff8fb; }
+.wk-lightbox-count { font: 12px var(--mono); color: #a1899b; padding: 0 2px; }
+.wk-lightbox-link { font: 12px var(--mono); color: var(--accent); margin-right: 6px; }
+.wk-lightbox-link:hover { text-decoration: underline; }
+.wk-lightbox-close {
+  position: absolute;
+  top: 23px;
+  right: 23px;
+  z-index: 2;
+  padding: 5px 10px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 3px 3px 0 rgba(163, 69, 107, 0.18);
+}
+/* 灯箱打开时锁住背景滚动 */
+html.wk-lightbox-open { overflow: hidden; }
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 760px) {
+  .wk-card { width: 212px; }
+  .wk-row {
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 22px, #000 calc(100% - 22px), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 22px, #000 calc(100% - 22px), transparent 100%);
+  }
+  .wk-item { padding-left: 32px; }
+  .wk-rail { left: 5px; }
+  .wk-dot { left: 0; }
+  .wk-body { padding: 15px 16px 16px; }
+  .wk-work { font-size: 13px; }
+  .wk-work-meta { display: block; font-size: 12px; }
+  .wk-work-meta::before { content: none; }
+}
+@media (max-width: 500px) {
+  .wk-heading .en,
+  .wk-heading .hint { display: none; }
+  .wk-lightbox-close { top: 6px; right: 6px; }
+}
+
+/* ---------- 降低动态效果 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  /* 滚动改成可手动横向滚动的静态列表，内容一张不少 */
+  .wk-track { animation: none; }
+  .wk-row { overflow-x: auto; -webkit-mask-image: none; mask-image: none; }
+  .wk-card { transition: none; }
+  .wk-card:not(.is-clone):hover { transform: none; }
+  .wk-js .wk-item,
+  .wk-js .wk-item.wk-visible { opacity: 1; transform: none; transition: none; }
+}

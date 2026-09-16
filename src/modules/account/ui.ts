@@ -4,6 +4,12 @@ import { type AccountSummary, ROLE_LABELS, login, logout, me, register } from '.
 
 const EVENT = 'naytia:session';
 
+/**
+ * 会话变化事件名（公开常量）。其他模块订阅这个事件来响应登录/退出，
+ * 不要各自复制字符串，也不要反向 import account 的内部实现。
+ */
+export const SESSION_EVENT = EVENT;
+
 function announce(account: AccountSummary | null): void {
   window.dispatchEvent(new CustomEvent(EVENT, { detail: account }));
 }
@@ -18,6 +24,20 @@ export function mountAccountChip(container: HTMLElement | null): void {
   void me()
     .then((account) => (account ? renderLoggedIn(container, account) : undefined))
     .catch(() => undefined); // 后端离线：保持静态表现
+}
+
+/**
+ * 打开登录/注册弹窗——给「需要登录才能做的事」当一个统一入口。
+ *
+ * 为什么放在公开接口里：论坛、收藏这类模块遇到未登录时，正确做法是提示并
+ * 把登录入口直接递到手上，而不是让用户自己去右上角找。弹窗的实现（表单、
+ * 校验、成功后的角标刷新）只有 account 知道，所以由它导出一个动作，
+ * 其他模块只调用、不复制。
+ */
+export function openAccountDialog(): void {
+  const container = document.getElementById('navAccount');
+  if (!container) return;
+  openDialog(container);
 }
 
 function renderLoggedOut(container: HTMLElement): void {

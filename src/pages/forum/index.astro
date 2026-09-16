@@ -1,20 +1,45 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeading from '../../components/ui/PageHeading.astro';
-import EmptyState from '../../components/ui/EmptyState.astro';
+import '../../styles/forum.css';
 
 /**
- * 论坛页（阶段 4 实装）：
- * 正式实现 = 静态外壳 + 客户端调用 Python API（FastAPI + SQLite，见 ADR-001）。
- * 当前 API 未部署，页面保持诚实的建设中状态，不渲染任何交互控件。
+ * 论坛页（阶段 4 正式实现）。
+ *
+ * 这个文件只负责**静态外壳**：标题、容器、加载前的占位说明。
+ * 列表、详情、发帖、3D 预览全部由 `modules/forum` 在客户端挂载——
+ * 帖子在数据库里，构建期拿不到，所以不能预渲染（02 文档：内容优先预生成，
+ * 确有服务端数据时按需取）。
+ *
+ * 路由用 hash（`#/t/12`、`#/new`）：静态托管没有动态路由，hash 方案让
+ * 前进/后退、刷新和分享链接都能用。
  */
 ---
 
 <BaseLayout title="论坛" description="聊机制、晒作品、互帮互助的小广场。">
   <PageHeading eyebrow="TALK & SHARE" heading="玩家论坛" lead="聊机制、晒作品、互帮互助的小广场。" />
 
-  <EmptyState
-    message="论坛建设中。"
-    hint="版块规划：机制研究 / 作品展示 / 问答互助 / 站务公告。发帖与回复需要登录（阶段 4 实装）。"
-  />
+  <div id="forum-app" data-part="forum-root">
+    <noscript>
+      <p class="forum-noscript">
+        论坛需要 JavaScript 才能读取帖子。内容由站内 API 提供，无法在纯静态页面里预生成。
+      </p>
+    </noscript>
+  </div>
 </BaseLayout>
+
+<script>
+  import { mountForum } from '../../modules/forum';
+
+  const root = document.getElementById('forum-app');
+  if (root) mountForum(root);
+</script>
+
+<style>
+  .forum-noscript {
+    border: 1px dashed var(--line);
+    padding: 22px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+</style>

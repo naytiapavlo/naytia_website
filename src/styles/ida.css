@@ -1,0 +1,450 @@
+/* 逆向工作台样式（/ida/）。
+ *
+ * 为什么放在全局样式文件而不是页面的 <style>：Astro 会给定稿模板里的元素加
+ * data-astro-* 作用域属性，而工作台的 DOM 全部是工作台脚本动态创建的，
+ * 不带这些属性，页面级 scoped 样式选不中它们。这里用 ida- 前缀自己限定作用范围。
+ */
+
+.ida-page {
+  /* 撑满视口宽度：BaseLayout 的 .shell（980px）放不下 IDA 式三栏 */
+  width: calc(100vw - 17px);
+  margin-left: calc(50% - 50vw + 8px);
+  margin-right: calc(50% - 50vw + 8px);
+}
+
+.ida-root {
+  --ida-bg: #ffffff;
+  --ida-chrome: #f4f2f6;
+  --ida-chrome-2: #eceaf1;
+  --ida-line: #d9d4de;
+  --ida-line-soft: #eae6ee;
+  --ida-ink: #26232b;
+  --ida-ink-2: #55505c;
+  --ida-dim: #8b8494;
+  --ida-dim-2: #a9a2b2;
+  --ida-accent: var(--accent);
+  --ida-accent-soft: #fdeef4;
+  --ida-sel: #f7e9f1;
+  --ida-ok: #3f7256;
+  --ida-warn: #8a6a2f;
+  --ida-bad: #a8374c;
+
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 96px);
+  min-height: 540px;
+  background: var(--ida-bg);
+  border: 1px solid var(--ida-line);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ida-ink);
+  overflow: hidden;
+}
+
+.ida-boot { padding: 30px; color: var(--ida-dim); margin: 0; }
+
+/* ---------- 标题栏 ---------- */
+.ida-titlebar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 12px;
+  background: linear-gradient(#fbfafc, var(--ida-chrome));
+  border-bottom: 1px solid var(--ida-line);
+  flex: none;
+}
+.ida-mark {
+  width: 22px; height: 22px; display: grid; place-items: center;
+  background: var(--ida-accent); color: #fff;
+  font: bold 13px var(--mono);
+  box-shadow: 2px 2px 0 #e3cfdb;
+  flex: none;
+}
+.ida-appname { font-weight: 700; letter-spacing: .3px; }
+.ida-appsub { font: 11px var(--mono); color: var(--ida-dim); }
+.ida-grow { flex: 1 1 auto; }
+
+/* ---------- 工具栏 ---------- */
+.ida-toolbar {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  padding: 6px 10px;
+  background: var(--ida-bg);
+  border-bottom: 1px solid var(--ida-line);
+  flex: none;
+}
+.ida-sep { width: 1px; height: 20px; background: var(--ida-line); margin: 0 4px; }
+.ida-label { font: 11px var(--mono); color: var(--ida-dim); }
+
+.ida-btn {
+  font: 12px var(--font-body); padding: 4px 10px;
+  border: 1px solid var(--ida-line); background: #fff; color: var(--ida-ink-2);
+  cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+}
+.ida-btn:hover { background: var(--ida-accent-soft); border-color: #edcddc; color: var(--ida-accent); }
+.ida-btn:disabled { opacity: .5; cursor: default; }
+.ida-btn:disabled:hover { background: #fff; border-color: var(--ida-line); color: var(--ida-ink-2); }
+
+.ida-field {
+  font: 12px var(--font-body); padding: 4px 7px;
+  border: 1px solid var(--ida-line); background: #fff; color: var(--ida-ink);
+}
+.ida-field:focus { outline: 2px solid #edcddc; outline-offset: 0; border-color: #e0bccd; }
+.ida-search { display: flex; align-items: center; }
+.ida-search .ida-field { width: 190px; border-right: 0; }
+.ida-search .ida-btn { border-left: 0; }
+select.ida-field { max-width: 240px; }
+
+.ida-chip {
+  font: 11px var(--mono); padding: 3px 9px;
+  border: 1px solid var(--ida-line); background: #faf9fb; color: var(--ida-dim);
+  white-space: nowrap;
+}
+.ida-chip[data-tone='ok'] { background: #f2faf5; border-color: #d3ebdc; color: var(--ida-ok); }
+.ida-chip[data-tone='warn'] { background: #fdf8ec; border-color: #f0e3c8; color: var(--ida-warn); }
+.ida-chip[data-tone='bad'] { background: #fdf3f5; border-color: #eccdd3; color: var(--ida-bad); }
+.ida-chip[data-tone='mock'] { background: #f4f1fb; border-color: #e0d8f2; color: #6b5a9c; }
+
+/* ---------- 主体 ---------- */
+.ida-workarea { flex: 1 1 auto; display: flex; min-height: 0; }
+
+/* ---------- 可拖拽分隔条 ----------
+   拖动时给 .ida-root 加 is-resizing：全局禁用选中、并固定光标方向。
+   键盘也能调（分隔条可聚焦，方向键调整，双击复位）。 */
+.ida-root.is-resizing { user-select: none; }
+.ida-root.is-resizing.is-resizing-x { cursor: col-resize; }
+.ida-root.is-resizing.is-resizing-y { cursor: row-resize; }
+
+.ida-splitter {
+  flex: none;
+  background: var(--ida-line-soft);
+  position: relative;
+  touch-action: none;
+}
+.ida-splitter.is-vertical { width: 5px; cursor: col-resize; }
+.ida-splitter.is-horizontal { height: 5px; cursor: row-resize; }
+.ida-splitter:hover { background: var(--ida-accent-soft); }
+.ida-splitter:focus-visible { outline: 2px solid var(--ida-accent); outline-offset: -1px; }
+.ida-splitter.is-active { background: var(--ida-accent); }
+
+.ida-side {
+  width: 336px; flex: none;
+  display: flex; flex-direction: column; min-height: 0;
+  background: #fbfafc;
+  border-right: 1px solid var(--ida-line);
+}
+.ida-side-tabs { display: flex; border-bottom: 1px solid var(--ida-line); flex: none; background: var(--ida-chrome-2); }
+.ida-side-tab {
+  font: 11.5px var(--font-body); padding: 6px 12px; border: 0; background: transparent;
+  color: var(--ida-dim); cursor: pointer; border-right: 1px solid var(--ida-line);
+}
+.ida-side-tab.is-active { background: var(--ida-bg); color: var(--ida-accent); font-weight: 600; }
+
+.ida-meta { padding: 7px 10px; border-bottom: 1px solid var(--ida-line-soft); }
+.ida-meta-row { font: 11px var(--mono); color: var(--ida-ink-2); display: flex; gap: 6px; }
+.ida-meta-row .k { color: var(--ida-dim-2); }
+
+.ida-listhead {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 5px 10px; border-bottom: 1px solid var(--ida-line-soft);
+  font: 10.5px var(--mono); color: var(--ida-dim); background: #fdfcfe; flex: none;
+}
+/* 列表区高度由「列表↔底部按钮区」之间的分隔条控制：
+   默认 flex 填充剩余空间；用户拖动后由内联 flex/height 覆盖。
+   注意必须有 overflow，否则列表会被内容撑到全高并顶坏整页布局。 */
+.ida-list { flex: 1 1 auto; min-height: 60px; overflow: auto; }
+.ida-row {
+  display: grid; grid-template-columns: 110px 1fr auto;
+  gap: 8px; align-items: center;
+  padding: 3px 10px;
+  font: 11.5px var(--mono);
+  border-bottom: 1px solid #f6f4f8;
+  cursor: pointer;
+}
+.ida-row:hover { background: #fdf3f7; }
+.ida-row.is-sel { background: var(--ida-sel); box-shadow: inset 2px 0 0 var(--ida-accent); }
+.ida-row .a { color: #b0a4bc; }
+.ida-row .n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ida-row .s { color: var(--ida-dim-2); font-size: 10.5px; }
+.ida-listfoot { padding: 6px 10px; border-top: 1px solid var(--ida-line-soft); flex: none; }
+
+/* ---------- 主区 ---------- */
+.ida-main { flex: 1 1 auto; display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--ida-bg); }
+
+.ida-crumbs {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 12px; border-bottom: 1px solid var(--ida-line-soft);
+  flex: none; min-width: 0;
+}
+.ida-fnname { font: 600 12.5px var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ida-fnat { font: 11.5px var(--mono); color: var(--ida-dim); flex: none; }
+
+.ida-tabs { display: flex; padding: 0 8px; border-bottom: 1px solid var(--ida-line); flex: none; background: var(--ida-chrome-2); }
+.ida-tab {
+  font: 12px var(--font-body); padding: 7px 15px; border: 1px solid transparent; border-bottom: 0;
+  background: transparent; color: var(--ida-dim); cursor: pointer; margin-bottom: -1px;
+}
+.ida-tab:hover { color: var(--ida-ink-2); }
+.ida-tab.is-active {
+  background: var(--ida-bg); border-color: var(--ida-line); border-bottom-color: var(--ida-bg);
+  color: var(--ida-accent); font-weight: 600;
+}
+.ida-tab .cnt { font: 10px var(--mono); color: var(--ida-dim-2); margin-left: 5px; }
+
+.ida-view { flex: 1 1 auto; overflow: auto; min-height: 0; position: relative; }
+
+/* 代码视图 */
+.ida-code {
+  margin: 0; padding: 10px 0 40px;
+  font: 12.5px/1.62 var(--mono);
+  white-space: pre;
+  tab-size: 4;
+}
+.ida-cl { display: flex; padding: 0 12px; }
+.ida-cl:hover { background: #fdfafc; }
+.ida-cl.is-hl { background: #fff6e8; box-shadow: inset 2px 0 0 #e0b06a; }
+.ida-cl .ln { width: 42px; flex: none; text-align: right; color: #c8bfd0; user-select: none; padding-right: 12px; }
+.ida-cl .ln.is-addr { width: 104px; color: #b0a4bc; user-select: text; text-align: left; }
+.ida-cl .ct { white-space: pre-wrap; word-break: break-word; }
+
+/* 语法着色 */
+.tok-c { color: #9c8fa6; font-style: italic; }
+.tok-s { color: #3f7256; }
+.tok-n { color: #8a5a2f; }
+.tok-k { color: var(--ida-accent); font-weight: 600; }
+.tok-m { color: #5a4a8a; font-weight: 600; }
+.tok-r { color: #2f5d7c; }
+.tok-lbl { color: #9b677f; font-weight: 600; }
+.tok-fn { color: #2f5d7c; }
+.ida-addr {
+  border: 0; background: transparent; padding: 0 1px; font: inherit;
+  color: #bb8fa6; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 2px;
+}
+.ida-addr:hover { color: var(--ida-accent); background: var(--ida-accent-soft); }
+
+/* 引用列 */
+.ida-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+.ida-col { border-right: 1px solid var(--ida-line-soft); min-width: 0; }
+.ida-col:last-child { border-right: 0; }
+.ida-col h4 {
+  margin: 0; padding: 7px 12px; font: 11.5px var(--font-body); color: var(--ida-ink-2);
+  background: #fdfcfe; border-bottom: 1px solid var(--ida-line-soft); position: sticky; top: 0;
+}
+.ida-ref {
+  display: grid; grid-template-columns: 110px 1fr auto; gap: 8px;
+  padding: 4px 12px; font: 11.5px var(--mono);
+  border-bottom: 1px solid #f7f5f9; cursor: pointer; width: 100%;
+  text-align: left; background: transparent; border-left: 0; border-right: 0; border-top: 0;
+}
+.ida-ref:hover { background: #fdf3f7; }
+.ida-ref .ra { color: #b0a4bc; }
+.ida-ref .rn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ida-ref .rt { color: var(--ida-dim-2); font-size: 10.5px; }
+.ida-empty { padding: 18px 12px; color: var(--ida-dim-2); font-size: 12px; }
+.ida-notice { padding: 22px 18px; text-align: center; color: var(--ida-dim); }
+.ida-notice strong { display: block; margin-bottom: 6px; color: #5d5462; font-size: 13px; }
+.ida-notice p { margin: 0 auto; max-width: 62ch; font-size: 12px; line-height: 1.8; }
+
+/* 表格 */
+.ida-table { width: 100%; border-collapse: collapse; font: 11.5px var(--mono); }
+.ida-table th, .ida-table td { border-bottom: 1px solid var(--ida-line-soft); padding: 5px 12px; text-align: left; }
+.ida-table th { background: #fdfcfe; font: 11px var(--font-body); color: var(--ida-ink-2); position: sticky; top: 0; }
+.ida-table tr:hover td { background: #fdfafc; }
+
+/* 基本块 */
+.ida-blocks { padding: 12px; display: grid; gap: 6px; }
+.ida-blk {
+  display: grid; grid-template-columns: 110px 110px 60px 1fr; gap: 10px;
+  font: 11.5px var(--mono); padding: 4px 8px;
+  border: 1px solid var(--ida-line-soft); background: #fdfcfe; cursor: pointer;
+  text-align: left; width: 100%;
+}
+.ida-blk:hover { border-color: #edcddc; background: var(--ida-accent-soft); }
+.ida-blk .bt { color: var(--ida-dim); }
+
+/* ---------- 状态栏 ---------- */
+.ida-status {
+  display: flex; align-items: center;
+  background: var(--ida-chrome); border-top: 1px solid var(--ida-line);
+  font: 11px var(--mono); color: var(--ida-ink-2); flex: none;
+}
+.ida-status > span { padding: 4px 12px; border-right: 1px solid var(--ida-line); white-space: nowrap; }
+.ida-status > span.ida-grow { border-right: 0; flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; }
+.ida-status .dim { color: var(--ida-dim); }
+
+/* ---------- 帮助浮层 ---------- */
+.ida-help { position: fixed; inset: 0; background: rgba(38, 35, 43, .34); display: none; place-items: center; z-index: 60; }
+.ida-help.show { display: grid; }
+.ida-help-card {
+  background: #fff; border: 1px solid var(--ida-line);
+  box-shadow: 6px 6px 0 rgba(163, 69, 107, .14);
+  padding: 22px 26px; max-width: 540px;
+}
+.ida-help-card h3 { margin: 0 0 12px; font-size: 15px; }
+.ida-help-card table { border-collapse: collapse; font-size: 12px; }
+.ida-help-card td { padding: 3px 14px 3px 0; vertical-align: top; }
+.ida-help-card kbd {
+  font: 11px var(--mono); border: 1px solid var(--ida-line); background: #faf9fb;
+  padding: 1px 6px; box-shadow: 0 1px 0 var(--ida-line);
+}
+.ida-help-card .ida-note { font-size: 12px; color: #8b8494; margin: 12px 0 0; }
+.ida-help-card .ida-btn { margin-top: 14px; }
+
+/* ---------- AI 助手悬浮窗 ---------- */
+.ai-bubble {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--ida-accent);
+  color: #fff;
+  font: bold 15px var(--mono);
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(163, 69, 107, .34);
+  z-index: 55;
+}
+.ai-bubble:hover { background: #8f3559; }
+
+.ai-panel {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  width: 400px;
+  max-width: calc(100vw - 44px);
+  height: 520px;
+  max-height: calc(100vh - 140px);
+  display: none;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid var(--ida-line);
+  box-shadow: 0 8px 28px rgba(38, 35, 43, .18);
+  z-index: 56;
+  overflow: hidden;
+}
+.ai-panel.is-open { display: flex; }
+
+.ai-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--ida-line);
+  background: linear-gradient(#fbfafc, var(--ida-chrome));
+  flex: none;
+}
+.ai-title { font-size: 13px; }
+.ai-grow { flex: 1 1 auto; }
+.ai-chip {
+  font: 11px var(--mono);
+  padding: 2px 8px;
+  border: 1px solid var(--ida-line);
+  background: #faf9fb;
+  color: var(--ida-dim);
+  white-space: nowrap;
+}
+.ai-chip[data-tone='ok'] { background: #f2faf5; border-color: #d3ebdc; color: var(--ida-ok); }
+.ai-chip[data-tone='warn'] { background: #fdf8ec; border-color: #f0e3c8; color: var(--ida-warn); }
+.ai-chip[data-tone='bad'] { background: #fdf3f5; border-color: #eccdd3; color: var(--ida-bad); }
+.ai-iconbtn {
+  border: 1px solid var(--ida-line);
+  background: #fff;
+  color: var(--ida-dim);
+  width: 24px; height: 24px;
+  cursor: pointer;
+  font: 14px var(--mono);
+  line-height: 1;
+}
+.ai-iconbtn:hover { color: var(--ida-accent); border-color: #edcddc; }
+
+.ai-body { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+.ai-log {
+  flex: 1 1 auto;
+  overflow: auto;
+  min-height: 0;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.ai-empty { color: var(--ida-dim-2); font-size: 12px; line-height: 1.8; }
+.ai-msg { display: flex; flex-direction: column; gap: 3px; max-width: 100%; }
+.ai-who { font: 10.5px var(--mono); color: var(--ida-dim-2); }
+.ai-msg.is-user .ai-who { color: var(--ida-accent); }
+.ai-text {
+  font-size: 12.5px;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  word-break: break-word;
+  padding: 7px 10px;
+  border: 1px solid var(--ida-line-soft);
+  background: #fdfcfe;
+}
+.ai-msg.is-user .ai-text { background: var(--ida-accent-soft); border-color: #f4dbe6; }
+.ai-tool {
+  font: 11px var(--mono);
+  color: var(--ida-dim);
+  padding: 3px 8px;
+  border-left: 2px solid #ded4e2;
+  background: #faf9fb;
+}
+.ai-addr {
+  border: 0; background: transparent; padding: 0 1px; font: inherit;
+  color: #bb8fa6; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 2px;
+}
+.ai-addr:hover { color: var(--ida-accent); background: var(--ida-accent-soft); }
+
+.ai-form {
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px 4px;
+  border-top: 1px solid var(--ida-line-soft);
+  flex: none;
+}
+.ai-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  resize: none;
+  font: 12.5px var(--font-body);
+  line-height: 1.6;
+  padding: 6px 9px;
+  border: 1px solid var(--ida-line);
+  background: #fff;
+  color: var(--ida-ink);
+}
+.ai-input:focus { outline: 2px solid #edcddc; outline-offset: 0; }
+.ai-send {
+  font: 12px var(--font-body);
+  padding: 0 14px;
+  border: 1px solid var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--ida-accent);
+  cursor: pointer;
+  flex: none;
+}
+.ai-send:hover { background: #ffe9f1; }
+.ai-send:disabled, .ai-input:disabled { opacity: .55; cursor: default; }
+.ai-hint {
+  font-size: 11px;
+  color: var(--ida-dim-2);
+  padding: 0 12px 9px;
+  flex: none;
+  min-height: 16px;
+}
+.ai-hint[data-tone='bad'] { color: var(--ida-bad); }
+.ai-hint[data-tone='warn'] { color: var(--ida-warn); }
+.ai-hint[data-tone='busy'] { color: var(--ida-accent); }
+
+@media (max-width: 500px) {
+  .ai-panel { right: 8px; bottom: 8px; width: calc(100vw - 16px); height: 60vh; }
+  .ai-bubble { right: 12px; bottom: 12px; }
+}
+
+@media (max-width: 900px) {
+  .ida-root { height: auto; min-height: 0; }
+  .ida-page { width: auto; margin-left: 0; margin-right: 0; }
+  .ida-workarea { flex-direction: column; }
+  .ida-side { width: 100%; max-height: 42vh; border-right: 0; border-bottom: 1px solid var(--ida-line); }
+  .ida-view { max-height: 60vh; }
+  .ida-row { grid-template-columns: 96px 1fr; }
+  .ida-row .s { display: none; }
+}

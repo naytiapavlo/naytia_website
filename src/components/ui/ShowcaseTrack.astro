@@ -1,0 +1,56 @@
+---
+/**
+ * 封面滚动轨道：同一批封面渲染两份（第二份 aria-hidden、不可聚焦），
+ * 配合 works.css 里 translateX(-50%) 的关键帧得到无缝循环。
+ * 第一份是可点击按钮（打开灯箱），第二份只是视觉克隆，不重复进入键盘顺序。
+ */
+import type { ShowcaseItem } from '../../modules/works';
+
+interface Props {
+  items: ShowcaseItem[];
+}
+
+const { items } = Astro.props;
+---
+
+<div class="wk-track">
+  {[false, true].map((clone) => (
+    <div class="wk-group" aria-hidden={clone ? 'true' : undefined}>
+      {items.map((item) =>
+        clone ? (
+          <div class="wk-card is-clone">
+            <img src={item.image} alt="" width="672" height="378" loading="lazy" decoding="async" />
+            <span class="wk-card-text">
+              <b>{item.title}</b>
+              <small>{item.caption}</small>
+            </span>
+          </div>
+        ) : (
+          <button
+            class="wk-card"
+            type="button"
+            data-image={item.image}
+            data-title={item.title}
+            data-caption={item.caption}
+            data-tags={item.tags.join(' · ')}
+            data-video={item.videoUrl ?? ''}
+            aria-label={`放大查看封面：${item.title}`}
+          >
+            <img
+              src={item.image}
+              alt={`${item.title}：${item.caption}`}
+              width="672"
+              height="378"
+              loading="lazy"
+              decoding="async"
+            />
+            <span class="wk-card-text">
+              <b>{item.title}</b>
+              <small>{item.caption}</small>
+            </span>
+          </button>
+        ),
+      )}
+    </div>
+  ))}
+</div>

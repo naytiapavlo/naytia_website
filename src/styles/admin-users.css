@@ -1,0 +1,138 @@
+/* 账号管理页（/admin/users/）：模块专属样式。
+ * 按钮 / 输入框 / 角色徽章沿用 dynamic-ui.css 的 ui-* 基础件，这里只写本页布局。 */
+
+.admin-users-page { padding-bottom: 10px; }
+
+/* 工具栏：搜索框在左，统计与刷新在右 */
+.au-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.au-search { position: relative; flex: 1 1 240px; max-width: 340px; }
+.au-search-input {
+  width: 100%;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.7;
+  padding: 8px 34px 8px 12px;
+  border: 1px solid #ddd4e0;
+  background: #fff;
+  color: #38343c;
+}
+.au-search-input:focus {
+  outline: 2px solid #f2c7d8;
+  border-color: var(--accent);
+}
+/* 隐藏浏览器自带的 search 清除钮：位置与像素风对不上，且 Safari 会另画一个 */
+.au-search-input::-webkit-search-cancel-button { display: none; }
+.au-count {
+  font: 12px var(--mono);
+  color: #8c7e93;
+  letter-spacing: 0.5px;
+  margin-right: auto;
+}
+
+/* 表格：用 grid 对齐，窄屏时右两列折行 */
+.au-table { border: 1px solid var(--line); background: #fff; }
+.au-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) 92px 132px minmax(0, 1.5fr);
+  gap: 12px;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid #f2eef3;
+  font-size: 14px;
+}
+.au-row:last-child { border-bottom: 0; }
+.au-row[hidden] { display: none; }
+.au-head {
+  background: var(--wash);
+  font: 12px var(--mono);
+  color: #8c7e93;
+  letter-spacing: 1px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+.au-c-user { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.au-avatar {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  background: #f9dfe8;
+  color: #94466b;
+  font: bold 14px/1 var(--mono);
+}
+.au-name { min-width: 0; }
+.au-name strong {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.au-name small { font: 11px var(--mono); color: #a89cae; }
+.au-c-role { display: flex; }
+.au-c-time { font: 12px var(--mono); color: #8d8091; }
+.au-c-act { display: flex; justify-content: flex-start; }
+.au-toggle { padding: 5px 12px; font-size: 12px; }
+/* 已开启状态与「未开启」必须一眼可分：颜色 + 实心边框，不靠悬停才看得见 */
+.au-toggle.is-on {
+  background: #fdf6ec;
+  color: #a5834b;
+  border-color: #f0e3cd;
+  box-shadow: 2px 2px 0 #f0e3cd;
+}
+.au-locked {
+  font-size: 12px;
+  color: #a89cae;
+  line-height: 1.6;
+}
+
+/* 空 / 错误 / 无权限：诚实说明原因，不放假内容，不放假按钮（重试除外） */
+.au-empty, .au-denied {
+  padding: 38px 20px;
+  text-align: center;
+  color: #93879a;
+  font-size: 14px;
+  border: 1px dashed #e2d9e6;
+}
+.au-denied { margin: 30px 0 40px; }
+.au-empty p, .au-denied p { margin: 0; }
+.au-empty small, .au-denied small {
+  display: block;
+  margin-top: 6px;
+  color: #a89cae;
+  line-height: 1.8;
+}
+.au-denied .ui-btn { margin-top: 16px; }
+.au-boot { color: #a89cae; font-size: 14px; padding: 26px 4px; margin: 0; }
+.au-note {
+  font-size: 12px;
+  color: #88758f;
+  line-height: 1.9;
+  margin: 16px 0 0;
+  padding-top: 12px;
+  border-top: 1px dashed #e8e0ea;
+}
+
+/* 搜索期间：保留表格内容，只用左侧竖条提示正在取新结果 */
+.au-table[aria-busy='true'] { border-left: 3px solid var(--accent-line); }
+
+@media (max-width: 700px) {
+  .au-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 8px;
+  }
+  .au-head { display: none; }
+  .au-c-time { grid-column: 1 / -1; }
+  .au-c-act { grid-column: 1 / -1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .au-toggle { transition: none; }
+}

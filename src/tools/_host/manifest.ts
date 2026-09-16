@@ -21,6 +21,17 @@ export interface ToolManifest {
   inputSchemaVersion: number;
   executionMode: ExecutionMode;
   supportedRulesetIds: string[];
+  /**
+   * 可见性门槛（可选）。'admin' 表示只对 admin/superadmin 显示——
+   * 用于依赖敏感能力（如访问本机 IDA 实例）的入口。
+   * 这只是界面可见性；真正的权限拦截必须在服务端路由上。
+   */
+  gate?: 'admin';
+  /**
+   * 外部入口（可选）。填写后目录页的卡片直接跳到这个路径，
+   * 而不是 /tools/<slug>/——用于「自成一套界面」的功能（如逆向工作台）。
+   */
+  entryHref?: string;
 }
 
 export const toolStatusLabels: Record<ToolStatus, string> = {

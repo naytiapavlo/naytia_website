@@ -1,0 +1,35 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/ida.css';
+
+/**
+ * 逆向工作台（docs/plans/07，决策见 ADR-004）：BDS 的反编译/反汇编浏览器。
+ *
+ * 独立于工具箱卡片：仿 IDA 的多面板界面需要整屏宽度，塞不进 980px 的工具容器。
+ * 工具箱目录里的卡片是入口，本页是工作区。
+ *
+ * 权限：访客/会员只读，admin 及以上可重命名函数与切换实例；
+ * 真正的拦截在服务端（/api/reverse/*），前端隐藏控件不作为权限控制。
+ *
+ * 样式放在 src/styles/ida.css 而不是这里的作用域 <style>：工作台的 DOM 由
+ * 脚本动态创建，不带 Astro 的 data-astro-* 作用域属性，scoped 样式选不中。
+ */
+---
+
+<BaseLayout title="逆向工作台" description="Minecraft 基岩版服务端（BDS）的反编译与反汇编浏览器。">
+  <div class="ida-page">
+    <div id="reverse-workspace" class="ida-root">
+      <p class="ida-boot">正在连接 IDA…</p>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  import { initReverseWorkspace } from '../modules/reverse';
+
+  const root = document.getElementById('reverse-workspace');
+  if (root) {
+    root.replaceChildren();
+    initReverseWorkspace(root);
+  }
+</script>

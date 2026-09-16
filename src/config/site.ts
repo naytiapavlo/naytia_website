@@ -37,6 +37,7 @@ export const site: SiteConfig = {
     { href: '/', label: '首页', icon: 'i-home' },
     { href: '/works/', label: '作品', icon: 'i-grid' },
     { href: '/tools/', label: '工具箱', icon: 'i-tool' },
+    { href: '/docs/', label: '文档树', icon: 'i-note' },
     { href: '/forum/', label: '论坛', icon: 'i-chat' },
   ],
   links: {
@@ -46,6 +47,7 @@ export const site: SiteConfig = {
     { href: '/works/', icon: 'i-grid', title: '去看看我的作品', summary: '一些研究，一些方块之间的创造。' },
     { href: '/tools/', icon: 'i-tool', title: '打开玩家工具箱', summary: '让重复的事情，变得简单一点。' },
     { href: '/blog/', icon: 'i-note', title: '读一读博客', summary: '视频之外，用文字记录探索的过程。' },
+    { href: '/docs/', icon: 'i-note', title: '翻翻文档树', summary: '基岩版机制与漏洞研究的笔记合集，边读边搜。' },
     { href: '/forum/', icon: 'i-chat', title: '来论坛聊聊', summary: '登录后发帖回复；机制、作品与互助的小广场。' },
   ],
 };

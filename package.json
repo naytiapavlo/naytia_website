@@ -8,8 +8,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "test": "node --import ./tests/resolve-ts.mjs --test tests/tools.test.ts",
-    "api:types": "openapi-typescript http://127.0.0.1:8000/openapi.json -o src/ports/api-schema.d.ts"
+    "test": "node --import ./tests/resolve-ts.mjs --test tests/mcstructure.test.ts tests/snbt.test.ts tests/forum-voxel.test.ts tests/admin-users.test.ts",
+    "api:types": "openapi-typescript http://127.0.0.1:8000/api/openapi.json -o src/ports/api-schema.d.ts"
   },
   "dependencies": {
     "astro": "^5.0.0"

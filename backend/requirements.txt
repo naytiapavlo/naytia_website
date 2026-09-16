@@ -4,3 +4,7 @@ SQLAlchemy>=2.0,<3
 pydantic>=2.7,<3
 pydantic-settings>=2.2,<3
 argon2-cffi>=23.1
+# 文件上传（.mcstructure 解析接口需要 multipart 解析器；FastAPI 的硬依赖）
+python-multipart>=0.0.9
+# 逆向工作台（ADR-004）：以 HTTP JSON-RPC 调用本机 ida-pro-mcp，运行期依赖
+httpx>=0.27

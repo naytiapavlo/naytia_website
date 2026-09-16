@@ -1,9 +1,9 @@
 /**
  * 后端 API 基地址与统一请求封装（shared 基础能力，见 docs/plans/02 分层）。
- * 开发期通过 PUBLIC_API_BASE 覆盖；同域部署时可设为空串走相对路径。
+ * 开发期通过 PUBLIC_API_BASE 覆盖；同域部署时为空串，走相对路径
+ * （正式部署由 deploy/server.py 把站点与 /api 收在同一个来源下，见 docs/plans/14）。
  */
-export const API_BASE: string =
-  (import.meta.env.PUBLIC_API_BASE as string | undefined) ?? 'http://127.0.0.1:8000';
+export const API_BASE: string = import.meta.env.PUBLIC_API_BASE ?? '';
 
 export class ApiError extends Error {
   constructor(
